@@ -1,6 +1,6 @@
 
 from bokeh.models import RangeSlider
-from bokeh.models.widgets import Paragraph, Button, Select, TextInput, Toggle, CheckboxGroup, RadioButtonGroup
+from bokeh.models.widgets import Button, CheckboxGroup, Paragraph, RadioButtonGroup, Slider, TextInput, Toggle
 
 class MapWidgets:
 
@@ -56,6 +56,12 @@ class MapWidgets:
 
         self.filters_active = CheckboxGroup(labels=["Filter by Sibling Count", "Filter by Area"], active=[0, 1])
         self.filters_active.on_change('active', self.filters_active_change)
+
+        self.toggle_blend = Toggle(label="Toggle Blend", active=False, width=150)
+        self.toggle_blend.on_click(self.toggle_blend_callback)
+
+        self.slider_blend = Slider(start=0.0, end=1.0, value=0.5, step=0.025, title="Blend Ratio")
+        self.slider_blend.on_change('value', self.slider_blend_change)
 
         self.text_count = Paragraph(text="")
         self.update_text_count()
@@ -281,3 +287,16 @@ class MapWidgets:
     def filters_active_change(self, attrname, old, new):
         self.map_tweet_data.filters_active(new)
         self.update_text_count()
+
+    def toggle_blend_callback(self, arg):
+        print("Toggle Blend: Callback: " + str(self.map_tweet_data.circle_id) + " : " + str(self.map_tweet_data.circle_idx))
+        if arg:
+            self.map_tweet_data.turn_blend_on()
+            self.slider_blend.disabled = False
+        else:
+            self.map_tweet_data.turn_blend_off()
+            self.slider_blend.disabled = True
+
+    def slider_blend_change(self, attrname, old, new):
+        print(new)
+        self.map_tweet_data.blend(new)

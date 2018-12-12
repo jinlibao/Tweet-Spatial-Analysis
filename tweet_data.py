@@ -470,13 +470,13 @@ class MapTweetData:
         subset_df = self.tweet_data_df
         if self.filter_settings.count_active:
             subset_df = subset_df.loc[
-                    (subset_df['count'] >= self.filter_settings.count_start)
-                    & (subset_df['count'] <= self.filter_settings.count_end)]
+                        (subset_df['count'] >= self.filter_settings.count_start)
+                    &   (subset_df['count'] <= self.filter_settings.count_end)]
 
         if self.filter_settings.area_active:
             subset_df = subset_df.loc[
-                    (subset_df['area'] >= self.filter_settings.area_start)
-                    & (subset_df['area'] <= self.filter_settings.area_end)]
+                        (subset_df['area'] >= self.filter_settings.area_start)
+                    &   (subset_df['area'] <= self.filter_settings.area_end)]
 
         self.circles.data = self.circles.from_df(subset_df)
 
@@ -487,3 +487,12 @@ class MapTweetData:
         self.clear_sibling_ellipses()
         self.clear_dissolve()
         self.clear_find_circle()
+
+    def turn_blend_on(self):
+        print("Turn Blend On:")
+
+    def turn_blend_off(self):
+        print("Turn Blend Off:")
+
+    def blend(self, blend_ratio):
+        print("Blend: "+ str(blend_ratio))

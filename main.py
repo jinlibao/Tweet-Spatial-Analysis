@@ -1,6 +1,6 @@
 from bokeh.io import curdoc
-from bokeh.layouts import row, column, widgetbox, layout
-from bokeh.models import Circle, Range1d, HoverTool, CustomJS, TapTool
+from bokeh.layouts import column, row
+from bokeh.models import Circle, CustomJS, HoverTool, Range1d, TapTool
 from bokeh.plotting import figure
 from bokeh.tile_providers import CARTODBPOSITRON
 
@@ -119,7 +119,8 @@ p.add_tools(hover_tool, tap_tool)
 
 lhs = column(   map_widgets.radio_button_data_type, map_widgets.text_id, map_widgets.toggle_sde_ellipse,
                 map_widgets.toggle_sibling_ellipses, map_widgets.toggle_dissolve, map_widgets.toggle_user_info,
-                map_widgets.text_username, map_widgets.text_profile, map_widgets.text_input, map_widgets.button_find)
+                map_widgets.text_username, map_widgets.text_profile, map_widgets.text_input, map_widgets.button_find,
+                map_widgets.toggle_blend, map_widgets.slider_blend)
 
 rhs = column(   row(    column(map_widgets.button_count_start_minus, map_widgets.button_count_start_plus, width=50),
                         map_widgets.range_slider_count,
