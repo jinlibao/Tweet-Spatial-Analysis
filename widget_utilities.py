@@ -29,14 +29,30 @@ class MapWidgets:
         self.button_find = Button(label="Find ID", width=150)
         self.button_find.on_click(self.button_find_callback)
 
-        self.radio_button_data_type = RadioButtonGroup(labels=['mean all', 'median working', 'median non-working'], active=0)
+        self.radio_button_data_type = RadioButtonGroup(labels=['all', 'working', 'non-working'], active=0, width=300)
         self.radio_button_data_type.on_change('active', self.radio_button_data_type_change)
 
         self.range_slider_count = RangeSlider(start=0, end=600, value=(0, 600), step=1, title="Sibling Count")
-        self.range_slider_count.on_change('value', self.range_slider_change)
+        self.range_slider_count.on_change('value', self.range_slider_count_change)
+        self.button_count_start_minus = Button(label="-", width=15)
+        self.button_count_start_minus.on_click(self.button_count_start_minus_callback)
+        self.button_count_start_plus = Button(label="+", width=15)
+        self.button_count_start_plus.on_click(self.button_count_start_plus_callback)
+        self.button_count_end_minus = Button(label="-", width=15)
+        self.button_count_end_minus.on_click(self.button_count_end_minus_callback)
+        self.button_count_end_plus = Button(label="+", width=15)
+        self.button_count_end_plus.on_click(self.button_count_end_plus_callback)
 
-        self.range_slider_area = RangeSlider(start=0, end=131000, value=(0, 131000), step=100, title="Area Size")
+        self.range_slider_area = RangeSlider(start=-100, end=131000, value=(0, 131000), step=100, title="Area Size")
         self.range_slider_area.on_change('value', self.range_slider_area_change)
+        self.button_area_start_minus = Button(label="-", width=15)
+        self.button_area_start_minus.on_click(self.button_area_start_minus_callback)
+        self.button_area_start_plus = Button(label="+", width=15)
+        self.button_area_start_plus.on_click(self.button_area_start_plus_callback)
+        self.button_area_end_minus = Button(label="-", width=15)
+        self.button_area_end_minus.on_click(self.button_area_end_minus_callback)
+        self.button_area_end_plus = Button(label="+", width=15)
+        self.button_area_end_plus.on_click(self.button_area_end_plus_callback)
 
         self.filters_active = CheckboxGroup(labels=["Filter by Sibling Count", "Filter by Area"], active=[0, 1])
         self.filters_active.on_change('active', self.filters_active_change)
@@ -60,13 +76,7 @@ class MapWidgets:
 
     def toggle_sde_ellipse_callback(self, arg):
         print("Toggle Ellipse: Callback: " + str(self.map_tweet_data.circle_id) + " : " + str(self.map_tweet_data.circle_idx))
-        #row_id = self.parse_text_to_find_id()
-        #df = self.map_tweet_data.tweet_data.loc[self.map_tweet_data.tweet_data['id'] == row_id]
-        #idx = df.index[0]
-        #print("Toggle Ellipse: Callback: df: " + str(row_id) + " : "+ str(idx))
-
         if arg:
-            #self.map_tweet_data.update_circle_index(idx)
             self.map_tweet_data.update_sde_ellipse()
             self.map_tweet_data.update_siblings()
         else:
@@ -81,13 +91,7 @@ class MapWidgets:
 
     def toggle_dissolve_callback(self, arg):
         print("Toggle Dissolve: Callback: " + str(self.map_tweet_data.circle_id) + " : " + str(self.map_tweet_data.circle_idx))
-        #row_id = self.parse_text_to_find_id()
-        #df = self.map_tweet_data.tweet_data.loc[self.map_tweet_data.tweet_data['id'] == row_id]
-        #idx = df.index[0]
-        #print("Toggle Dissolve: Callback: df: " + str(row_id) + " : " + str(idx))
-
         if arg:
-            #self.map_tweet_data.update_circle_index(idx)
             self.map_tweet_data.update_dissolve()
         else:
             self.map_tweet_data.clear_dissolve()
@@ -142,6 +146,69 @@ class MapWidgets:
             self.map_tweet_data.update_find_circle_index(idx[0])
             self.map_tweet_data.update_find_circle()
 
+    def range_slider_count_change(self, attrname, old, new):
+        start_count = int(new[0])
+        end_count = int(new[1])
+        self.map_tweet_data.filter_circles_by_count(start_count, end_count)
+        self.map_tweet_data.clear_all()
+        self.update_text_count()
+
+    def button_count_start_minus_callback(self):
+        value_start = int(self.range_slider_count.value[0])
+        value_end = int(self.range_slider_count.value[1])
+
+        if value_start > self.range_slider_count.start:
+            value_start -= 1
+
+        new_values = [value_start, value_end]
+        self.range_slider_count.value = new_values
+
+        self.map_tweet_data.filter_circles_by_count(value_start, value_end)
+        self.map_tweet_data.clear_all()
+        self.update_text_count()
+
+    def button_count_start_plus_callback(self):
+        value_start = int(self.range_slider_count.value[0])
+        value_end = int(self.range_slider_count.value[1])
+
+        if value_start < value_end:
+            value_start += 1
+
+        new_values = [value_start, value_end]
+        self.range_slider_count.value = new_values
+
+        self.map_tweet_data.filter_circles_by_count(value_start, value_end)
+        self.map_tweet_data.clear_all()
+        self.update_text_count()
+
+    def button_count_end_minus_callback(self):
+        value_start = int(self.range_slider_count.value[0])
+        value_end = int(self.range_slider_count.value[1])
+
+        if value_end > value_start:
+            value_end -= 1
+
+        new_values = [value_start, value_end]
+        self.range_slider_count.value = new_values
+
+        self.map_tweet_data.filter_circles_by_count(value_start, value_end)
+        self.map_tweet_data.clear_all()
+        self.update_text_count()
+
+    def button_count_end_plus_callback(self):
+        value_start = int(self.range_slider_count.value[0])
+        value_end = int(self.range_slider_count.value[1])
+
+        if value_end < self.range_slider_count.end:
+            value_end += 1
+
+        new_values = [value_start, value_end]
+        self.range_slider_count.value = new_values
+
+        self.map_tweet_data.filter_circles_by_count(value_start, value_end)
+        self.map_tweet_data.clear_all()
+        self.update_text_count()
+
     def range_slider_area_change(self, attrname, old, new):
         start_area = int(new[0])
         end_area = int(new[1])
@@ -149,10 +216,59 @@ class MapWidgets:
         self.map_tweet_data.clear_all()
         self.update_text_count()
 
-    def range_slider_change(self, attrname, old, new):
-        start_count = int(new[0])
-        end_count = int(new[1])
-        self.map_tweet_data.filter_circles_by_count(start_count, end_count)
+    def button_area_start_minus_callback(self):
+        value_start = int(self.range_slider_area.value[0])
+        value_end = int(self.range_slider_area.value[1])
+
+        if value_start > self.range_slider_area.start:
+            value_start -= 100
+
+        new_values = [value_start, value_end]
+        self.range_slider_area.value = new_values
+
+        self.map_tweet_data.filter_circles_by_area(value_start, value_end)
+        self.map_tweet_data.clear_all()
+        self.update_text_count()
+
+    def button_area_start_plus_callback(self):
+        value_start = int(self.range_slider_area.value[0])
+        value_end = int(self.range_slider_area.value[1])
+
+        if value_start < value_end:
+            value_start += 100
+
+        new_values = [value_start, value_end]
+        self.range_slider_area.value = new_values
+
+        self.map_tweet_data.filter_circles_by_area(value_start, value_end)
+        self.map_tweet_data.clear_all()
+        self.update_text_count()
+
+    def button_area_end_minus_callback(self):
+        value_start = int(self.range_slider_area.value[0])
+        value_end = int(self.range_slider_area.value[1])
+
+        if value_end > value_start:
+            value_end -= 100
+
+        new_values = [value_start, value_end]
+        self.range_slider_area.value = new_values
+
+        self.map_tweet_data.filter_circles_by_area(value_start, value_end)
+        self.map_tweet_data.clear_all()
+        self.update_text_count()
+
+    def button_area_end_plus_callback(self):
+        value_start = int(self.range_slider_area.value[0])
+        value_end = int(self.range_slider_area.value[1])
+
+        if value_end < self.range_slider_area.end:
+            value_end += 100
+
+        new_values = [value_start, value_end]
+        self.range_slider_area.value = new_values
+
+        self.map_tweet_data.filter_circles_by_area(value_start, value_end)
         self.map_tweet_data.clear_all()
         self.update_text_count()
 

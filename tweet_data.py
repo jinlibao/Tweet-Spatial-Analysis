@@ -296,7 +296,7 @@ class MapTweetData:
         self.update_selected_circle()
 
     def selected_circle_changed(self, attrname, old, new):
-        print("Selected Circle Change: " + str(new))
+        #print("Selected Circle Change: " + str(new))
         if len(new['id']) > 0:
             self.circle_id = new['id'][0]
             print("Selected Circle Change: id: " + str(self.circle_id))

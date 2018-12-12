@@ -18,7 +18,6 @@ ToDo: 053: Add a slide for distance between working and non working: Added 20181
 ToDo: 056: Consider potentially pre-processing dissolve area so the map can be filtered on that: Added 20181208:
 ToDo: 058: If nothing selected then reset Selected ID text.
 ToDo: 059: Sibling data points are not selected-able nor have a hover tooltip: Added 20181208:
-ToDo: 060: Consider adding text input for the sliders. For example unable to explicit slide to '1': Added 20181208:
 ToDo: 061: Add a legend for the 'sibling count' visualization: Added 20181209:
 ToDo: 062: Create a 'global configuration' that can be loaded at runtime - including details generated from the preprocessing stage: Added 20181209:
 ToDo: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: 
@@ -27,7 +26,6 @@ ToDo: 064: Evolving from 049, consider adding various appropriate histograms to 
 InProgress: 010: Add Logging: https://bokeh.pydata.org/en/latest/docs/reference/util.html#bokeh-util-logconfig: Added 20181122: Started 20181122:
 InProgress: 018: Consider how to use visualization to represent area / number of tweets within ellipse etc - maybe add to the hover tool?: Added: 20181130: Started 20181202
 InProgress: 027: Create a better layout: Added 20181130: Started 20181130:
-InProgress: 028: Consider using check boxes to define which ellipses to show for a selected data point: Added 20181130: Started 20181130:
 InProgress: 029: Consider adding filters/sliders for some bins of 'num of local data points', 'ellipse area' and other measures: Added 20181201: Started 20181207
 InProgress: 032: Consider optimization as a whole over the entire 50K data set (x 3): Added 20181202:
 InProgress: 034: BBug: A user is able to select multiple data points when the scale is zoomed out enough - only won't ability to select a single one: Added 20181202: Started 20181203:
@@ -35,7 +33,6 @@ InProgress: 038: Display both 'working'/'non-working' ellipses together: Added 2
 InProgress: 042: Can I format the text on the hover tooltip? Added 20181203: Started 20181203:
 InProgress: 054: Consider adding connecting lines between working and non working (with direction): Added 2081207: Started 20181207
 InProgress: 063: Consider some form of heat map for clustered tweet data points - representing density: Added 20181210: Started 20181210: 
-InProgress: 067: Create a Git repo around the first version: Added 20181211: Started 20181211:
 
 
 Done: 001: Draw ellipse on selecting a user: Added 20181122: Started 20181122: Completed 20181126
@@ -55,6 +52,7 @@ Done: 023: Check the drawing of the ellipse if the area is 0 or -1: Added 201811
 Done: 024: Allow the user to select a point by entering the ID in a text book. This will require some form of automatic zoom to 'fly' to the selected point: Added 20181130: Started 20181130: Completed 20181130
 Done: 025: Understand why data point ID 2760872119 is not within it's ellipse? Surely this can't happen as the data point is the location for ellipse? Added 20181130: Started 20181130: Completed 20181130
 Done: 026: On text, have single ID (idx) string - then parse this backend: Added 20181130: Started 20181130: Completed 20181130
+Done: 028: Consider using check boxes to define which ellipses to show for a selected data point: Added 20181130: Started 20181130: Completed 20181211
 Done: 030: Confirm spatial references / projections being used: Added 20181201: Started 20181201: Completed 20181201
 Done: 031: BBug: When changing the dataset, the selected data point is no longer displayed in red: Added 20181202: Started 20181202: Completed 20181202
 Done: 033: Need to save the pre-processed data out to a file and then load into app: Added 20181202: Started 20181203: Completed 20181205
@@ -70,8 +68,10 @@ Done: 051: On changing the sibling count slider, clear all selections: Added 208
 Done: 052: Add a glyph that represents the selected point, as issue when changing slider and showing selected point using internal mechanism: Added 2081207: Started 20181207: Completed 20181208
 Done: 055: When changing datasets, re-apply the count filter: Added 20181208: Started 20181208: Completed 20181208
 Done: 057: Add numerical count and %s respect to number of points for each slider: Added 20181208: Started 20181208: Completed 20181208
+Done: 060: Consider adding text input for the sliders. For example unable to explicit slide to '1': Added 20181208: Started 20181211: Completed 20181211
 Done: 065: BBug with circle_renderer.selection_glyph and point 2429397887 - cheated by setting alpha to 0.0 to work: Added 20181211: Started 20181211: Completed 20181211
 Done: 066: Choose different color for the find circle to contrast from other points better: Added 20181211: Stated 20181211: Completed 20181211
+Done: 067: Create a Git repo around the first version: Added 20181211: Started 20181211: Completed 20181211
 
 
 OnGoing:
@@ -218,9 +218,11 @@ Only using the text_id widget, and then some basic string manipulation to extrac
 
 InProgress: 027: Create a better layout: Added 20181130: Started 20181130:
 Started playing, look at TextInput not respecting width: https://github.com/bokeh/bokeh/issues/6427:
+20181211: Played with columns and rows. There is only so much that can be achieved, so keep expectations low.
 
-InProgress: 028: Consider using check boxes to define which ellipses to show for a selected data point: Added 20181130: Started 20181130:
+Done: 028: Consider using check boxes to define which ellipses to show for a selected data point: Added 20181130: Started 20181130: Completed 20181211
 Consider various states such as the checkbox for the selected data set should always be selected.
+20181211: Used radio buttons. Work better than the drop down.
 
 InProgress: 029: Consider adding filters/sliders for some bins of 'num of local data points', 'ellipse area' and other measures: Added 20181201: Started 20181207
 20181208: Range Sliders for sibling count and area.
@@ -372,6 +374,11 @@ Need to modify code so that all filters are actually applied together.
 Consider being able to select which filters to apply using a check box.
 Implemented so each filter has a checkbox to indicate if its on/off.
 
+Done: 060: Consider adding text input for the sliders. For example unable to explicit slide to '1': Added 20181208: Started 20181211: Completed 20181211
+Add buttons either side of the slider with '-' and '+' to add 1 to the current slider value.
+Added buttons to the count slider as we need the +-1 precision when selecting. Do we need the same level of precision for the area slider?
+Lets say yes, as we do have tweets with an area of -1, so it might be useful to view areas from say -100 to 0 - again difficult to get this level of precision just with a slide.
+
 InProgress: 063: Consider some form of heat map for clustered tweet data points - representing density: Added 20181210: Started 20181210: 
 Related to task 032
 Influenced by:
@@ -394,4 +401,5 @@ Cheated by making alpha 0.0.
 BUT why for this point and hardly any others?
 20181211: Replicated problem in earlier version.
 
-InProgress: 067: Create a Git repo around the first version: Added 20181211: Started 20181211:
+Done: 067: Create a Git repo around the first version: Added 20181211: Started 20181211: Completed 20181211
+Created repository with dev branch.

@@ -1,5 +1,5 @@
 from bokeh.io import curdoc
-from bokeh.layouts import row, column, widgetbox
+from bokeh.layouts import row, column, widgetbox, layout
 from bokeh.models import Circle, Range1d, HoverTool, CustomJS, TapTool
 from bokeh.plotting import figure
 from bokeh.tile_providers import CARTODBPOSITRON
@@ -116,11 +116,21 @@ def callback_tap(   hover_idx = map_tweet_data.hover_idx,
 tap_tool = TapTool(callback = CustomJS.from_py_func(callback_tap), renderers=[circles_renderer])
 p.add_tools(hover_tool, tap_tool)
 
-l = row(p, column(widgetbox(map_widgets.radio_button_data_type, map_widgets.text_id, map_widgets.toggle_sde_ellipse, map_widgets.toggle_sibling_ellipses,
-                            map_widgets.toggle_dissolve, map_widgets.toggle_user_info,
-                            map_widgets.text_username, map_widgets.text_profile, map_widgets.text_input,
-                            map_widgets.button_find, map_widgets.range_slider_count, map_widgets.range_slider_area,
-                            map_widgets.text_count, map_widgets.filters_active)))
+
+lhs = column(   map_widgets.radio_button_data_type, map_widgets.text_id, map_widgets.toggle_sde_ellipse,
+                map_widgets.toggle_sibling_ellipses, map_widgets.toggle_dissolve, map_widgets.toggle_user_info,
+                map_widgets.text_username, map_widgets.text_profile, map_widgets.text_input, map_widgets.button_find)
+
+rhs = column(   row(    column(map_widgets.button_count_start_minus, map_widgets.button_count_start_plus, width=50),
+                        map_widgets.range_slider_count,
+                        column(map_widgets.button_count_end_minus, map_widgets.button_count_end_plus)),
+                row(    column(map_widgets.button_area_start_minus, map_widgets.button_area_start_plus, width=50),
+                        map_widgets.range_slider_area,
+                        column(map_widgets.button_area_end_minus, map_widgets.button_area_end_plus)),
+                map_widgets.text_count,
+                map_widgets.filters_active)
+
+l = row(lhs, p, rhs)
 
 curdoc().add_root(l)
 curdoc().title = "Tweet Spatial Analysis"
