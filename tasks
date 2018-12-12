@@ -1,0 +1,397 @@
+See: PEP 350 -- Codetags: https://www.python.org/dev/peps/pep-0350/
+
+Next Id: 068
+
+ToDo: 006: Potentially compare working against non-working on same graph: Added 20181122
+ToDo: 007: Consider some form of quad-tree pre optimization of data: Added 20181122
+ToDo: 009: Assess the use of CustomJSHover: https://bokeh.pydata.org/en/latest/docs/reference/models/tools.html#: Added 20181122:
+ToDo: 013: Can I add a main to the main.py file?
+ToDo: 016: What is the association between having an area of 0 and x/y columns being infinity or 0? Because initial observations indicate that the tallies don't match? Added: 20181128
+ToDo: 021: Consider adding the option to showing the ellipses from all datasets when a data point is selected - allowing to compare. Would need a legend: Added 20181130
+ToDo: 022: Consider recording history of data points selected and allowing the user to track analysis e.g. print previous IDs: Added 20181130
+ToDo: 037: If a data point has no siblings de-active the siblings and dissolve toggles: Added 20181202:
+ToDo: 041: After implementing the dissolve functionality, consider adding 'intersection': Added 20181203: 
+ToDo: 043: Consider using Bokeh's DataTable to provide a way to list the siblings within a selected datapoint's ellipse.  Added 20181203
+ToDo: 049: Consider adding statistical descriptive details to the page: Added 20181205
+ToDo: 050: Add a colour palette to represent sibling count: Added 20181206
+ToDo: 053: Add a slide for distance between working and non working: Added 20181208:
+ToDo: 056: Consider potentially pre-processing dissolve area so the map can be filtered on that: Added 20181208:
+ToDo: 058: If nothing selected then reset Selected ID text.
+ToDo: 059: Sibling data points are not selected-able nor have a hover tooltip: Added 20181208:
+ToDo: 060: Consider adding text input for the sliders. For example unable to explicit slide to '1': Added 20181208:
+ToDo: 061: Add a legend for the 'sibling count' visualization: Added 20181209:
+ToDo: 062: Create a 'global configuration' that can be loaded at runtime - including details generated from the preprocessing stage: Added 20181209:
+ToDo: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: 
+
+
+InProgress: 010: Add Logging: https://bokeh.pydata.org/en/latest/docs/reference/util.html#bokeh-util-logconfig: Added 20181122: Started 20181122:
+InProgress: 018: Consider how to use visualization to represent area / number of tweets within ellipse etc - maybe add to the hover tool?: Added: 20181130: Started 20181202
+InProgress: 027: Create a better layout: Added 20181130: Started 20181130:
+InProgress: 028: Consider using check boxes to define which ellipses to show for a selected data point: Added 20181130: Started 20181130:
+InProgress: 029: Consider adding filters/sliders for some bins of 'num of local data points', 'ellipse area' and other measures: Added 20181201: Started 20181207
+InProgress: 032: Consider optimization as a whole over the entire 50K data set (x 3): Added 20181202:
+InProgress: 034: BBug: A user is able to select multiple data points when the scale is zoomed out enough - only won't ability to select a single one: Added 20181202: Started 20181203:
+InProgress: 038: Display both 'working'/'non-working' ellipses together: Added 20181202: Started 20181203
+InProgress: 042: Can I format the text on the hover tooltip? Added 20181203: Started 20181203:
+InProgress: 054: Consider adding connecting lines between working and non working (with direction): Added 2081207: Started 20181207
+InProgress: 063: Consider some form of heat map for clustered tweet data points - representing density: Added 20181210: Started 20181210: 
+InProgress: 067: Create a Git repo around the first version: Added 20181211: Started 20181211:
+
+
+Done: 001: Draw ellipse on selecting a user: Added 20181122: Started 20181122: Completed 20181126
+Done: 002: Understand mapping of ellipse data to actual drawing: Added 20181122: Started 20181129: Completed 20181129
+Done: 003: Toggle ellipse on/off: Added 20181122: Started 20181122: Completed 20181202
+Done: 004: Look up how to create dissolve of intersecting areas: Added 20181122: Started 20181127: Completed 20181202
+Done: 005: Switch between working/non-working and medium/mean datasets - drop-down menu: Added 20181122: Started 20181129: Completed 20181130
+Done: 008: How much pre-processing regards an individual and the data points within their area? Vs doing on the fly: Added 20181122: Started 20181126: Completed 20181130
+Done: 011: Understand how to make a callback to the server when not using a widget and return values: Added 20181122: Started 20181122: Completed 20181126
+Done: 012: Look at pre-processing the (latitude, longitude) coordinate projections: Added 20181122: Started 20181126: Completed 20181129
+Done: 014: Start understanding how to dissolve polygons together: Added 20181127: Started 20181127: Completed ??
+Done: 015: Step back and profile the data - this will then be used to direct how to clean it and which columns to focus on: Added 20181128: Started 20181128: Completed 20181128
+Done: 017: How to check for a point in an ellipse - how to optimize this over the entire 50K data set (x 3): Added 20181129: STarted 20181129: Completed 20181202
+Done: 019: When switching datasets, consider automatically updating the ellipse or clearing it: Added 20181130: Started 20181130: Completed 20181130
+Done: 020: When selecting another data point, clear the previous ellipse: Added 20181130: Started 20181130: Completed 20181130
+Done: 023: Check the drawing of the ellipse if the area is 0 or -1: Added 20181130: Started 20181130: Completed 20181130
+Done: 024: Allow the user to select a point by entering the ID in a text book. This will require some form of automatic zoom to 'fly' to the selected point: Added 20181130: Started 20181130: Completed 20181130
+Done: 025: Understand why data point ID 2760872119 is not within it's ellipse? Surely this can't happen as the data point is the location for ellipse? Added 20181130: Started 20181130: Completed 20181130
+Done: 026: On text, have single ID (idx) string - then parse this backend: Added 20181130: Started 20181130: Completed 20181130
+Done: 030: Confirm spatial references / projections being used: Added 20181201: Started 20181201: Completed 20181201
+Done: 031: BBug: When changing the dataset, the selected data point is no longer displayed in red: Added 20181202: Started 20181202: Completed 20181202
+Done: 033: Need to save the pre-processed data out to a file and then load into app: Added 20181202: Started 20181203: Completed 20181205
+Done: 035: Consider drawing all the ellipses of the datapoints within the selected datapoint - this is different to drawing the single dissolve: Added 20181202: Started 20181202: Completed 20181202
+Done: 036: Change buttons (where appropriate) to toggles to switch things on/off: Added 20181202: Completed 20181202
+Done: 039: When displaying the dissolve - consider still overlaying the original ellipse so the extent of new area can clearly be seen: Added 20181202: Started 20181203: Completed 20181204
+Done: 040: Can the area of the dissolve be calculated? Added 20181202: Started 20181203: Completed 20181204
+Done: 044: Present user profiles: Added 20181203: Started 20181204: Completed 20181204
+Done: 045: Consider the width and height for the ellipse. The measures I have are in non-projected space - but when I draw the ellipse they are in project space - surely I need to project the width and height lengths: Added 20181203: Started 20181203: Completed 20181204
+Done: 046: BBug: The reset tool appears to distort glyphs after being used? Added 20181204: Started 20181204: Completed 20181204
+Done: 048: Consider storing 'a' and 'b' instead of 'width' and 'height' to reduce the amount of divisions: Added 20181204: Started 20181204: Completed 20181205
+Done: 051: On changing the sibling count slider, clear all selections: Added 2081207: Started 20181207: Completed 20181208
+Done: 052: Add a glyph that represents the selected point, as issue when changing slider and showing selected point using internal mechanism: Added 2081207: Started 20181207: Completed 20181208
+Done: 055: When changing datasets, re-apply the count filter: Added 20181208: Started 20181208: Completed 20181208
+Done: 057: Add numerical count and %s respect to number of points for each slider: Added 20181208: Started 20181208: Completed 20181208
+Done: 065: BBug with circle_renderer.selection_glyph and point 2429397887 - cheated by setting alpha to 0.0 to work: Added 20181211: Started 20181211: Completed 20181211
+Done: 066: Choose different color for the find circle to contrast from other points better: Added 20181211: Stated 20181211: Completed 20181211
+
+
+OnGoing:
+OnGoing: 002: Understand mapping of ellipse data to actual drawing: Added 20181122: Started 20181129: Completed 20181129
+OnGoing: 012: Look at pre-processing the (latitude, longitude) coordinate projections: Added 20181122: Started 20181126: Completed 20181129
+OnGoing: 055: When changing datasets, re-apply the count filter: Added 20181208: Started 20181208: Completed 20181208
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Interesting IDs:
+14194497: The median 'working'/'non-working' are in the same location, while 'all' is not.
+2760872119: Data point not in ellipse? Potentially an error - see 025
+277781910: 'all' is different location to 'working'/'non-working' that are in same proximity?
+284446436: Small 'all' ellipse - small 'working' and 'non-working' ellipses either side of 'all'.
+348559181: Ellipses all similar shape - but 'all' is displaced from the 'working'/'non-working'
+59160796: The 'all' data set appears to show a point (162569725) outside of the ellipse?
+287740733: Viewing siblings using 'median working' shows a large dissolve compared to the other sets.
+348559181: Ellipse and dissolve don't match? (Semi-) Solved: Caused by using the reset button that appears to dissort things somehow?
+
+2429397887 Erronous mean all point - 883064623 - Task 065
+
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Notes:
+------
+
+Done: 001: Draw ellipse on selecting a user
+Dependent on 003
+20181122: Draw an ellipse at the correct position:
+Ref: https://bokeh.pydata.org/en/latest/docs/reference/models/glyphs/ellipse.html#bokeh.models.glyphs.Ellipse
+Can I define this as a separate course - independent of the circles?
+Can draw a basic ellipse.
+
+OnGoing: 002: Understand mapping of ellipse data to actual drawing: Added 20181122: Started 20181127: Completed 20181129
+Started looking at the general equations for an Ellipse.
+Don't get too hung up on how the Standard Deviational Ellipse is actually calculated, as all this does is to provide me with the x/y ratio, area and angle.
+What I need to focus on is the correct drawing of this ellipse (i.e. angle measured from which axis) on the map.
+Assuming the SDE follows http://www.portailsig.org/content/qgis-des-ellipses-de-deviation-standard-sde-un-plugin-standard-deviational-ellipse-des-scrip
+Follow: Clarifying the Standard Deviational Ellipse - Jianxin Gong - 2002.pdf
+20181129: Get hold of the original raw data to visually test that the drawn ellipses look correct.
+
+Done: 003: Toggle ellipse on/off: Added 20181122: Started 20181122: Completed 20181202
+20181122: Base functionality on https://bokeh.pydata.org/en/latest/docs/user_guide/styling.html#userguide-styling-selected-unselected-glyphs
+Once a circle has been selected - switch this button on - then allow user to toggle the ellipse on/off
+20181202: Toggle widget added.
+
+Done: 004: Look up how to create dissolve of intersecting areas: Added 20181122: Started 20181127: Completed 20181202
+Looked up a variety of potential libraries.
+20181202: Will use shapely.
+
+Done: 005: Switch between working/non-working and medium/mean datasets - drop-down menu: Added 20181122: Started 20181129: Completed 20181130
+Created the three data sets.
+20181130: Started to wire in the drop down callback with swapping between the data sets.
+Although data sets are being swapped - the showing of the appropriate ellipse is not.
+Fixed: Wasn't defining the tweet_data as a global within the function call.
+
+Done: 008: How much pre-processing regards an individual and the data points within their area? Vs doing on the fly: Added 20181122: Started 20181126: Completed 20181130
+20181130: As a whole follow the strategy of pre-processing as much as possible.
+Consider this as part of 012
+
+InProgress: 010 Add Logging:
+Ref: https://bokeh.pydata.org/en/latest/docs/reference/util.html#bokeh-util-logconfig:
+By default, logging is not configured, to allow users of Bokeh to have full control over logging policy. However, it is
+useful to be able to enable logging arbitrarily during when developing Bokeh. This can be accomplished by setting the
+environment variable BOKEH_PY_LOG_LEVEL. The default logging level is none.
+Looks like this needs to be configured on the command line when using the bokeh server
+bokeh serve --show 5880_geog_dev_02.py --log-level debug --log-file output.txt --log-format "%(asctime)s %(levelname)s: %(message)s"
+Ref: Python Bokeh Logger: https://stackoverflow.com/questions/45376571/python-bokeh-logger
+
+Done: 011: Understand how to make a callback to the server when not using a widget and return values.
+Already know this works when using a widget so maybe start there e.g. press button to show ellipse - this then makes a callback.
+20181126: Work around: Had to add the array index to a paragraph object that could then be read in the server callback.
+
+OnGoing: 012: Look at pre-processing the (latitude, longitude) coordinate projections: Added 20181122: Started 20181126: Completed 20181129
+20181126: Create a class that loads and cleans the original tweet data.
+To assist development, add a 'number of rows to process' variable.
+Have removed rows containing NaN.
+Working on identifying rows that contain the string 'Infinity' - this is not np.inf.
+Consider rows where the 'area' column has a value of 0.
+20181127: Even if the area is 0 then it's still a spatial point - consider what it means? i.e. they always tweet from the same location.
+So, no ellipise, but they can still be in someone else's ellipse.
+So, keep data point in, but flag that they do not have an ellipse.
+20181129: Calculated width, height from area and ratio.
+20181130: Get hold of the original raw data to visually test that the drawn ellipses look correct.
+
+Done: 014: Start understanding how to dissolve polygons together: Added 20181127: Started 20181127: Completed ??
+Started looking at potential (Open Source) libraries - including Shapely + GeoPandas
+As with 004: Will use shapely that has dissolve functionality.
+Basic approach will be to define each ellipse as a point set/polygon and then use the shapely dissolve tool to create a single polygon.
+Confirm that the ellipse definition defined in shapely maps accurately to those drawn in bokeh.
+Created a set of ellipse points using shapely and they DO match the ellipse shape drawn by bokeh.
+Create a list of ellipse details, then for each ellipse calculate it's points to create a polygon.
+From this list of polygons perform a shapely cascaded_union. Appears to be working.
+
+Done: 015: Step back and profile the data - this will then be used to direct how to clean it and which columns to focus on: Added 20181128: Started 20181128: Completed 20181128
+x/y-all-tweets: Infinity: 47 : 0: 8
+x/y-working-tweets: Infinity: 90 : 0: 8
+x/y-nonworking-tweets: Infinity: 72 : 0: 6
+area-all-tweets: 0.0: 115
+area-working-tweets: 0.0: 183
+area-nonworking-tweets: 0.0: 162
+Used Data Profiling tool - results in data_profiling folder.
+20181129: Looking at the 57902 rows - none of the latitude or longitude values are NaN - i.e. they ALL have a spatial position.
+area-all-tweets: 99 nan : 115 0
+area-nonworking-tweets: 118 nan : 162 0
+area-working-tweets: 120 nan : 183 0
+For area-all-tweets:
+- the x/y-all-tweets values are [NaN, Infinity, 0] - but there is a value for the theta-all-tweets column
+- areas with NaN - x/y are NaN - theta mixture of NaN and values
+This is the same for areas for working and non-working.
+So, what to do?
+An area of 0 is allowed - potentially implying they don't move - always tweeting from the same location.
+An area of NaN? Mark as '-1' to identify undefined.
+So, don't remove rows with an NaN value - clean it instead.
+Do I need to clean angles that are nan? Why not just check for it when the data point is selected, and if nan then don't draw.
+
+Done: 017: How to check for a point in an ellipse - how to optimize this over the entire 50K data set (x 3): Added 20181129: STarted 20181129: Completed 20181202
+Have found the basic formula: Point and ellipse (rotated) position test: algorithm:
+https://stackoverflow.com/questions/7946187/point-and-ellipse-rotated-position-test-algorithm
+Perform some quick bounding box / circle test to disclude other data points quickly, before applying more computationally expensive ellipse check.
+20181202: This will be pre-processed.
+
+InProgress: 018: Consider how to use visualization to represent area / number of tweets within ellipse etc - maybe add to the hover tool?: Added: 20181130: Started 20181202
+Take a look at bokeh.colors: https://bokeh.pydata.org/en/latest/docs/reference/colors.html
+20181208: Have added a 'color' column to the source circle CDS.
+Explore various maps. There is a concentration of counts in the low 10s - which is hidden using a linear map.
+
+Done: 023: Check the drawing of the ellipse if the area is 0 or -1: Added 20181130: Started 20181130: Completed 20181130
+Dependent on 024 as although I can find an ID where the area is 0 or -1, need a convenient way to then locate and select it.
+On first look it appears that nothing appears to happen? Which is fine, but was semi expecting an error of some kind.
+Added check for the returned dataframe of the entered ID being empty. If it is empty, i.e. no row with that ID, then the find circle is cleared.
+
+Done: 024: Allow the user to select a point by entering the ID in a text book. This will require some form of automatic zoom to 'fly' to the selected point: Added 20181130: Started 20181130: Completed 20181130
+Added text input box and button to 'find id'.
+How do I define/change the selected data point?
+Potentially draw a circle around the data point - but it will still need to be explicitly selected.
+Circle drawn. Need to clear this circle selection on some action.
+Circle cleared when user selects (another) point.
+
+Done: 025: Understand why data point ID 2760872119 is not within it's ellipse? Surely this can't happen as the data point is the location for ellipse? Added 20181130: Started 20181130: Completed 20181130
+Looks like this might have just been an error, as it looks fine now.
+
+Done: 026: On text, have single ID (idx) string - then parse this backend: Added 20181130: Started 20181130: Completed 20181130
+Only using the text_id widget, and then some basic string manipulation to extract the idx from between the brackets.
+
+InProgress: 027: Create a better layout: Added 20181130: Started 20181130:
+Started playing, look at TextInput not respecting width: https://github.com/bokeh/bokeh/issues/6427:
+
+InProgress: 028: Consider using check boxes to define which ellipses to show for a selected data point: Added 20181130: Started 20181130:
+Consider various states such as the checkbox for the selected data set should always be selected.
+
+InProgress: 029: Consider adding filters/sliders for some bins of 'num of local data points', 'ellipse area' and other measures: Added 20181201: Started 20181207
+20181208: Range Sliders for sibling count and area.
+Add for 'distance between working and non working', and for 'ratio'.
+
+Done: 030: Confirm spatial references / projections being used: Added 20181201: Started 20181201: Completed 20181201
+Remember: We have (latitude, longitude) angles converted into (x, y) coordinates.
+Confirmed that data is non-projected EPSG:4326 and OpenStreetMap is using EPSG:3857
+EPSG 3857 or 4326 for GoogleMaps, OpenStreetMap and Leaflet: https://gis.stackexchange.com/questions/48949/epsg-3857-or-4326-for-googlemaps-openstreetmap-and-leaflet
+Omniscale: Background maps in EPSG:4326 for your application: https://maps.omniscale.com/en/openstreetmap/epsg-4326
+
+Done: 031: BBug: When changing the dataset, the selected data point is no longer displayed in red: Added 20181202: Started 20181202: Completed 20181202
+This occurs when the user clicks on the map but no circle is selected i.e. unselecting everything.
+So, actually, I should be clearing the ellipse and circles inside ellipse instead.
+This doesn't appear to be a problem any more?
+
+InProgress: 032: Consider optimization as a whole over the entire 50K data set (x 3): Added 20181202:
+Related to task 063
+On home desktop, 10K points is slow. It loads within less than 10s which is good, but zooming and panning is jerky.
+How many points have a count less than 0?
+Maybe having the slider that controls which points are displayed w.r.t. count will help.
+Does Bokeh provide anything similar to Folium/Leaflet that groups points depending on zoom factor?
+Can I somehow plot something similar to Folium's MarkerCluster?
+Try 'Controlling Level of Detail' under: https://bokeh.pydata.org/en/latest/docs/user_guide/tools.html
+How can I get the currect axis scale / zoom factor.
+Can I maybe turn rendering off / down-sample while moving/zooming?
+Once a point is selected - remove points outside a certain range?
+Only show datapoint and siblings? i.e. only points in it's ellipse?
+
+Done: 033: Need to save the pre-processed data out to a file and then load into app: Added 20181202: Started 20181203: Completed 20181205
+Look at Bokeh's Mapping Geo Data: https://bokeh.pydata.org/en/latest/docs/user_guide/geo.html for some direction.
+GeoJSON: http://geojson.org/
+Simply used Pandas Dataframe to_json / read_json - appears super quick (for 1000 x 3 points).
+
+InProgress: 034: BBug: A user is able to select multiple data points when the scale is zoomed out enough - only won't ability to select a single one: Added 20181202: Started 20181203:
+Look at Folium/Leaflet that uses a 'group pin' that indicates X individual points are grouped together, which gradually zooms down into single pins.
+
+Done: 035: Consider drawing all the ellipses of the datapoints within the selected datapoint - this is different to drawing the single dissolve: Added 20181202: Started 20181202: Completed 20181202
+We already have the list of enclosed datapoints.
+Create another data source to define the ellipses for the enclosed datapoints.
+The idea is to allow the user to view the extent of the ellipses which might give a different perspective than just the single dissolve.
+This will also act as a visual check for the dissolve.
+Ellipses outline drawn using a toggle switch.
+
+Done: 036: Change buttons (where appropriate) to toggles to switch things on/off: Added 20181202: Completed 20181202
+Consider what to do on change datasets? Toggle everything off, or re-calculate what's turned on?
+Decided to toggle everything off.
+
+InProgress: 038: Display both 'working'/'non-working' ellipses together: Added 20181202: Started 20181203
+Consider whether to display both on the same single map, or potentially on two maps. This will be influenced by how 'crowded' the map looks having both datasets on a single map.
+If there is close localisation then this could look messy. But there is some benefit being able to view the overlap - potentially have a 'blending slider' that controls for example transparency.
+Consider how plots can be linked? e.g. selecting a point on 'working' selects the same point on 'non-working'.
+20181205: For the first implementation use a slide to blend between them on a single map.
+Basic slider working for blending between the data poitns ellipse.
+
+Done: 039: When displaying the dissolve - consider still overlaying the original ellipse so the extent of new area can clearly be seen: Added 20181202: Started 20181203: Completed 20181204
+Can already draw the SDE ellipse - so is this an implementation of drawing the dissolve, and then drawing the line of the SDE ellipse?
+Go with this method. The user can toggle the ellipse on/off.
+
+Done: 040: Can the area of the dissolve be calculated? Added 20181202: Started 20181203: Completed 20181204
+It looks like a shapely object does has an '.area' attribute that can be used.
+Various articles regards transforming the object (appropriately) first.
+Can use the .area property from the dissolved polygon created.
+
+InProgress: 042: Can I format the text on the hover tooltip? Added 20181203: Started 20181203:
+There's an example here: Interactive Data Visualization in Python With Bokeh: https://realpython.com/python-data-visualization-bokeh/
+Here's a Bokeh Example: tools_hover_tooltip_formatting.py: https://bokeh.pydata.org/en/latest/docs/user_guide/examples/tools_hover_tooltip_formatting.html
+
+Done: 044: Present user profiles: Added 20181203: Started 20181204: Completed 20181204
+Create a new file/class to load and make the data accessible.
+Used the toggle approach to show the username and profile text.
+
+Done: 045: Consider the width and height for the ellipse. The measures I have are in non-projected space - but when I draw the ellipse they are in project space - surely I need to project the width and height lengths: Added 20181203: Started 20181203: Completed 20181204
+This is triggered since the areas of the shapely ellipses do not match the data.
+Selected ID: 1888186304 (107)
+Button Show Dissolve: Callback: 107
+72071.43708897052 : 9559.655059507002 : 2164.4884690000004
+Area Data: 2164.4884690000004
+Area Calculated using a and b    : 2164488469.0000005
+Area Calculated using a/b and b/2:  541122117.2500001
+Shapely: Ellipse Area            :  135063321.97284874
+Shapely: Polygon Ellipse Area    :  135063321.97284874
+Area in KM from Polygon of coordinates: https://gis.stackexchange.com/questions/127607/area-in-km-from-polygon-of-coordinates
+robinkraft/projected_area.py: https://gist.github.com/robinkraft/c6de2f988c9d3f01af3c
+20181204: Fundamentally, should I be calculating the ellipse points in non-projected EPSG:4326 space, and then projecting these points into EPSG:3857?
+It's down to understanding the underlying process applied to the original data.
+How to compute area for polygons in an EPSG:4326 shapefile?: https://gis.stackexchange.com/questions/65736/how-to-compute-area-for-polygons-in-an-epsg4326-shapefile/130289
+- I would first convert it to an equal area projection and then do the field calculator for area  you can not calculate an area with a geographic coordinate system such as 4326.
+Directional Distribution (Standard Deviational Ellipse) (Spatial Statistics): http://resources.esri.com/help/9.3/arcgisengine/java/gp_toolref/spatial_statistics_tools/directional_distribution_standard_deviational_ellipse_spatial_statistics_.htm
+- Usage tips This tool honors the environment output coordinate system. Feature geometry is projected to the output coordinate system prior to analysis. All mathematical computations are based on the output coordinate system spatial reference.
+- Calculations based on either Euclidean or Manhattan distance require projected data to accurately measure distances.
+How Directional Distribution: Standard Deviational Ellipse (Spatial Statistics) works: http://resources.esri.com/help/9.3/arcgisengine/java/gp_toolref/spatial_statistics_tools/how_directional_distribution_colon_standard_deviational_ellipse_spatial_statistics_works.htm
+- A common way of measuring the trend for a set of points or areas is to calculate the standard distance separately in the x and y directions. These two measures define the axes of an ellipse encompassing the distribution of features. The ellipse is referred to as the standard deviational ellipse, since the method calculates the standard deviation of the x coordinates and y coordinates from the mean center to define the axes of the ellipse. 
+About projected coordinate systems: http://webhelp.esri.com/arcgisdesktop/9.3/index.cfm?TopicName=About%20projected%20coordinate%20systems
+- A projected coordinate system is defined on a flat, two-dimensional surface. Unlike a geographic coordinate system, a projected coordinate system has constant lengths, angles, and areas across the two dimensions. A projected coordinate system is always based on a geographic coordinate system that is in turn based on a sphere or spheroid.
+Directional Distribution (Standard Deviational Ellipse): http://pro.arcgis.com/en/pro-app/tool-reference/spatial-statistics/directional-distribution.htm
+- Calculations require projected data to accurately measure distances.
+Spatial Analysis 3., Analysis Márkus Béla (2010): https://www.tankonyvtar.hu/en/tartalom/tamop425/0027_SAN3/ch01s02.html
+What units are used by GeoPandas/Shapely area and distance functions?: https://gis.stackexchange.com/questions/166675/what-units-are-used-by-geopandas-shapely-area-and-distance-functions
+EPSG:3857: https://epsg.io/3857
+- Unit: metre
+- Scope: Certain Web mapping and visualisation applications. It is not a recognised geodetic system: for that see ellipsoidal Mercator CRS code 3395 (WGS 84 / World Mercator).
+- Remarks: Uses spherical development of ellipsoidal coordinates. Relative to WGS 84 / World Mercator (CRS code 3395) errors of 0.7 percent in scale and differences in northing of up to 43km in the map (equivalent to 21km on the ground) may arise.
+- Area of use: World between 85.06°S and 85.06°N.
+- Coordinate system: Cartesian 2D CS. Axes: easting, northing (X,Y). Orientations: east, north. UoM: m.
+Incorrect distances/area using Python and Shapely: https://gis.stackexchange.com/questions/286562/incorrect-distances-area-using-python-and-shapely
+- The Web Mercator coordinate system distorts area and distance a lot. You're going to have a bad time trying to calculate these values in this CRS.
+Web Mercator  The Standard for Sharing Data on the Web: https://www.esri.com/events/seminars/bettermaps/~/media/files/pdfs/events/seminars/bettermaps/materials/pdfs/webmercatorsmnrbrochure.pdf
+Many organizations use geographic information system (GIS) data stored in a local  projected coordinate system. When preparing to share maps or layers on the Web, it is recommended to reproject your source data to the Web Mercator coordinate system. Doing so will ensure that your map data is located correctly and aligns properly with  other services such as popular content providers Microsoft®   Bing Maps, Google Maps, and ESRI ArcGIS Online, which have standardized their services on the Web Mercator coordinate system.
+Web Mercator projection: https://en.wikipedia.org/wiki/Web_Mercator_projection
+- Web Mercator, Google Web Mercator, Spherical Mercator, WGS 84 Web Mercator or WGS 84/Pseudo-Mercator is a variant of the Mercator projection and is the de facto standard for Web mapping applications. It rose to prominence when Google Maps adopted it in 2005. It is used by virtually all major online map providers, including Google Maps, MapBox, Bing Maps, OpenStreetMap, Mapquest, Esri, and many others. Its official EPSG identifier is EPSG:3857, although others have been used historically.
+- Properties: Web Mercator is a slight variant of the Mercator projection, one used primarily in Web-based mapping programs. It uses the same formulas as the standard Mercator as used for small-scale maps. However, the Web Mercator uses the spherical formulas at all scales whereas large-scale Mercator maps normally use the ellipsoidal form of the projection. The discrepancy is imperceptible at the global scale but causes maps of local areas to deviate slightly from true ellipsoidal Mercator maps at the same scale. This deviation becomes more pronounced further from the equator, and can reach as much as 40km on the ground. While the Web Mercator's formulas are for the spherical form of the Mercator, geographical coordinates are required to be in the WGS 84 ellipsoidal datum. This discrepancy causes the projection to be slightly non-conformal. General lack of understanding that the Web Mercator differs from standard Mercator usage has caused considerable confusion and misuse: For all these reasons, the United States Department of Defense through the National Geospatial-Intelligence Agency has declared this map projection to be unacceptable for any official use.
+ISSUE: So, I'm unsure how the SDE area and xy_ratio have been calculated if not performed in projected coordinate (x,y) space compared to geographic coordinate (lat, lon) space?
+Maybe I just have to define the spatial reference when calculating the area? Or something?
+SOLVED: Issues caused by miss-intepreting an ellipses 'a' and 'b' values compared to bokeh's 'width' and 'height' values.
+Rememeber, 'a' and 'b' are mesaured from the center out along the axis. While 'width' and 'height' refer to the distances across the axis from one side of the ellipse to the other.
+So width = 2*a and height=2*b
+
+Done: 046: BBug: The reset tool appears to distort glyphs after being used? Added 20181204: Started 20181204: Completed 20181204
+The square select appeared to cause the same issue?
+Simplest solution for this implementation was too simply not include reset or box_select in the toolbar.
+
+Done: 048: Consider storing 'a' and 'b' instead of 'width' and 'height' to reduce the amount of divisions: Added 20181204: Started 20181204: Completed 20181205
+How many calculations are there? This only involves pre processing (finding siblings) and when finding the dissolve - so minimal really.
+Made the change. I think it confirms better the expected standard data defined for an ellipses.
+
+Done: 051: On changing the sibling count slider, clear all selections: Added 2081207: Started 20181207: Completed 20181208
+Appears to be working.
+Extend to include find circle, as well as on pressing 'find id' elements are cleared.
+
+Done: 052: Add a glyph that represents the selected point, as issue when changing slider and showing selected point using internal mechanism: Added 2081207: Started 20181207: Completed 20181208
+Thought: On selecting, create coordinates of each of the three datasets.
+20181208 Was able to add an on_change to the circle selected CDS.
+This then triggered a callback.
+
+InProgress: 054: Consider adding connecting lines between working and non working (with direction): Added 2081207: Started 20181207
+By including direction maybe this can provide some form of insight into commuting and distance travelled?
+20181207: Need to clean this column up before trying to processing.
+
+Done: 055: When changing datasets, re-apply the count filter: Added 20181208: Started 20181208: Completed 20181208
+Filter re-applied. But there is a noticeable flicker as all circles are drawn and then the filter is applied.
+Is there a better way? Potentially - but explore at a later date.
+
+Done: 057: Add numerical count and %s respect to number of points for each slider: Added 20181208: Started 20181208:
+This is the number w.r.t. to all the filters, not individual filters.
+Example: Although starting with 1000 points, as soon as the sibling count is applied, this drops to 996?
+This is because some rows have an area of -1, so the area filter removes these.
+Need to modify code so that all filters are actually applied together.
+Consider being able to select which filters to apply using a check box.
+Implemented so each filter has a checkbox to indicate if its on/off.
+
+InProgress: 063: Consider some form of heat map for clustered tweet data points - representing density: Added 20181210: Started 20181210: 
+Related to task 032
+Influenced by:
+Clustering millions of points on a map with Supercluster: https://blog.mapbox.com/clustering-millions-of-points-on-a-map-with-supercluster-272046ec5c97
+A dive into spatial search algorithms: Searching through millions of points in an instant: https://blog.mapbox.com/a-dive-into-spatial-search-algorithms-ebd0c5e39d2a
+Hierarchical Greedy Clustering:
+Wiki: Spatial Database: Spatial Index: https://en.wikipedia.org/wiki/Spatial_database#Spatial_index
+Hierarchical Clustering with Python and Scikit-Learn: https://stackabuse.com/hierarchical-clustering-with-python-and-scikit-learn/
+SciKit Learn: https://scikit-learn.org/stable/modules/generated/sklearn.cluster.AgglomerativeClustering.html
+Rtree 0.8.3: https://pypi.org/project/Rtree/ and http://toblerity.org/rtree/ : Rtree is a ctypes Python wrapper of libspatialindex that provides a number of advanced spatial indexing features for the spatially curious Python user. These features include: Nearest neighbor search, Intersection search, Multi-dimensional indexes, Clustered indexes (store Python pickles directly with index entries), Bulk loading, Deletion, Disk serialization, Custom storage implementation (to implement spatial indexing in ZODB, for example).
+* Learning Geospatial Analysis with Python: Spatial Indexing: p54: Quadtree vs R-Tree
+
+Done: 065: BBug with circle_renderer.selection_glyph and point 2429397887 - cheated by setting alpha to 0.0 to work: Added 20181211: Started 20181211: Completed 20181211
+Replicate:
+Find 2429397887
+Switch to working
+Switch back to all - erronous point appears?
+Appears to be connected to circle_renderer.selection_glyph
+Cheated by making alpha 0.0.
+BUT why for this point and hardly any others?
+20181211: Replicated problem in earlier version.
+
+InProgress: 067: Create a Git repo around the first version: Added 20181211: Started 20181211:

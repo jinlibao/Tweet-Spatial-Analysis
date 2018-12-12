@@ -1,0 +1,25 @@
+ProfileDataFrame:
+Filename:tweet-data
+Num of Rows:57902
+Num of Columns:17
+Column Names: ['User-ID', 'latitude-median-working-tweets', 'longitude-median-working-tweets', 'latitude-median-nonworking-tweets', 'longitude-median-nonworking-tweets', 'medians-distance', 'latitude-mean-all-tweets', 'longitude-mean-all-tweets', 'area-all-tweets', 'x/y-all-tweets', 'theta-all-tweets', 'area-working-tweets', 'x/y-working-tweets', 'theta-working-tweets', 'area-nonworking-tweets', 'x/y-nonworking-tweets', 'theta-nonworking-tweets']
+Num of Duplicates: 0
+Summary:
+                            ColumnName  Valid      Valid% Missing  Missing% Unique            ColumnType ValueType ConstantValue Min(L) Mean(L) Max(L) DateFormat          Min          Mean           Max
+0                              User-ID  57902  100.000000       0  0.000000  57902    Numerical Discrete    Unique                                                 1027.000000  7.373807e+08  2.923295e+09
+1       latitude-median-working-tweets  57902  100.000000       0  0.000000  57873  Numerical Continuous     Mixed                                                   34.104011  4.019119e+01  5.336932e+01
+2      longitude-median-working-tweets  57902  100.000000       0  0.000000  57872  Numerical Continuous     Mixed                                                  -84.596317 -7.520155e+01 -2.334672e+00
+3    latitude-median-nonworking-tweets  57902  100.000000       0  0.000000  57874  Numerical Continuous     Mixed                                                   34.104005  4.019027e+01  5.336932e+01
+4   longitude-median-nonworking-tweets  57902  100.000000       0  0.000000  57879  Numerical Continuous     Mixed                                                  -84.596379 -7.520082e+01 -2.334692e+00
+5                     medians-distance  57901   99.998273       1  0.001727  39182  Numerical Continuous     Mixed                                                    0.000000  4.132281e+00  8.408196e+02
+6             latitude-mean-all-tweets  57902  100.000000       0  0.000000  57878  Numerical Continuous     Mixed                                                   31.937287  4.018956e+01  5.336755e+01
+7            longitude-mean-all-tweets  57902  100.000000       0  0.000000  57882  Numerical Continuous     Mixed                                                  -84.593347 -7.520283e+01 -2.307787e+00
+8                      area-all-tweets  57803   99.829021      99  0.170979  57408  Numerical Continuous     Mixed                                                    0.000000  7.712339e+02  3.100953e+05
+9                       x/y-all-tweets  57743   99.725398     159  0.274602  57687  Numerical Continuous     Mixed                                                    0.000000           inf           inf
+10                    theta-all-tweets  57894   99.986184       8  0.013816  57867  Numerical Continuous     Mixed                                                   -1.570793  2.022530e-01  1.570796e+00
+11                 area-working-tweets  57782   99.792753     120  0.207247  42871  Numerical Continuous     Mixed                                                    0.000000  7.474027e+02  3.127980e+05
+12                  x/y-working-tweets  57698   99.647681     204  0.352319  57594  Numerical Continuous     Mixed                                                    0.000000           inf           inf
+13                theta-working-tweets  57876   99.955097      26  0.044903  57807  Numerical Continuous     Mixed                                                   -1.570796  1.674003e-01  1.570796e+00
+14              area-nonworking-tweets  57784   99.796207     118  0.203793  41230  Numerical Continuous     Mixed                                                    0.000000  6.192489e+02  3.128176e+05
+15               x/y-nonworking-tweets  57701   99.652862     201  0.347138  57618  Numerical Continuous     Mixed                                                    0.000000           inf           inf
+16             theta-nonworking-tweets  57872   99.948188      30  0.051812  57799  Numerical Continuous     Mixed                                                   -1.570796  1.769344e-01  1.570796e+00

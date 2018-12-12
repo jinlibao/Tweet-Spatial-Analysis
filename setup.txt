@@ -1,0 +1,13 @@
+
+
+set PATH=%PYTHON37_PATH%;%PYTHON37_SCRIPTS%;%PATH%
+python --version
+3.7.1
+
+cd C:\Users\simon\Google Drive\UW Classes\11 GEOG5880 Intro Python Spatial Analysis\UW\Final Project\Chen Xu
+
+bokeh serve --show Tweet-Spatial-Analysis --log-level info --log-file output.txt --log-format "%(asctime)s %(levelname)s: %(message)s"
+bokeh serve Tweet-Spatial-Analysis --log-level info --log-file output.txt --log-format "%(asctime)s %(levelname)s: %(message)s"
+
+http://localhost:5006/Tweet-Spatial-Analysis
+
