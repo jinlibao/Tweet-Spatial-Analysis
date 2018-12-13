@@ -24,9 +24,9 @@ class TweetDataPreProcessing:
         self.encoding = encoding
         self.separator = separator
         self.df = None
-        self.df_tweet_data_all = None
-        self.df_tweet_data_working = None
-        self.df_tweet_data_non_working = None
+        self.tweet_data_all = None
+        self.tweet_data_working = None
+        self.tweet_data_non_working = None
 
     def trim_columns(self, df):
         # Trimming / stripping the white space can create an empty cell. This is then NOT picked up by isspace()
@@ -96,34 +96,34 @@ class TweetDataPreProcessing:
         #self.identify_rows_with_nan()
         #self.df_details()
 
-        self.df_tweet_data_all = TweetData("all")
-        self.df_tweet_data_all.create_dataframe(self.df, 'User-ID', 'latitude-mean-all-tweets',
+        self.tweet_data_all = TweetData("all")
+        self.tweet_data_all.create_dataframe(self.df, 'User-ID', 'latitude-mean-all-tweets',
                                                 'longitude-mean-all-tweets', 'area-all-tweets', 'x/y-all-tweets',
                                                 'theta-all-tweets')
-        logger.info(self.df_tweet_data_all)
+        logger.info(self.tweet_data_all)
 
-        self.df_tweet_data_working = TweetData("working")
-        self.df_tweet_data_working.create_dataframe(self.df, 'User-ID', 'latitude-median-working-tweets',
+        self.tweet_data_working = TweetData("working")
+        self.tweet_data_working.create_dataframe(self.df, 'User-ID', 'latitude-median-working-tweets',
                                             'longitude-median-working-tweets', 'area-working-tweets',
                                             'x/y-working-tweets', 'theta-working-tweets')
-        logger.info(self.df_tweet_data_working)
+        logger.info(self.tweet_data_working)
 
-        self.df_tweet_data_non_working = TweetData("non-working")
-        self.df_tweet_data_non_working.create_dataframe(self.df, 'User-ID', 'latitude-median-nonworking-tweets',
+        self.tweet_data_non_working = TweetData("non-working")
+        self.tweet_data_non_working.create_dataframe(self.df, 'User-ID', 'latitude-median-nonworking-tweets',
                                                 'longitude-median-nonworking-tweets', 'area-nonworking-tweets',
                                                 'x/y-nonworking-tweets', 'theta-nonworking-tweets')
 
-        logger.info(self.df_tweet_data_non_working)
+        logger.info(self.tweet_data_non_working)
 
     def read_from_json(self, all, working, non_working):
-        self.df_tweet_data_all = TweetData("all")
-        self.df_tweet_data_all.read_from_json(all)
+        self.tweet_data_all = TweetData("all")
+        self.tweet_data_all.read_from_json(all)
 
-        self.df_tweet_data_working = TweetData("working")
-        self.df_tweet_data_working.read_from_json(working)
+        self.tweet_data_working = TweetData("working")
+        self.tweet_data_working.read_from_json(working)
 
-        self.df_tweet_data_non_working = TweetData("non-working")
-        self.df_tweet_data_non_working.read_from_json(non_working)
+        self.tweet_data_non_working = TweetData("non-working")
+        self.tweet_data_non_working.read_from_json(non_working)
 
     def identify_rows_with_nan(self):
         logger.info("Identify rows with NaN values:")
@@ -202,9 +202,9 @@ def main():
     logger.info(pre_processor)
     pre_processor.process()
 
-    pre_processor.write_to_json(pre_processor.df_tweet_data_non_working.df, "tweets_median_non_working.json")
-    pre_processor.write_to_json(pre_processor.df_tweet_data_working.df, "tweets_median_working.json")
-    pre_processor.write_to_json(pre_processor.df_tweet_data_all.df, "tweet_mean_all.json")
+    pre_processor.write_to_json(pre_processor.tweet_data_non_working.df, "tweets_median_non_working.json")
+    pre_processor.write_to_json(pre_processor.tweet_data_working.df, "tweets_median_working.json")
+    pre_processor.write_to_json(pre_processor.tweet_data_all.df, "tweet_mean_all.json")
 
     '''
         id_value = 20610093 # 16 all

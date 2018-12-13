@@ -1,6 +1,6 @@
 See: PEP 350 -- Codetags: https://www.python.org/dev/peps/pep-0350/
 
-Next Id: 070
+Next Id: 071
 
 ToDo: 006: Potentially compare working against non-working on same graph: Added 20181122
 ToDo: 007: Consider some form of quad-tree pre optimization of data: Added 20181122
@@ -12,8 +12,6 @@ ToDo: 022: Consider recording history of data points selected and allowing the u
 ToDo: 037: If a data point has no siblings de-active the siblings and dissolve toggles: Added 20181202:
 ToDo: 041: After implementing the dissolve functionality, consider adding 'intersection': Added 20181203: 
 ToDo: 043: Consider using Bokeh's DataTable to provide a way to list the siblings within a selected datapoint's ellipse.  Added 20181203
-ToDo: 049: Consider adding statistical descriptive details to the page: Added 20181205
-ToDo: 050: Add a colour palette to represent sibling count: Added 20181206
 ToDo: 053: Add a slide for distance between working and non working: Added 20181208:
 ToDo: 056: Consider potentially pre-processing dissolve area so the map can be filtered on that: Added 20181208:
 ToDo: 059: Sibling data points are not selected-able nor have a hover tooltip: Added 20181208:
@@ -30,10 +28,13 @@ InProgress: 032: Consider optimization as a whole over the entire 50K data set (
 InProgress: 034: BBug: A user is able to select multiple data points when the scale is zoomed out enough - only won't ability to select a single one: Added 20181202: Started 20181203:
 InProgress: 038: Display both 'working'/'non-working' ellipses together: Added 20181202: Started 20181203
 InProgress: 042: Can I format the text on the hover tooltip? Added 20181203: Started 20181203:
+InProgress: 049: Consider adding statistical descriptive details to the page: Added 20181205: Started 20181212:
+InProgress: 050: Add a colour palette to represent sibling count: Added 20181206: Started 20181207:
 InProgress: 054: Consider adding connecting lines between working and non working (with direction): Added 2081207: Started 20181207
 InProgress: 058: If nothing selected then reset Selected ID text: Added 20181208: Started 20181211:
 InProgress: 063: Consider some form of heat map for clustered tweet data points - representing density: Added 20181210: Started 20181210: 
 InProgress: 068: Think about a map of overlapping SDEs - use grey scale + transparency - maybe convert patches to a raster: Added 20181211: Started 20181211:
+InProgress: 070: Restructure code to use a controller to interface from the widgets to the data: Added 20181212: Started 20181212:
 
 
 Done: 001: Draw ellipse on selecting a user: Added 20181122: Started 20181122: Completed 20181126
@@ -288,6 +289,7 @@ Next steps:
 3) Create plot renderers.
 Can I reuse existing clear and update functions, and define the tweet_data to use?
 Add logic that if 'all' is selected then toggle blend is disabled, and any existing blend is cleared?
+20181212: Need to disable the blend slider on start up.
 
 Done: 039: When displaying the dissolve - consider still overlaying the original ellipse so the extent of new area can clearly be seen: Added 20181202: Started 20181203: Completed 20181204
 Can already draw the SDE ellipse - so is this an implementation of drawing the dissolve, and then drawing the line of the SDE ellipse?
@@ -360,6 +362,15 @@ Done: 048: Consider storing 'a' and 'b' instead of 'width' and 'height' to reduc
 How many calculations are there? This only involves pre processing (finding siblings) and when finding the dissolve - so minimal really.
 Made the change. I think it confirms better the expected standard data defined for an ellipses.
 
+InProgress: 049: Consider adding statistical descriptive details to the page: Added 20181205: Started 20181212:
+Add interactivity for clicking on histogram bars to act as 'filters' on the map.
+When doing this, adjust the filter sliders appropriately.
+Would these graphs potentially live in a separate tab? The existing page is starting to get 'busy'.
+
+InProgress: 050: Add a colour palette to represent sibling count: Added 20181206: Started 20181207:
+Tried a linear colour scheme and a 1.0 - 1.0/(1.0 + count) version.
+There is prodominently a high grouping between 0 and the low 10s - maybe create a more tailed palette that specifically bins the palette?
+
 Done: 051: On changing the sibling count slider, clear all selections: Added 2081207: Started 20181207: Completed 20181208
 Appears to be working.
 Extend to include find circle, as well as on pressing 'find id' elements are cleared.
@@ -422,3 +433,7 @@ Created repository with dev branch.
 InProgress: 068: Think about a map of overlapping SDEs - use grey scale + transparency - maybe convert patches to a raster: Added 20181211: Started 20181211:
 Can I convert the shape patch into a raster?
 Rather than using transparency do I need to look at aggregation / sum of counts?
+
+InProgress: 070: Restructure code to use a controller to interface from the widgets to the data: Added 20181212: Started 20181212:
+Basic idea is to allow the controller to manage which of the three data sets is being displayed and the blending between the working and non working.
+Implementation appears to be working.

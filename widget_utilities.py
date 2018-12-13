@@ -4,8 +4,8 @@ from bokeh.models.widgets import Button, CheckboxGroup, Paragraph, RadioButtonGr
 
 class MapWidgets:
 
-    def __init__(self, map_tweet_data, user_info):
-        self.map_tweet_data = map_tweet_data
+    def __init__(self, tweet_data_controller, user_info):
+        self.tweet_data_controller = tweet_data_controller
         self.user_info = user_info
 
         self.toggle_sde_ellipse = Toggle(label="Toggle Ellipse", active=False, width=150)
@@ -62,51 +62,52 @@ class MapWidgets:
 
         self.slider_blend = Slider(start=0.0, end=1.0, value=0.5, step=0.025, title="Blend Ratio")
         self.slider_blend.on_change('value', self.slider_blend_change)
+        self.slider_blend.disabled = True
 
         self.text_count = Paragraph(text="")
         self.update_text_count()
 
-    def parse_text_to_find_idx(self):
-        print(self.text_id.text)
-        start_bracket = self.text_id.text.find("(")
-        end_bracket = self.text_id.text.find(")")
-        idx = int(self.text_id.text[start_bracket + 1:end_bracket])
-        return idx
+    #def parse_text_to_find_idx(self):
+    #    print(self.text_id.text)
+    #    start_bracket = self.text_id.text.find("(")
+    #    end_bracket = self.text_id.text.find(")")
+    #    idx = int(self.text_id.text[start_bracket + 1:end_bracket])
+    #    return idx
 
-    def parse_text_to_find_id(self):
-        print(self.text_id.text)
-        start_bracket = self.text_id.text.find(":")
-        end_bracket = self.text_id.text.find("(")
-        select_id = int(self.text_id.text[start_bracket + 1:end_bracket])
-        return select_id
+    #def parse_text_to_find_id(self):
+    #    print(self.text_id.text)
+    #    start_bracket = self.text_id.text.find(":")
+    #    end_bracket = self.text_id.text.find("(")
+    #    select_id = int(self.text_id.text[start_bracket + 1:end_bracket])
+    #    return select_id
 
     def toggle_sde_ellipse_callback(self, arg):
-        print("Toggle Ellipse: Callback: " + str(self.map_tweet_data.circle_id) + " : " + str(self.map_tweet_data.circle_idx))
+        print("Toggle Ellipse: Callback: " + str(self.tweet_data_controller.circle_id) + " : " + str(self.tweet_data_controller.circle_idx))
         if arg:
-            self.map_tweet_data.update_sde_ellipse()
-            self.map_tweet_data.update_siblings()
+            self.tweet_data_controller.update_sde_ellipse()
+            self.tweet_data_controller.update_siblings()
         else:
-            self.map_tweet_data.clear_sde_ellipse()
-            self.map_tweet_data.clear_siblings()
+            self.tweet_data_controller.clear_sde_ellipse()
+            self.tweet_data_controller.clear_siblings()
 
     def toggle_sibling_ellipses_callback(self, arg):
         if arg:
-            self.map_tweet_data.update_sibling_ellipses()
+            self.tweet_data_controller.update_sibling_ellipses()
         else:
-            self.map_tweet_data.clear_sibling_ellipses()
+            self.tweet_data_controller.clear_sibling_ellipses()
 
     def toggle_dissolve_callback(self, arg):
-        print("Toggle Dissolve: Callback: " + str(self.map_tweet_data.circle_id) + " : " + str(self.map_tweet_data.circle_idx))
+        print("Toggle Dissolve: Callback: " + str(self.tweet_data_controller.circle_id) + " : " + str(self.tweet_data_controller.circle_idx))
         if arg:
-            self.map_tweet_data.update_dissolve()
+            self.tweet_data_controller.update_dissolve()
         else:
-            self.map_tweet_data.clear_dissolve()
+            self.tweet_data_controller.clear_dissolve()
 
     def toggle_user_info_callback(self, arg):
-        print("Toggle User Info: Callback: " + str(self.map_tweet_data.circle_id))
+        print("Toggle User Info: Callback: " + str(self.tweet_data_controller.circle_id))
 
         if arg:
-            username, profile_text = self.user_info.find_user_profile(int(self.map_tweet_data.circle_id))
+            username, profile_text = self.user_info.find_user_profile(int(self.tweet_data_controller.circle_id))
             self.text_username.text = "Username: " + str(username)
             self.text_profile.text = "Profile: " + str(profile_text)
         else:
@@ -114,49 +115,39 @@ class MapWidgets:
             self.text_profile.text = "Profile:"
 
     def radio_button_data_type_change(self, attrname, old, new):
-        self.map_tweet_data.switch_tweet_data(new)
+        self.tweet_data_controller.switch_tweet_dataset(new)
 
-        self.map_tweet_data.apply_filters()
+        self.tweet_data_controller.apply_filters()
 
         if self.toggle_sde_ellipse.active:
-            self.map_tweet_data.update_sde_ellipse()
-            self.map_tweet_data.update_siblings()
+            self.tweet_data_controller.update_sde_ellipse()
+            self.tweet_data_controller.update_siblings()
         else:
-            self.map_tweet_data.clear_sde_ellipse()
-            self.map_tweet_data.clear_siblings()
+            self.tweet_data_controller.clear_sde_ellipse()
+            self.tweet_data_controller.clear_siblings()
 
         if self.toggle_sibling_ellipses.active:
-            self.map_tweet_data.update_sibling_ellipses()
+            self.tweet_data_controller.update_sibling_ellipses()
         else:
-            self.map_tweet_data.clear_sibling_ellipses()
+            self.tweet_data_controller.clear_sibling_ellipses()
 
         if self.toggle_dissolve.active:
-            self.map_tweet_data.update_dissolve()
+            self.tweet_data_controller.update_dissolve()
         else:
-            self.map_tweet_data.clear_dissolve()
+            self.tweet_data_controller.clear_dissolve()
 
-        self.map_tweet_data.clear_find_circle()
+        self.tweet_data_controller.clear_find_circle()
 
     def button_find_callback(self):
         id_value = int(self.text_input.value)
         print("Button Find: Callback: " + str(id_value))
-
-        # This is a dataframe of the selected (single) row.
-        id_df = self.map_tweet_data.tweet_data_df.loc[self.map_tweet_data.tweet_data_df['id'] == id_value]
-        if id_df.empty:
-            print("No row with ID: " + str(id_value))
-            self.map_tweet_data.clear_find_circle()
-        else:
-            idx = id_df.index
-            # We can assume that there will be only one index value in this list, as IDs are unique.
-            self.map_tweet_data.update_find_circle_index(idx[0])
-            self.map_tweet_data.update_find_circle()
+        self.tweet_data_controller.find_id(id_value)
 
     def range_slider_count_change(self, attrname, old, new):
         start_count = int(new[0])
         end_count = int(new[1])
-        self.map_tweet_data.filter_circles_by_count(start_count, end_count)
-        self.map_tweet_data.clear_all()
+        self.tweet_data_controller.filter_circles_by_count(start_count, end_count)
+        self.tweet_data_controller.clear_all()
         self.update_text_count()
 
     def button_count_start_minus_callback(self):
@@ -169,8 +160,8 @@ class MapWidgets:
         new_values = [value_start, value_end]
         self.range_slider_count.value = new_values
 
-        self.map_tweet_data.filter_circles_by_count(value_start, value_end)
-        self.map_tweet_data.clear_all()
+        self.tweet_data_controller.filter_circles_by_count(value_start, value_end)
+        self.tweet_data_controller.clear_all()
         self.update_text_count()
 
     def button_count_start_plus_callback(self):
@@ -183,8 +174,8 @@ class MapWidgets:
         new_values = [value_start, value_end]
         self.range_slider_count.value = new_values
 
-        self.map_tweet_data.filter_circles_by_count(value_start, value_end)
-        self.map_tweet_data.clear_all()
+        self.tweet_data_controller.filter_circles_by_count(value_start, value_end)
+        self.tweet_data_controller.clear_all()
         self.update_text_count()
 
     def button_count_end_minus_callback(self):
@@ -197,8 +188,8 @@ class MapWidgets:
         new_values = [value_start, value_end]
         self.range_slider_count.value = new_values
 
-        self.map_tweet_data.filter_circles_by_count(value_start, value_end)
-        self.map_tweet_data.clear_all()
+        self.tweet_data_controller.filter_circles_by_count(value_start, value_end)
+        self.tweet_data_controller.clear_all()
         self.update_text_count()
 
     def button_count_end_plus_callback(self):
@@ -211,15 +202,15 @@ class MapWidgets:
         new_values = [value_start, value_end]
         self.range_slider_count.value = new_values
 
-        self.map_tweet_data.filter_circles_by_count(value_start, value_end)
-        self.map_tweet_data.clear_all()
+        self.tweet_data_controller.filter_circles_by_count(value_start, value_end)
+        self.tweet_data_controller.clear_all()
         self.update_text_count()
 
     def range_slider_area_change(self, attrname, old, new):
         start_area = int(new[0])
         end_area = int(new[1])
-        self.map_tweet_data.filter_circles_by_area(start_area, end_area)
-        self.map_tweet_data.clear_all()
+        self.tweet_data_controller.filter_circles_by_area(start_area, end_area)
+        self.tweet_data_controller.clear_all()
         self.update_text_count()
 
     def button_area_start_minus_callback(self):
@@ -232,8 +223,8 @@ class MapWidgets:
         new_values = [value_start, value_end]
         self.range_slider_area.value = new_values
 
-        self.map_tweet_data.filter_circles_by_area(value_start, value_end)
-        self.map_tweet_data.clear_all()
+        self.tweet_data_controller.filter_circles_by_area(value_start, value_end)
+        self.tweet_data_controller.clear_all()
         self.update_text_count()
 
     def button_area_start_plus_callback(self):
@@ -246,8 +237,8 @@ class MapWidgets:
         new_values = [value_start, value_end]
         self.range_slider_area.value = new_values
 
-        self.map_tweet_data.filter_circles_by_area(value_start, value_end)
-        self.map_tweet_data.clear_all()
+        self.tweet_data_controller.filter_circles_by_area(value_start, value_end)
+        self.tweet_data_controller.clear_all()
         self.update_text_count()
 
     def button_area_end_minus_callback(self):
@@ -260,8 +251,8 @@ class MapWidgets:
         new_values = [value_start, value_end]
         self.range_slider_area.value = new_values
 
-        self.map_tweet_data.filter_circles_by_area(value_start, value_end)
-        self.map_tweet_data.clear_all()
+        self.tweet_data_controller.filter_circles_by_area(value_start, value_end)
+        self.tweet_data_controller.clear_all()
         self.update_text_count()
 
     def button_area_end_plus_callback(self):
@@ -274,29 +265,29 @@ class MapWidgets:
         new_values = [value_start, value_end]
         self.range_slider_area.value = new_values
 
-        self.map_tweet_data.filter_circles_by_area(value_start, value_end)
-        self.map_tweet_data.clear_all()
+        self.tweet_data_controller.filter_circles_by_area(value_start, value_end)
+        self.tweet_data_controller.clear_all()
         self.update_text_count()
 
     def update_text_count(self):
-        count_active, count_total = self.map_tweet_data.num_of_points_active()
+        count_active, count_total = self.tweet_data_controller.num_of_points_active()
         percentage = (count_active/count_total) * 100.0
         text_count_str = "Count: Total: " + str(count_active) + " : " + str(percentage) + "%"
         self.text_count.text = text_count_str
 
     def filters_active_change(self, attrname, old, new):
-        self.map_tweet_data.filters_active(new)
+        self.tweet_data_controller.filters_active(new)
         self.update_text_count()
 
     def toggle_blend_callback(self, arg):
-        print("Toggle Blend: Callback: " + str(self.map_tweet_data.circle_id) + " : " + str(self.map_tweet_data.circle_idx))
+        print("Toggle Blend: Callback: " + str(self.tweet_data_controller.circle_id) + " : " + str(self.tweet_data_controller.circle_idx))
         if arg:
-            self.map_tweet_data.turn_blend_on()
+            self.tweet_data_controller.turn_blend_on()
             self.slider_blend.disabled = False
         else:
-            self.map_tweet_data.turn_blend_off()
+            self.tweet_data_controller.turn_blend_off()
             self.slider_blend.disabled = True
 
     def slider_blend_change(self, attrname, old, new):
         print(new)
-        self.map_tweet_data.blend(new)
+        self.tweet_data_controller.blend(new)

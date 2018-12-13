@@ -192,6 +192,104 @@ class TweetData:
 
         return df_str
 
+class MapTweetData:
+
+    def __init__(self, tweet_data_df):
+        self.tweet_data_df = tweet_data_df
+
+    def update_selected_circle(self, circle_id):
+        id_df = self.tweet_data_df.loc[self.tweet_data_df['id'] == circle_id]
+        idx = id_df.index
+        circle_idx = idx[0]
+
+        new_data = dict()
+        new_data['x'] = [self.tweet_data_df['x'][idx[0]]]
+        new_data['y'] = [self.tweet_data_df['y'][idx[0]]]
+        new_data['id'] = [circle_id]
+
+        return new_data, circle_idx
+
+    def update_sde_ellipse(self, circle_idx):
+        print("Update SDE Ellipse: " + str(circle_idx))
+
+        new_data = dict()
+        new_data['x'] = [self.tweet_data_df['x'][circle_idx]]
+        new_data['y'] = [self.tweet_data_df['y'][circle_idx]]
+        new_data['width'] = [self.tweet_data_df['a'][circle_idx] * 2.0]
+        new_data['height'] = [self.tweet_data_df['b'][circle_idx] * 2.0]
+        new_data['angle'] = [self.tweet_data_df['angle'][circle_idx]]
+
+        return new_data
+
+    def update_siblings(self, circle_idx):
+        print("Update Siblings: " + str(circle_idx))
+        print(str(circle_idx) + " : " + str(self.tweet_data_df['idxs'][circle_idx]))
+        new_data = dict()
+        new_data['x'] = []
+        new_data['y'] = []
+        for row_idx in self.tweet_data_df['idxs'][circle_idx]:
+            new_data['x'].append(self.tweet_data_df['x'][row_idx])
+            new_data['y'].append(self.tweet_data_df['y'][row_idx])
+
+        return new_data
+
+    def update_sibling_ellipses(self, circle_idx):
+        print("Update Sibling Ellipses: " + str(circle_idx))
+
+        print(self.tweet_data_df['idxs'][circle_idx])
+        new_data = dict()
+        new_data['x'] = []
+        new_data['y'] = []
+        new_data['width'] = []
+        new_data['height'] = []
+        new_data['angle'] = []
+        for row_idx in self.tweet_data_df['idxs'][circle_idx]:
+            new_data['x'].append(self.tweet_data_df['x'][row_idx])
+            new_data['y'].append(self.tweet_data_df['y'][row_idx])
+            new_data['width'].append(self.tweet_data_df['a'][row_idx] * 2.0)
+            new_data['height'].append(self.tweet_data_df['b'][row_idx] * 2.0)
+            new_data['angle'].append(self.tweet_data_df['angle'][row_idx])
+
+        return new_data
+
+    def update_dissolve(self, circle_idx):
+        print("Update Dissolve: " + str(circle_idx))
+
+        print(self.tweet_data_df['idxs'][circle_idx])
+        ellipses = dict()
+        ellipses['x'] = []
+        ellipses['y'] = []
+        ellipses['a'] = []
+        ellipses['b'] = []
+        ellipses['angle'] = []
+        for row_idx in self.tweet_data_df['idxs'][circle_idx]:
+            ellipses['x'].append(self.tweet_data_df['x'][row_idx])
+            ellipses['y'].append(self.tweet_data_df['y'][row_idx])
+            ellipses['a'].append(self.tweet_data_df['a'][row_idx])
+            ellipses['b'].append(self.tweet_data_df['b'][row_idx])
+            ellipses['angle'].append(self.tweet_data_df['angle'][row_idx])
+
+        # Need to remember to include the datapoints own ellipse details. Otherwise the following error occurs:
+        # AttributeError("'MultiPolygon' object has no attribute 'exterior'")
+        # Probably caused by the sibling ellipses NOT overlapping i.e. separate.
+        ellipses['x'].append(self.tweet_data_df['x'][circle_idx])
+        ellipses['y'].append(self.tweet_data_df['y'][circle_idx])
+        ellipses['a'].append(self.tweet_data_df['a'][circle_idx])
+        ellipses['b'].append(self.tweet_data_df['b'][circle_idx])
+        ellipses['angle'].append(self.tweet_data_df['angle'][circle_idx])
+
+        new_data = dict()
+        new_data['x'], new_data['y'] = dissolve_ellipses(ellipses)
+
+        return new_data
+
+    def update_find_circle(self, find_circle_idx):
+        new_data = dict()
+        new_data['x'] = [self.tweet_data_df['x'][find_circle_idx]]
+        new_data['y'] = [self.tweet_data_df['y'][find_circle_idx]]
+
+        return new_data
+
 class FilterSettings:
 
     def __init__(self, count_start, count_end, area_start, area_end):
@@ -203,11 +301,13 @@ class FilterSettings:
         self.area_active = True
 
 
-class MapTweetData:
+class TweetDataController:
 
     def __init__(self, pre_processor):
-        self.pre_processor = pre_processor
-        self.tweet_data_df = self.pre_processor.df_tweet_data_all.df
+        self.all = MapTweetData(pre_processor.tweet_data_all.df)
+        self.working = MapTweetData(pre_processor.tweet_data_working.df)
+        self.non_working = MapTweetData(pre_processor.tweet_data_non_working.df)
+        self.active_dataset = self.all
 
         self.hover_idx = ColumnDataSource(data=dict(id=[], idx=[]))
         data_hover_idx = {
@@ -218,7 +318,7 @@ class MapTweetData:
         self.hover_idx.data = self.hover_idx.from_df(df_hover_idx)
 
         self.circles = ColumnDataSource(data=dict(x=[], y=[], id=[]))
-        self.circles.data = self.circles.from_df(self.tweet_data_df)
+        self.circles.data = self.circles.from_df(self.active_dataset.tweet_data_df)
 
         self.selected_circle = ColumnDataSource(data=dict(x=[], y=[], id=[]))
         sc_data = {
@@ -270,45 +370,33 @@ class MapTweetData:
 
         self.find_circle = ColumnDataSource(data=dict(id=[], x=[], y=[]))
 
+        self.filter_settings = FilterSettings(0, 600, 0, 131000)
+
         self.circle_id = -1
         self.circle_idx = -1
         self.find_circle_idx = -1
 
-        self.filter_settings = FilterSettings(0, 600, 0, 131000)
-
-    def num_of_points_active(self):
-        active = len(self.circles.data['id'])
-        total = len(self.tweet_data_df['id'])
-        return active, total
-
-    def switch_tweet_data(self, value):
-        if value == 0: #"median non-working":
-            self.tweet_data_df = self.pre_processor.df_tweet_data_all.df
-            print("Switching to 'mean all'.")
-        elif value == 1: #"median working":
-            self.tweet_data_df = self.pre_processor.df_tweet_data_working.df
-            print("Switching to 'median working'.")
+    def find_id(self, id_value):
+        print("Find: ID: " + str(id_value))
+        # This is a dataframe of the selected (single) row.
+        id_df = self.active_dataset.tweet_data_df.loc[self.active_dataset.tweet_data_df['id'] == id_value]
+        if id_df.empty:
+            print("No row with ID: " + str(id_value))
+            self.clear_find_circle()
         else:
-            self.tweet_data_df = self.pre_processor.df_tweet_data_non_working.df
-            print("Switching to 'median non-working'.")
-
-        self.circles.data = self.circles.from_df(self.tweet_data_df)
-        self.update_selected_circle()
+            idx = id_df.index
+            # We can assume that there will be only one index value in this list, as IDs are unique.
+            self.find_circle_idx = idx[0]
+            self.update_find_circle()
 
     def selected_circle_changed(self, attrname, old, new):
         #print("Selected Circle Change: " + str(new))
         if len(new['id']) > 0:
             self.circle_id = new['id'][0]
             print("Selected Circle Change: id: " + str(self.circle_id))
-            id_df = self.tweet_data_df.loc[self.tweet_data_df['id'] == self.circle_id]
+            id_df = self.active_dataset.tweet_data_df.loc[self.active_dataset.tweet_data_df['id'] == self.circle_id]
             self.circle_idx = id_df.index[0]
             print("Selected Circle Change: idx: " + str(self.circle_idx))
-
-    def update_circle_index(self, circle_idx):
-        self.circle_idx = circle_idx
-
-    def update_find_circle_index(self, find_circle_idx):
-        self.find_circle_idx = find_circle_idx
 
     def clear_selected_circle(self):
         new_data = dict()
@@ -319,14 +407,8 @@ class MapTweetData:
 
     def update_selected_circle(self):
         if self.circle_id > -1:
-            id_df = self.tweet_data_df.loc[self.tweet_data_df['id'] == self.circle_id]
-            idx = id_df.index
-            new_data = dict()
-            new_data['x'] = [self.tweet_data_df['x'][idx[0]]]
-            new_data['y'] = [self.tweet_data_df['y'][idx[0]]]
-            new_data['id'] = [self.circle_id]
-            self.selected_circle.data = new_data
-            self.circle_idx = idx[0]
+            print("Updating Selected Circle: " + str(self.circle_id))
+            self.selected_circle.data, self.circle_idx = self.active_dataset.update_selected_circle(self.circle_id)
 
     def clear_sde_ellipse(self):
         new_data = dict()
@@ -340,14 +422,7 @@ class MapTweetData:
     def update_sde_ellipse(self):
         print("Update SDE Ellipse: " + str(self.circle_idx))
         if self.circle_idx > -1:
-            new_data = dict()
-            new_data['x'] = [self.tweet_data_df['x'][self.circle_idx]]
-            new_data['y'] = [self.tweet_data_df['y'][self.circle_idx]]
-            new_data['width'] = [self.tweet_data_df['a'][self.circle_idx] * 2.0]
-            new_data['height'] = [self.tweet_data_df['b'][self.circle_idx] * 2.0]
-            new_data['angle'] = [self.tweet_data_df['angle'][self.circle_idx]]
-
-            self.sde_ellipse.data = new_data
+            self.sde_ellipse.data = self.active_dataset.update_sde_ellipse(self.circle_idx)
 
     def clear_siblings(self):
         new_data = dict()
@@ -358,15 +433,7 @@ class MapTweetData:
     def update_siblings(self):
         print("Update Siblings: " + str(self.circle_idx))
         if self.circle_idx > -1:
-            print(str(self.circle_idx) + " : " + str(self.tweet_data_df['idxs'][self.circle_idx]))
-            new_data = dict()
-            new_data['x'] = []
-            new_data['y'] = []
-            for row_idx in self.tweet_data_df['idxs'][self.circle_idx]:
-                new_data['x'].append(self.tweet_data_df['x'][row_idx])
-                new_data['y'].append(self.tweet_data_df['y'][row_idx])
-
-            self.siblings.data = new_data
+            self.siblings.data = self.active_dataset.update_siblings(self.circle_idx)
 
     def clear_sibling_ellipses(self):
         new_data = dict()
@@ -380,21 +447,7 @@ class MapTweetData:
     def update_sibling_ellipses(self):
         print("Update Sibling Ellipses: " + str(self.circle_idx))
         if self.circle_idx > -1:
-            print(self.tweet_data_df['idxs'][self.circle_idx])
-            new_data = dict()
-            new_data['x'] = []
-            new_data['y'] = []
-            new_data['width'] = []
-            new_data['height'] = []
-            new_data['angle'] = []
-            for row_idx in self.tweet_data_df['idxs'][self.circle_idx]:
-                new_data['x'].append(self.tweet_data_df['x'][row_idx])
-                new_data['y'].append(self.tweet_data_df['y'][row_idx])
-                new_data['width'].append(self.tweet_data_df['a'][row_idx] * 2.0)
-                new_data['height'].append(self.tweet_data_df['b'][row_idx] * 2.0)
-                new_data['angle'].append(self.tweet_data_df['angle'][row_idx])
-
-            self.sibling_ellipses.data = new_data
+            self.sibling_ellipses.data = self.active_dataset.update_sibling_ellipses(self.circle_idx)
 
     def clear_dissolve(self):
         new_data = dict()
@@ -405,32 +458,7 @@ class MapTweetData:
     def update_dissolve(self):
         print("Update Dissolve: " + str(self.circle_idx))
         if self.circle_idx > -1:
-            print(self.tweet_data_df['idxs'][self.circle_idx])
-            ellipses = dict()
-            ellipses['x'] = []
-            ellipses['y'] = []
-            ellipses['a'] = []
-            ellipses['b'] = []
-            ellipses['angle'] = []
-            for row_idx in self.tweet_data_df['idxs'][self.circle_idx]:
-                ellipses['x'].append(self.tweet_data_df['x'][row_idx])
-                ellipses['y'].append(self.tweet_data_df['y'][row_idx])
-                ellipses['a'].append(self.tweet_data_df['a'][row_idx])
-                ellipses['b'].append(self.tweet_data_df['b'][row_idx])
-                ellipses['angle'].append(self.tweet_data_df['angle'][row_idx])
-
-            # Need to remember to include the datapoints own ellipse details. Otherwise the following error occurs:
-            # AttributeError("'MultiPolygon' object has no attribute 'exterior'")
-            # Probably caused by the sibling ellipses NOT overlapping i.e. separate.
-            ellipses['x'].append(self.tweet_data_df['x'][self.circle_idx])
-            ellipses['y'].append(self.tweet_data_df['y'][self.circle_idx])
-            ellipses['a'].append(self.tweet_data_df['a'][self.circle_idx])
-            ellipses['b'].append(self.tweet_data_df['b'][self.circle_idx])
-            ellipses['angle'].append(self.tweet_data_df['angle'][self.circle_idx])
-
-            new_data = dict()
-            new_data['x'], new_data['y'] = dissolve_ellipses(ellipses)
-            self.patch_dissolve.data = new_data
+            self.patch_dissolve.data = self.active_dataset.update_dissolve(self.circle_idx)
 
     def clear_find_circle(self):
         new_data = dict()
@@ -439,10 +467,36 @@ class MapTweetData:
         self.find_circle.data = new_data
 
     def update_find_circle(self):
-        new_data = dict()
-        new_data['x'] = [self.tweet_data_df['x'][self.find_circle_idx]]
-        new_data['y'] = [self.tweet_data_df['y'][self.find_circle_idx]]
-        self.find_circle.data = new_data
+        if self.find_circle_idx > -1:
+            self.find_circle.data = self.active_dataset.update_find_circle(self.find_circle_idx)
+
+    def clear_all(self):
+        self.active_dataset.clear_selected_circle()
+        self.active_dataset.clear_sde_ellipse()
+        self.active_dataset.clear_siblings()
+        self.active_dataset.clear_sibling_ellipses()
+        self.active_dataset.clear_dissolve()
+        self.active_dataset.clear_find_circle()
+
+    def switch_tweet_dataset(self, value):
+        if value == 0:
+            self.active_dataset = self.all
+            print("Switching to 'mean all'.")
+        elif value == 1:
+            self.active_dataset = self.working
+            print("Switching to 'median working'.")
+        else:
+            self.active_dataset = self.non_working
+            print("Switching to 'median non-working'.")
+
+        self.circles.data = self.circles.from_df(self.active_dataset.tweet_data_df)
+
+        self.update_selected_circle()
+
+    def num_of_points_active(self):
+        active = len(self.circles.data['id'])
+        total = len(self.active_dataset.tweet_data_df['id'])
+        return active, total
 
     def filter_circles_by_count(self, count_start, count_end):
         self.filter_settings.count_start = count_start
@@ -467,7 +521,7 @@ class MapTweetData:
         self.apply_filters()
 
     def apply_filters(self):
-        subset_df = self.tweet_data_df
+        subset_df = self.active_dataset.tweet_data_df
         if self.filter_settings.count_active:
             subset_df = subset_df.loc[
                         (subset_df['count'] >= self.filter_settings.count_start)
@@ -479,14 +533,6 @@ class MapTweetData:
                     &   (subset_df['area'] <= self.filter_settings.area_end)]
 
         self.circles.data = self.circles.from_df(subset_df)
-
-    def clear_all(self):
-        self.clear_selected_circle()
-        self.clear_sde_ellipse()
-        self.clear_siblings()
-        self.clear_sibling_ellipses()
-        self.clear_dissolve()
-        self.clear_find_circle()
 
     def turn_blend_on(self):
         print("Turn Blend On:")
