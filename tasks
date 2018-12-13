@@ -20,6 +20,7 @@ ToDo: 062: Create a 'global configuration' that can be loaded at runtime - inclu
 ToDo: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: 
 ToDo: 069: Think about create some form of point density - can this relate to the spatial index?
 
+
 InProgress: 010: Add Logging: https://bokeh.pydata.org/en/latest/docs/reference/util.html#bokeh-util-logconfig: Added 20181122: Started 20181122:
 InProgress: 018: Consider how to use visualization to represent area / number of tweets within ellipse etc - maybe add to the hover tool?: Added: 20181130: Started 20181202
 InProgress: 027: Create a better layout: Added 20181130: Started 20181130:
@@ -34,7 +35,6 @@ InProgress: 054: Consider adding connecting lines between working and non workin
 InProgress: 058: If nothing selected then reset Selected ID text: Added 20181208: Started 20181211:
 InProgress: 063: Consider some form of heat map for clustered tweet data points - representing density: Added 20181210: Started 20181210: 
 InProgress: 068: Think about a map of overlapping SDEs - use grey scale + transparency - maybe convert patches to a raster: Added 20181211: Started 20181211:
-InProgress: 070: Restructure code to use a controller to interface from the widgets to the data: Added 20181212: Started 20181212:
 
 
 Done: 001: Draw ellipse on selecting a user: Added 20181122: Started 20181122: Completed 20181126
@@ -74,6 +74,7 @@ Done: 060: Consider adding text input for the sliders. For example unable to exp
 Done: 065: BBug with circle_renderer.selection_glyph and point 2429397887 - cheated by setting alpha to 0.0 to work: Added 20181211: Started 20181211: Completed 20181211
 Done: 066: Choose different color for the find circle to contrast from other points better: Added 20181211: Stated 20181211: Completed 20181211
 Done: 067: Create a Git repo around the first version: Added 20181211: Started 20181211: Completed 20181211
+Done: 070: Restructure code to use a controller to interface from the widgets to the data: Added 20181212: Started 20181212: Completed 20181212
 
 
 OnGoing:
@@ -290,6 +291,7 @@ Next steps:
 Can I reuse existing clear and update functions, and define the tweet_data to use?
 Add logic that if 'all' is selected then toggle blend is disabled, and any existing blend is cleared?
 20181212: Need to disable the blend slider on start up.
+Blend slider disabled on start up.
 
 Done: 039: When displaying the dissolve - consider still overlaying the original ellipse so the extent of new area can clearly be seen: Added 20181202: Started 20181203: Completed 20181204
 Can already draw the SDE ellipse - so is this an implementation of drawing the dissolve, and then drawing the line of the SDE ellipse?
@@ -434,6 +436,7 @@ InProgress: 068: Think about a map of overlapping SDEs - use grey scale + transp
 Can I convert the shape patch into a raster?
 Rather than using transparency do I need to look at aggregation / sum of counts?
 
-InProgress: 070: Restructure code to use a controller to interface from the widgets to the data: Added 20181212: Started 20181212:
+Done: 070: Restructure code to use a controller to interface from the widgets to the data: Added 20181212: Started 20181212:
 Basic idea is to allow the controller to manage which of the three data sets is being displayed and the blending between the working and non working.
 Implementation appears to be working.
+Merged work from branch dev_tweet_class into dev
