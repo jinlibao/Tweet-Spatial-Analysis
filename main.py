@@ -40,7 +40,7 @@ p = figure(plot_width=800, plot_height=800,
 p.add_tile(CARTODBPOSITRON)
 
 circles_renderer = p.circle(x='x', y='y', source=tweet_data_controller.circles, fill_color='color', line_color=None, fill_alpha=0.9, size=5)
-# There is either something I'm missing, or potentially a bug:
+# There is either something I'm missing, or potentially a problem with bokeh:
 # Related to task 065: BBug with circle_renderer.selection_glyph and point 2429397887 - cheated by setting alpha to 0.0 to work:
 # To replicate: Find 2429397887, Switch to working, Switch back to all - erronous point appears with id 2429397887 ?
 # Cheated by making alpha 0.0.

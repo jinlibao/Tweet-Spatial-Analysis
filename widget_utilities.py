@@ -67,20 +67,6 @@ class MapWidgets:
         self.text_count = Paragraph(text="")
         self.update_text_count()
 
-    #def parse_text_to_find_idx(self):
-    #    print(self.text_id.text)
-    #    start_bracket = self.text_id.text.find("(")
-    #    end_bracket = self.text_id.text.find(")")
-    #    idx = int(self.text_id.text[start_bracket + 1:end_bracket])
-    #    return idx
-
-    #def parse_text_to_find_id(self):
-    #    print(self.text_id.text)
-    #    start_bracket = self.text_id.text.find(":")
-    #    end_bracket = self.text_id.text.find("(")
-    #    select_id = int(self.text_id.text[start_bracket + 1:end_bracket])
-    #    return select_id
-
     def toggle_sde_ellipse_callback(self, arg):
         print("Toggle Ellipse: Callback: " + str(self.tweet_data_controller.circle_id) + " : " + str(self.tweet_data_controller.circle_idx))
         if arg:

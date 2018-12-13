@@ -1,7 +1,6 @@
 
 import logging
 import logging.config
-import pandas as pd
 import numpy as np
 
 from file_utilities import *
@@ -115,9 +114,9 @@ class TweetDataPreProcessing:
 
         logger.info(self.tweet_data_non_working)
 
-    def read_from_json(self, all, working, non_working):
+    def read_from_json(self, mean_all, working, non_working):
         self.tweet_data_all = TweetData("all")
-        self.tweet_data_all.read_from_json(all)
+        self.tweet_data_all.read_from_json(mean_all)
 
         self.tweet_data_working = TweetData("working")
         self.tweet_data_working.read_from_json(working)

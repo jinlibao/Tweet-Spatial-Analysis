@@ -144,9 +144,9 @@ class TweetData:
             count = row.count
             scale_factor = 1.0 - 1.0/(1.0 + count)
 
-            point_r = hex(int(start_r + scale_factor * interval_r)).split(('x'))[-1]
-            point_g = hex(int(start_g + scale_factor * interval_g)).split(('x'))[-1]
-            point_b = hex(int(start_b + scale_factor * interval_b)).split(('x'))[-1]
+            point_r = hex(int(start_r + scale_factor * interval_r)).split('x')[-1]
+            point_g = hex(int(start_g + scale_factor * interval_g)).split('x')[-1]
+            point_b = hex(int(start_b + scale_factor * interval_b)).split('x')[-1]
             colour_hex_str = "#" + str(point_r) + str(point_g) + str(point_b)
             colours.append(colour_hex_str)
 
@@ -471,12 +471,12 @@ class TweetDataController:
             self.find_circle.data = self.active_dataset.update_find_circle(self.find_circle_idx)
 
     def clear_all(self):
-        self.active_dataset.clear_selected_circle()
-        self.active_dataset.clear_sde_ellipse()
-        self.active_dataset.clear_siblings()
-        self.active_dataset.clear_sibling_ellipses()
-        self.active_dataset.clear_dissolve()
-        self.active_dataset.clear_find_circle()
+        self.clear_selected_circle()
+        self.clear_sde_ellipse()
+        self.clear_siblings()
+        self.clear_sibling_ellipses()
+        self.clear_dissolve()
+        self.clear_find_circle()
 
     def switch_tweet_dataset(self, value):
         if value == 0:
@@ -511,11 +511,11 @@ class TweetDataController:
     def filters_active(self, active_list):
         self.filter_settings.count_active = False
         self.filter_settings.area_active = False
-        for filter in active_list:
-            if filter is 0:
+        for filter_check_value in active_list:
+            if filter_check_value is 0:
                 self.filter_settings.count_active = True
 
-            if filter is 1:
+            if filter_check_value is 1:
                 self.filter_settings.area_active = True
 
         self.apply_filters()
