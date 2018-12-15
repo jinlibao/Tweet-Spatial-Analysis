@@ -1,6 +1,6 @@
 See: PEP 350 -- Codetags: https://www.python.org/dev/peps/pep-0350/
 
-Next Id: 071
+Next Id: 072
 
 ToDo: 006: Potentially compare working against non-working on same graph: Added 20181122
 ToDo: 007: Consider some form of quad-tree pre optimization of data: Added 20181122
@@ -75,7 +75,7 @@ Done: 065: BBug with circle_renderer.selection_glyph and point 2429397887 - chea
 Done: 066: Choose different color for the find circle to contrast from other points better: Added 20181211: Stated 20181211: Completed 20181211
 Done: 067: Create a Git repo around the first version: Added 20181211: Started 20181211: Completed 20181211
 Done: 070: Restructure code to use a controller to interface from the widgets to the data: Added 20181212: Started 20181212: Completed 20181212
-
+Done: 071: Can I dynamically update user info: Added 20181215: Started 20181215: Completed 20181215:
 
 OnGoing:
 OnGoing: 002: Understand mapping of ellipse data to actual drawing: Added 20181122: Started 20181129: Completed 20181129
@@ -440,3 +440,11 @@ Done: 070: Restructure code to use a controller to interface from the widgets to
 Basic idea is to allow the controller to manage which of the three data sets is being displayed and the blending between the working and non working.
 Implementation appears to be working.
 Merged work from branch dev_tweet_class into dev
+
+Done: 071: Can I dynamically update user info: Added 20181215: Started 20181215: Completed 20181215:
+Can I use the TweetDataCOntroller: selected_circle_changed to update the user info?
+Wired in widgets for info to the controller and this worked.
+Consider displaying the area and number of siblings as well - although these will need updating when the dataset is changed.
+Also, why do I need separate widgets for these? Can I just not now use a single one?
+Modified to use a single Div that also allows text formatting such as new line <br> and bold <b>.
+Added area and count. Updated when changing datasets.

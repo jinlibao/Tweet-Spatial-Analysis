@@ -303,11 +303,16 @@ class FilterSettings:
 
 class TweetDataController:
 
-    def __init__(self, pre_processor):
+    def __init__(self, pre_processor, user_info):
         self.all = MapTweetData(pre_processor.tweet_data_all.df)
         self.working = MapTweetData(pre_processor.tweet_data_working.df)
         self.non_working = MapTweetData(pre_processor.tweet_data_non_working.df)
         self.active_dataset = self.all
+
+        self.user_info = user_info
+        self.selection_details = None
+        #self.text_username = None
+        #self.text_profile = None
 
         self.hover_idx = ColumnDataSource(data=dict(id=[], idx=[]))
         data_hover_idx = {
@@ -394,9 +399,30 @@ class TweetDataController:
         if len(new['id']) > 0:
             self.circle_id = new['id'][0]
             print("Selected Circle Change: id: " + str(self.circle_id))
-            id_df = self.active_dataset.tweet_data_df.loc[self.active_dataset.tweet_data_df['id'] == self.circle_id]
-            self.circle_idx = id_df.index[0]
-            print("Selected Circle Change: idx: " + str(self.circle_idx))
+            self.update_selection_details()
+
+            self.clear_sde_ellipse()
+            self.clear_siblings()
+            self.clear_sibling_ellipses()
+            self.clear_dissolve()
+
+    def update_selection_details(self):
+        id_df = self.active_dataset.tweet_data_df.loc[self.active_dataset.tweet_data_df['id'] == self.circle_id]
+        print(id_df)
+        self.circle_idx = id_df.index[0]
+
+        area = self.active_dataset.tweet_data_df['area'][self.circle_idx]
+        count = self.active_dataset.tweet_data_df['count'][self.circle_idx]
+        print("Selected Circle Change: idx: " + str(self.circle_idx))
+
+        username, profile_text = self.user_info.find_user_profile(int(self.circle_id))
+        details_str = "<b>Selected ID</b>: " + str(self.circle_id) + "<br/>"
+        details_str += "<b>Username</b>: " + str(username) + "<br/>"
+        details_str += "<b>Profile</b>: " + str(profile_text) + "<br/>"
+        details_str += "<b>Area</b>: " + str(area) + "<br/>"
+        details_str += "<b>Count</b>: " + str(count)
+
+        self.selection_details.text = details_str
 
     def clear_selected_circle(self):
         new_data = dict()
@@ -492,6 +518,7 @@ class TweetDataController:
         self.circles.data = self.circles.from_df(self.active_dataset.tweet_data_df)
 
         self.update_selected_circle()
+        self.update_selection_details()
 
     def num_of_points_active(self):
         active = len(self.circles.data['id'])

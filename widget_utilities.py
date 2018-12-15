@@ -1,12 +1,12 @@
 
 from bokeh.models import RangeSlider
-from bokeh.models.widgets import Button, CheckboxGroup, Paragraph, RadioButtonGroup, Slider, TextInput, Toggle
+from bokeh.models.widgets import Button, CheckboxGroup, Div, Paragraph, RadioButtonGroup, Slider, TextInput, Toggle
+
 
 class MapWidgets:
 
     def __init__(self, tweet_data_controller, user_info):
         self.tweet_data_controller = tweet_data_controller
-        self.user_info = user_info
 
         self.toggle_sde_ellipse = Toggle(label="Toggle Ellipse", active=False, width=150)
         self.toggle_sde_ellipse.on_click(self.toggle_sde_ellipse_callback)
@@ -17,12 +17,7 @@ class MapWidgets:
         self.toggle_dissolve = Toggle(label="Toggle Dissolve", active=False, width=150)
         self.toggle_dissolve.on_click(self.toggle_dissolve_callback)
 
-        self.toggle_user_info = Toggle(label="Toggle User Info", active=False, width=150)
-        self.toggle_user_info.on_click(self.toggle_user_info_callback)
-
-        self.text_id = Paragraph(text='Selected ID: -1 (-1)')
-        self.text_username = Paragraph(text='Username: ')
-        self.text_profile = Paragraph(text='Profile: ')
+        self.text_selection_details = Div(text='Selected ID:')
 
         self.text_input = TextInput(value="-1", title="Enter ID:", width=150)
 
@@ -88,17 +83,6 @@ class MapWidgets:
             self.tweet_data_controller.update_dissolve()
         else:
             self.tweet_data_controller.clear_dissolve()
-
-    def toggle_user_info_callback(self, arg):
-        print("Toggle User Info: Callback: " + str(self.tweet_data_controller.circle_id))
-
-        if arg:
-            username, profile_text = self.user_info.find_user_profile(int(self.tweet_data_controller.circle_id))
-            self.text_username.text = "Username: " + str(username)
-            self.text_profile.text = "Profile: " + str(profile_text)
-        else:
-            self.text_username.text = "Username:"
-            self.text_profile.text = "Profile:"
 
     def radio_button_data_type_change(self, attrname, old, new):
         self.tweet_data_controller.switch_tweet_dataset(new)

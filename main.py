@@ -19,8 +19,9 @@ file_open = FileOpen("Tweet-Spatial-Analysis/data", "user-info.csv")
 user_info = UserProfileDetails(file_open)
 user_info.process()
 
-tweet_data_controller = TweetDataController(pre_processor)
+tweet_data_controller = TweetDataController(pre_processor, user_info)
 map_widgets = MapWidgets(tweet_data_controller, user_info)
+tweet_data_controller.selection_details = map_widgets.text_selection_details
 
 latitude_range = [37, 43]
 longitude_range = [-78.0, -72.0]
@@ -69,20 +70,12 @@ hover_tool = HoverTool(tooltips=[('id', "@id"), ('area', '@area'), ('count', '@c
 # Tapping on the 'bare' map isn't registered.
 def callback_tap(   hover_idx = tweet_data_controller.hover_idx,
                     circles = tweet_data_controller.circles,
-                    fnd_circle = tweet_data_controller.find_circle,
                     selected_circle=tweet_data_controller.selected_circle,
-                    sde_ellipse=tweet_data_controller.sde_ellipse,
-                    siblings = tweet_data_controller.siblings,
-                    sibling_ellipses = tweet_data_controller.sibling_ellipses,
-                    patch_dissolve=tweet_data_controller.patch_dissolve,
                     toggle_sde_e = map_widgets.toggle_sde_ellipse,
                     toggle_se = map_widgets.toggle_sibling_ellipses,
-                    toggle_d = map_widgets.toggle_dissolve,
-                    toggle_ui = map_widgets.toggle_user_info,
-                    txt_id = map_widgets.text_id):
+                    toggle_d = map_widgets.toggle_dissolve
+                    ):
     idx = hover_idx.data['idx']
-    txt_id.text = "Selected ID: " + str(circles.data['id'][idx])
-    print(txt_id.text)
 
     new_data = dict()
     new_data['x'] = [circles.data['x'][idx]]
@@ -90,31 +83,16 @@ def callback_tap(   hover_idx = tweet_data_controller.hover_idx,
     new_data['id'] = [circles.data['id'][idx]]
     selected_circle.data = new_data
 
-    new_data = dict()
-    new_data['x'] = []
-    new_data['y'] = []
-    fnd_circle.data = new_data
-    siblings.data = new_data
-    patch_dissolve.data = new_data
-
-    new_data['width'] = []
-    new_data['height'] = []
-    new_data['angle'] = []
-    sde_ellipse.data = new_data
-    sibling_ellipses.data = new_data
-
     toggle_sde_e.active = False
     toggle_se.active = False
     toggle_d.active = False
-    toggle_ui.active = False
 
 tap_tool = TapTool(callback = CustomJS.from_py_func(callback_tap), renderers=[circles_renderer])
 p.add_tools(hover_tool, tap_tool)
 
-
-lhs = column(   map_widgets.radio_button_data_type, map_widgets.text_id, map_widgets.toggle_sde_ellipse,
-                map_widgets.toggle_sibling_ellipses, map_widgets.toggle_dissolve, map_widgets.toggle_user_info,
-                map_widgets.text_username, map_widgets.text_profile, map_widgets.text_input, map_widgets.button_find,
+lhs = column(   map_widgets.radio_button_data_type, map_widgets.text_selection_details,
+                map_widgets.toggle_sde_ellipse, map_widgets.toggle_sibling_ellipses, map_widgets.toggle_dissolve,
+                map_widgets.text_input, map_widgets.button_find,
                 map_widgets.toggle_blend, map_widgets.slider_blend)
 
 rhs = column(   row(    column(map_widgets.button_count_start_minus, map_widgets.button_count_start_plus, width=50),
