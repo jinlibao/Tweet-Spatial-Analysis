@@ -1,3 +1,5 @@
+
+from bokeh import events
 from bokeh.io import curdoc
 from bokeh.layouts import column, row
 from bokeh.models import Circle, CustomJS, HoverTool, Range1d, TapTool
@@ -48,13 +50,30 @@ circles_renderer = p.circle(x='x', y='y', source=tweet_data_controller.circles, 
 circles_renderer.selection_glyph = Circle(fill_alpha=0.0, fill_color="olivedrab", line_color=None)
 circles_renderer.nonselection_glyph = Circle(fill_alpha=0.2, fill_color="blue", line_color=None)
 
-sde_ellipse_renderer = p.ellipse(x='x', y='y', width='width', height='height', angle='angle', source=tweet_data_controller.sde_ellipse, fill_color="#cab2d6", fill_alpha=0.5)
-siblings_renderer = p.circle(x='x', y='y', source=tweet_data_controller.siblings, fill_color="orange", line_color="orange", fill_alpha=0.8, size=3)
+patch_dissolve_renderer = p.patch(x='x', y='y', source=tweet_data_controller.patch_dissolve, fill_color="wheat", line_color="wheat", line_alpha=0.4, fill_alpha=0.4)
+sde_ellipse_renderer = p.ellipse(x='x', y='y', width='width', height='height', angle='angle', source=tweet_data_controller.sde_ellipse, fill_color="#cab2d6", line_alpha=0.5, fill_alpha=0.5)
 sibling_ellipses_renderer = p.ellipse(x='x', y='y', width='width', height='height', angle='angle', source=tweet_data_controller.sibling_ellipses, line_color="darkmagenta", fill_alpha=0.0)
-patch_dissolve_renderer = p.patch(x='x', y='y', source=tweet_data_controller.patch_dissolve, fill_color="wheat", line_color="wheat", fill_alpha=0.4)
+siblings_renderer = p.circle(x='x', y='y', source=tweet_data_controller.siblings, fill_color="orange", line_color="orange", fill_alpha=0.8, size=3)
 selected_circle_renderer = p.circle(x='x', y='y', source=tweet_data_controller.selected_circle, fill_color="olivedrab", line_color=None, fill_alpha=1, size=5)
+
+patch_dissolve_blend_renderer = p.patch(x='x', y='y', source=tweet_data_controller.patch_dissolve_blend, fill_color="wheat", line_color="wheat", line_alpha=0.4, fill_alpha=0.4)
+sde_ellipse_blend_renderer = p.ellipse(x='x', y='y', width='width', height='height', angle='angle', source=tweet_data_controller.sde_ellipse_blend, fill_color="#cab2d6", line_alpha=0.5, fill_alpha=0.5)
+sibling_ellipses_blend_renderer = p.ellipse(x='x', y='y', width='width', height='height', angle='angle', source=tweet_data_controller.sibling_ellipses_blend, line_color="darkmagenta", fill_alpha=0.0)
+siblings_blend_renderer = p.circle(x='x', y='y', source=tweet_data_controller.siblings_blend, fill_color="orange", line_color="orange", fill_alpha=0.8, size=3)
+selected_circle_blend_renderer = p.circle(x='x', y='y', source=tweet_data_controller.selected_circle_blend, fill_color="indigo", line_color=None, fill_alpha=1, size=5)
+
 find_circle_renderer = p.circle(x='x', y='y', source=tweet_data_controller.find_circle, line_color="#410967", fill_color="orange", fill_alpha=0.0, size=15)
 
+tweet_data_controller.csr = selected_circle_renderer
+tweet_data_controller.csbr = selected_circle_blend_renderer
+tweet_data_controller.er = sde_ellipse_renderer
+tweet_data_controller.ebr = sde_ellipse_blend_renderer
+tweet_data_controller.ser = sibling_ellipses_renderer
+tweet_data_controller.sebr = sibling_ellipses_blend_renderer
+tweet_data_controller.pdr = patch_dissolve_renderer
+tweet_data_controller.pdbr = patch_dissolve_blend_renderer
+tweet_data_controller.sr = siblings_renderer
+tweet_data_controller.sbr = siblings_blend_renderer
 
 # Causes:
 # Uncaught Error: reference {"id":"1005","type":"ColumnDataSource"} isn't known (not in Document?)
@@ -73,7 +92,9 @@ def callback_tap(   hover_idx = tweet_data_controller.hover_idx,
                     selected_circle=tweet_data_controller.selected_circle,
                     toggle_sde_e = map_widgets.toggle_sde_ellipse,
                     toggle_se = map_widgets.toggle_sibling_ellipses,
-                    toggle_d = map_widgets.toggle_dissolve
+                    toggle_d = map_widgets.toggle_dissolve,
+                    toggle_b = map_widgets.toggle_blend,
+                    ba = tweet_data_controller.blend_active
                     ):
     idx = hover_idx.data['idx']
 
@@ -86,9 +107,30 @@ def callback_tap(   hover_idx = tweet_data_controller.hover_idx,
     toggle_sde_e.active = False
     toggle_se.active = False
     toggle_d.active = False
+    toggle_b.active = False
+    ba = False
 
 tap_tool = TapTool(callback = CustomJS.from_py_func(callback_tap), renderers=[circles_renderer])
 p.add_tools(hover_tool, tap_tool)
+
+def lod_start(circles = tweet_data_controller.circles):
+    print("LOD Start:")
+
+def lod_end(circles = tweet_data_controller.circles):
+    print("LOD End:")
+
+p.js_on_event(events.LODStart, CustomJS.from_py_func(lod_start))
+p.js_on_event(events.LODEnd, CustomJS.from_py_func(lod_end))
+
+def pan_start(circles = tweet_data_controller.circles):
+    print("Pan Start:")
+
+def pan_end(circles = tweet_data_controller.circles):
+    print("Pan End:")
+
+p.js_on_event(events.PanStart, CustomJS.from_py_func(pan_start))
+p.js_on_event(events.PanEnd, CustomJS.from_py_func(pan_end))
+
 
 lhs = column(   map_widgets.radio_button_data_type, map_widgets.text_selection_details,
                 map_widgets.toggle_sde_ellipse, map_widgets.toggle_sibling_ellipses, map_widgets.toggle_dissolve,

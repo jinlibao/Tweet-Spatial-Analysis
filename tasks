@@ -1,6 +1,6 @@
 See: PEP 350 -- Codetags: https://www.python.org/dev/peps/pep-0350/
 
-Next Id: 072
+Next Id: 074
 
 ToDo: 006: Potentially compare working against non-working on same graph: Added 20181122
 ToDo: 007: Consider some form of quad-tree pre optimization of data: Added 20181122
@@ -19,6 +19,7 @@ ToDo: 061: Add a legend for the 'sibling count' visualization: Added 20181209:
 ToDo: 062: Create a 'global configuration' that can be loaded at runtime - including details generated from the preprocessing stage: Added 20181209:
 ToDo: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: 
 ToDo: 069: Think about create some form of point density - can this relate to the spatial index?
+ToDo: 072: Add scale to map and units to details for area.
 
 
 InProgress: 010: Add Logging: https://bokeh.pydata.org/en/latest/docs/reference/util.html#bokeh-util-logconfig: Added 20181122: Started 20181122:
@@ -27,7 +28,6 @@ InProgress: 027: Create a better layout: Added 20181130: Started 20181130:
 InProgress: 029: Consider adding filters/sliders for some bins of 'num of local data points', 'ellipse area' and other measures: Added 20181201: Started 20181207
 InProgress: 032: Consider optimization as a whole over the entire 50K data set (x 3): Added 20181202:
 InProgress: 034: BBug: A user is able to select multiple data points when the scale is zoomed out enough - only won't ability to select a single one: Added 20181202: Started 20181203:
-InProgress: 038: Display both 'working'/'non-working' ellipses together: Added 20181202: Started 20181203
 InProgress: 042: Can I format the text on the hover tooltip? Added 20181203: Started 20181203:
 InProgress: 049: Consider adding statistical descriptive details to the page: Added 20181205: Started 20181212:
 InProgress: 050: Add a colour palette to represent sibling count: Added 20181206: Started 20181207:
@@ -60,6 +60,7 @@ Done: 031: BBug: When changing the dataset, the selected data point is no longer
 Done: 033: Need to save the pre-processed data out to a file and then load into app: Added 20181202: Started 20181203: Completed 20181205
 Done: 035: Consider drawing all the ellipses of the datapoints within the selected datapoint - this is different to drawing the single dissolve: Added 20181202: Started 20181202: Completed 20181202
 Done: 036: Change buttons (where appropriate) to toggles to switch things on/off: Added 20181202: Completed 20181202
+Done: 038: Display both 'working'/'non-working' ellipses together: Added 20181202: Started 20181203: Completed 20181217
 Done: 039: When displaying the dissolve - consider still overlaying the original ellipse so the extent of new area can clearly be seen: Added 20181202: Started 20181203: Completed 20181204
 Done: 040: Can the area of the dissolve be calculated? Added 20181202: Started 20181203: Completed 20181204
 Done: 044: Present user profiles: Added 20181203: Started 20181204: Completed 20181204
@@ -76,6 +77,8 @@ Done: 066: Choose different color for the find circle to contrast from other poi
 Done: 067: Create a Git repo around the first version: Added 20181211: Started 20181211: Completed 20181211
 Done: 070: Restructure code to use a controller to interface from the widgets to the data: Added 20181212: Started 20181212: Completed 20181212
 Done: 071: Can I dynamically update user info: Added 20181215: Started 20181215: Completed 20181215:
+Done: 073: Consider showing area/count for both working and non-working together: Added 20181217: Started 20181217: Completed 20181217
+
 
 OnGoing:
 OnGoing: 002: Understand mapping of ellipse data to actual drawing: Added 20181122: Started 20181129: Completed 20181129
@@ -254,6 +257,7 @@ How can I get the currect axis scale / zoom factor.
 Can I maybe turn rendering off / down-sample while moving/zooming?
 Once a point is selected - remove points outside a certain range?
 Only show datapoint and siblings? i.e. only points in it's ellipse?
+20181215: Started looking at the LOD/Pan events.
 
 Done: 033: Need to save the pre-processed data out to a file and then load into app: Added 20181202: Started 20181203: Completed 20181205
 Look at Bokeh's Mapping Geo Data: https://bokeh.pydata.org/en/latest/docs/user_guide/geo.html for some direction.
@@ -274,7 +278,7 @@ Done: 036: Change buttons (where appropriate) to toggles to switch things on/off
 Consider what to do on change datasets? Toggle everything off, or re-calculate what's turned on?
 Decided to toggle everything off.
 
-InProgress: 038: Display both 'working'/'non-working' ellipses together: Added 20181202: Started 20181203
+Done: 038: Display both 'working'/'non-working' ellipses together: Added 20181202: Started 20181203: Completed 20181217
 Consider whether to display both on the same single map, or potentially on two maps. This will be influenced by how 'crowded' the map looks having both datasets on a single map.
 If there is close localisation then this could look messy. But there is some benefit being able to view the overlap - potentially have a 'blending slider' that controls for example transparency.
 Consider how plots can be linked? e.g. selecting a point on 'working' selects the same point on 'non-working'.
@@ -292,6 +296,36 @@ Can I reuse existing clear and update functions, and define the tweet_data to us
 Add logic that if 'all' is selected then toggle blend is disabled, and any existing blend is cleared?
 20181212: Need to disable the blend slider on start up.
 Blend slider disabled on start up.
+20181215: Remember, we're only belending (at this stage) between working and non-working to this affects when the toggle blend button is active.
+toggle_button initially disabled as starting dataset is 'all'
+Implementation:
+If blend_dataset is not None then process the various elements.
+Add transparency to the various renderers.
+Start with the ellipse then add the other elements.
+20181216: Blending working for the sde ellipse.
+Looks like I might not be able to blend the path:
+Reading: Confusing multi_line error message: https://github.com/bokeh/bokeh/issues/8348
+>> What other meaning could there be besides "extra irrelevant stuff has been omitted"?
+>> all properties provided either need to be scalars (like "red") or else strings specifying a column in the CDS?
+>> That's not a true statement. This situation does not apply to all properties, only to DataSpecs, which can either be single scalar values, or columns of data. And then, when providing any columns of data for a DataSpec property, the situation is:
+>> Either:
+>> All values have to be literal sequences passed to the glyph function, with no source given, OR
+>> All values have to be string names that reference a column in a CDS, and a source has to be given
+>> You can't mix and match the two possibilities. i.e. "Supplying a user-defined data source AND iterable values to glyph methods is not possible."
+and the error I'm getting is:
+2018-12-17 10:15:15,576 ERROR: Error running application handler <bokeh.application.handlers.directory.DirectoryHandler object at 0x0000022B39E08518>: expected a value of type Real, got alpha of type str
+File "bases.py", line 453, in validate:
+raise ValueError(msg) Traceback (most recent call last):
+  File "c:\development\python\python37\lib\site-packages\bokeh\application\handlers\code_runner.py", line 180, in run
+    exec(self._code, module.__dict__)
+  File "C:\Users\simon\Google Drive\UW Classes\11 GEOG5880 Intro Python Spatial Analysis\UW\Final Project\Chen Xu\Tweet-Spatial-Analysis\main.py", line 56, in <module>
+    patch_dissolve_renderer = p.patch(x='x', y='y', source=tweet_data_controller.patch_dissolve, fill_color="wheat", line_color="wheat", alpha='alpha')
+  File "fakesource", line 5, in patch
+20181217: I can change the ine and fill alpha by directly modifying the attributes via the renderer. Is this a bit of a hack? Yeah - but seems the only way I'll be able to do it for a patch.
+Add alpha to sibling points. Implemented by modifing the renderer directly.
+Blending functionality is in place - need to tidy up the toggle states wrt what is shown.
+Can blend selected circle, sde ellipse, sibling ellipses and path.
+
 
 Done: 039: When displaying the dissolve - consider still overlaying the original ellipse so the extent of new area can clearly be seen: Added 20181202: Started 20181203: Completed 20181204
 Can already draw the SDE ellipse - so is this an implementation of drawing the dissolve, and then drawing the line of the SDE ellipse?

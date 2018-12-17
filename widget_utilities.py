@@ -54,6 +54,7 @@ class MapWidgets:
 
         self.toggle_blend = Toggle(label="Toggle Blend", active=False, width=150)
         self.toggle_blend.on_click(self.toggle_blend_callback)
+        self.toggle_blend.disabled = True
 
         self.slider_blend = Slider(start=0.0, end=1.0, value=0.5, step=0.025, title="Blend Ratio")
         self.slider_blend.on_change('value', self.slider_blend_change)
@@ -85,8 +86,16 @@ class MapWidgets:
             self.tweet_data_controller.clear_dissolve()
 
     def radio_button_data_type_change(self, attrname, old, new):
-        self.tweet_data_controller.switch_tweet_dataset(new)
+        if new == 0:
+            self.toggle_blend.disabled = True
+            self.toggle_blend.active = False
+            self.tweet_data_controller.blend_active = False
+        else:
+            self.toggle_blend.disabled = False
+            self.toggle_blend.active = False
+            self.tweet_data_controller.blend_active = False
 
+        self.tweet_data_controller.switch_tweet_dataset(new)
         self.tweet_data_controller.apply_filters()
 
         if self.toggle_sde_ellipse.active:
@@ -252,12 +261,11 @@ class MapWidgets:
     def toggle_blend_callback(self, arg):
         print("Toggle Blend: Callback: " + str(self.tweet_data_controller.circle_id) + " : " + str(self.tweet_data_controller.circle_idx))
         if arg:
-            self.tweet_data_controller.turn_blend_on()
+            self.tweet_data_controller.turn_blend_on(self.toggle_sde_ellipse.active, self.toggle_sibling_ellipses.active, self.toggle_dissolve.active)
             self.slider_blend.disabled = False
         else:
             self.tweet_data_controller.turn_blend_off()
             self.slider_blend.disabled = True
 
     def slider_blend_change(self, attrname, old, new):
-        print(new)
-        self.tweet_data_controller.blend(new)
+        self.tweet_data_controller.blend(new, self.toggle_sde_ellipse.active, self.toggle_sibling_ellipses.active, self.toggle_dissolve.active)
