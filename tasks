@@ -2,14 +2,7 @@ See: PEP 350 -- Codetags: https://www.python.org/dev/peps/pep-0350/
 
 Working on since last commit:
 Tasks:
-Completed
-029: Consider adding filters/sliders for some bins of 'num of local data points', 'ellipse area' and other measures: Added 20181201: Started 20181207: Completed 20181217
-This was finished off by adding distance and ratio
-053: Add a slide for distance between working and non working: Added 20181208: Completed 20181217
-074: BBug: Sibling ellipses not being cleared when toggle blend turned off: Added 20181217: Started 20181217: Completed 20181217
-075: BBug: IndexError: Added 20181217: Started Added 20181217: Completed 20181217
-076: Add medians distance to user info: Added 20181217: Started 20191217: Completed 20181217:
-TweetDataController: General tidying up of CDS definitions - removed the need to define and create from a dataframe.
+
 
 
 Next Id: 077
@@ -45,6 +38,7 @@ InProgress: 054: Consider adding connecting lines between working and non workin
 InProgress: 058: If nothing selected then reset Selected ID text: Added 20181208: Started 20181211:
 InProgress: 063: Consider some form of heat map for clustered tweet data points - representing density: Added 20181210: Started 20181210: 
 InProgress: 068: Think about a map of overlapping SDEs - use grey scale + transparency - maybe convert patches to a raster: Added 20181211: Started 20181211:
+InProgress: 075: BBug: IndexError: Added 20181217: Started Added 20181217: Completed 20181217: Reopened 20181217
 
 
 Done: 001: Draw ellipse on selecting a user: Added 20181122: Started 20181122: Completed 20181126
@@ -91,7 +85,6 @@ Done: 070: Restructure code to use a controller to interface from the widgets to
 Done: 071: Can I dynamically update user info: Added 20181215: Started 20181215: Completed 20181215:
 Done: 073: Consider showing area/count for both working and non-working together: Added 20181217: Started 20181217: Completed 20181217
 Done: 074: BBug: Sibling ellipses not being cleared when toggle blend turned off: Added 20181217: Started 20181217: Completed 20181217
-Done: 075: BBug: IndexError: Added 20181217: Started Added 20181217: Completed 20181217
 Done: 076: Add medians distance to user info: Added 20181217: Started 20191217: Completed 20181217:
 
 
