@@ -24,7 +24,7 @@ class MapWidgets:
         self.button_find = Button(label="Find ID", width=150)
         self.button_find.on_click(self.button_find_callback)
 
-        self.radio_button_data_type = RadioButtonGroup(labels=['all', 'working', 'non-working'], active=0, width=300)
+        self.radio_button_data_type = RadioButtonGroup(labels=['all', 'working', 'non-working'], active=1, width=300)
         self.radio_button_data_type.on_change('active', self.radio_button_data_type_change)
 
         self.range_slider_count = RangeSlider(start=0, end=600, value=(0, 600), step=1, title="Sibling Count")
@@ -49,12 +49,35 @@ class MapWidgets:
         self.button_area_end_plus = Button(label="+", width=15)
         self.button_area_end_plus.on_click(self.button_area_end_plus_callback)
 
-        self.filters_active = CheckboxGroup(labels=["Filter by Sibling Count", "Filter by Area"], active=[0, 1])
+        self.range_slider_distance = RangeSlider(start=-1, end=850, value=(0, 850), step=10, title="Distance")
+        self.range_slider_distance.on_change('value', self.range_slider_distance_change)
+        self.button_distance_start_minus = Button(label="-", width=15)
+        self.button_distance_start_minus.on_click(self.button_distance_start_minus_callback)
+        self.button_distance_start_plus = Button(label="+", width=15)
+        self.button_distance_start_plus.on_click(self.button_distance_start_plus_callback)
+        self.button_distance_end_minus = Button(label="-", width=15)
+        self.button_distance_end_minus.on_click(self.button_distance_end_minus_callback)
+        self.button_distance_end_plus = Button(label="+", width=15)
+        self.button_distance_end_plus.on_click(self.button_distance_end_plus_callback)
+
+        self.range_slider_ratio = RangeSlider(start=-1, end=100, value=(0, 100), step=2, title="Ratio")
+        self.range_slider_ratio.on_change('value', self.range_slider_ratio_change)
+        self.button_ratio_start_minus = Button(label="-", width=15)
+        self.button_ratio_start_minus.on_click(self.button_ratio_start_minus_callback)
+        self.button_ratio_start_plus = Button(label="+", width=15)
+        self.button_ratio_start_plus.on_click(self.button_ratio_start_plus_callback)
+        self.button_ratio_end_minus = Button(label="-", width=15)
+        self.button_ratio_end_minus.on_click(self.button_ratio_end_minus_callback)
+        self.button_ratio_end_plus = Button(label="+", width=15)
+        self.button_ratio_end_plus.on_click(self.button_ratio_end_plus_callback)
+
+        self.filters_active = CheckboxGroup(labels=["Filter by Sibling Count", "Filter by Area", "Filter by Distance", "Filter by Ratio"], active=[0, 1, 2, 3])
         self.filters_active.on_change('active', self.filters_active_change)
 
         self.toggle_blend = Toggle(label="Toggle Blend", active=False, width=150)
         self.toggle_blend.on_click(self.toggle_blend_callback)
-        self.toggle_blend.disabled = True
+        self.toggle_blend.disabled = False
+        self.tweet_data_controller.blend_active = True
 
         self.slider_blend = Slider(start=0.0, end=1.0, value=0.5, step=0.025, title="Blend Ratio")
         self.slider_blend.on_change('value', self.slider_blend_change)
@@ -245,6 +268,136 @@ class MapWidgets:
         self.range_slider_area.value = new_values
 
         self.tweet_data_controller.filter_circles_by_area(value_start, value_end)
+        self.tweet_data_controller.clear_all()
+        self.update_text_count()
+
+    def range_slider_distance_change(self, attrname, old, new):
+        start_distance = int(new[0])
+        end_distance = int(new[1])
+        self.tweet_data_controller.filter_circles_by_distance(start_distance, end_distance)
+        self.tweet_data_controller.clear_all()
+        self.update_text_count()
+
+    def button_distance_start_minus_callback(self):
+        value_start = int(self.range_slider_distance.value[0])
+        value_end = int(self.range_slider_distance.value[1])
+
+        if value_start > self.range_slider_distance.start:
+            value_start -= 1
+
+        new_values = [value_start, value_end]
+        self.range_slider_distance.value = new_values
+
+        self.tweet_data_controller.filter_circles_by_distance(value_start, value_end)
+        self.tweet_data_controller.clear_all()
+        self.update_text_count()
+
+    def button_distance_start_plus_callback(self):
+        value_start = int(self.range_slider_distance.value[0])
+        value_end = int(self.range_slider_distance.value[1])
+
+        if value_start < value_end:
+            value_start += 1
+
+        new_values = [value_start, value_end]
+        self.range_slider_distance.value = new_values
+
+        self.tweet_data_controller.filter_circles_by_distance(value_start, value_end)
+        self.tweet_data_controller.clear_all()
+        self.update_text_count()
+
+    def button_distance_end_minus_callback(self):
+        value_start = int(self.range_slider_distance.value[0])
+        value_end = int(self.range_slider_distance.value[1])
+
+        if value_end > value_start:
+            value_end -= 1
+
+        new_values = [value_start, value_end]
+        self.range_slider_distance.value = new_values
+
+        self.tweet_data_controller.filter_circles_by_distance(value_start, value_end)
+        self.tweet_data_controller.clear_all()
+        self.update_text_count()
+
+    def button_distance_end_plus_callback(self):
+        value_start = int(self.range_slider_distance.value[0])
+        value_end = int(self.range_slider_distance.value[1])
+
+        if value_end < self.range_slider_distance.end:
+            value_end += 1
+
+        new_values = [value_start, value_end]
+        self.range_slider_distance.value = new_values
+
+        self.tweet_data_controller.filter_circles_by_distance(value_start, value_end)
+        self.tweet_data_controller.clear_all()
+        self.update_text_count()
+
+
+    def range_slider_ratio_change(self, attrname, old, new):
+        start_ratio = new[0]
+        end_ratio = new[1]
+        self.tweet_data_controller.filter_circles_by_ratio(start_ratio, end_ratio)
+        self.tweet_data_controller.clear_all()
+        self.update_text_count()
+
+    def button_ratio_start_minus_callback(self):
+        value_start = self.range_slider_ratio.value[0]
+        value_end = self.range_slider_ratio.value[1]
+
+        if value_start > self.range_slider_ratio.start:
+            value_start -= 0.1
+
+        new_values = [value_start, value_end]
+        self.range_slider_ratio.value = new_values
+
+        self.tweet_data_controller.filter_circles_by_ratio(value_start, value_end)
+        self.tweet_data_controller.clear_all()
+        self.update_text_count()
+
+    def button_ratio_start_plus_callback(self):
+        value_start = self.range_slider_ratio.value[0]
+        value_end = self.range_slider_ratio.value[1]
+
+        if value_start < value_end:
+            value_start += 0.1
+
+        new_values = [value_start, value_end]
+        self.range_slider_ratio.value = new_values
+
+        self.tweet_data_controller.filter_circles_by_ratio(value_start, value_end)
+        self.tweet_data_controller.clear_all()
+        self.update_text_count()
+
+    def button_ratio_end_minus_callback(self):
+        value_start = self.range_slider_ratio.value[0]
+        value_end = self.range_slider_ratio.value[1]
+
+        if value_end > value_start:
+            value_end -= 0.1
+
+        new_values = [value_start, value_end]
+        self.range_slider_ratio.value = new_values
+
+        self.tweet_data_controller.filter_circles_by_ratio(value_start, value_end)
+        self.tweet_data_controller.clear_all()
+        self.update_text_count()
+
+    def button_ratio_end_plus_callback(self):
+        value_start = self.range_slider_ratio.value[0]
+        value_end = self.range_slider_ratio.value[1]
+
+        if value_end < self.range_slider_ratio.end:
+            value_end += 0.1
+            # This is a hack to prevent the end value to reaching 100.1
+            if value_end > self.range_slider_ratio.end:
+                value_end = self.range_slider_ratio.end
+
+        new_values = [value_start, value_end]
+        self.range_slider_ratio.value = new_values
+
+        self.tweet_data_controller.filter_circles_by_ratio(value_start, value_end)
         self.tweet_data_controller.clear_all()
         self.update_text_count()
 

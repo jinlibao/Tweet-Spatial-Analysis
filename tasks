@@ -1,6 +1,18 @@
 See: PEP 350 -- Codetags: https://www.python.org/dev/peps/pep-0350/
 
-Next Id: 074
+Working on since last commit:
+Tasks:
+Completed
+029: Consider adding filters/sliders for some bins of 'num of local data points', 'ellipse area' and other measures: Added 20181201: Started 20181207: Completed 20181217
+This was finished off by adding distance and ratio
+053: Add a slide for distance between working and non working: Added 20181208: Completed 20181217
+074: BBug: Sibling ellipses not being cleared when toggle blend turned off: Added 20181217: Started 20181217: Completed 20181217
+075: BBug: IndexError: Added 20181217: Started Added 20181217: Completed 20181217
+076: Add medians distance to user info: Added 20181217: Started 20191217: Completed 20181217:
+TweetDataController: General tidying up of CDS definitions - removed the need to define and create from a dataframe.
+
+
+Next Id: 077
 
 ToDo: 006: Potentially compare working against non-working on same graph: Added 20181122
 ToDo: 007: Consider some form of quad-tree pre optimization of data: Added 20181122
@@ -12,20 +24,18 @@ ToDo: 022: Consider recording history of data points selected and allowing the u
 ToDo: 037: If a data point has no siblings de-active the siblings and dissolve toggles: Added 20181202:
 ToDo: 041: After implementing the dissolve functionality, consider adding 'intersection': Added 20181203: 
 ToDo: 043: Consider using Bokeh's DataTable to provide a way to list the siblings within a selected datapoint's ellipse.  Added 20181203
-ToDo: 053: Add a slide for distance between working and non working: Added 20181208:
 ToDo: 056: Consider potentially pre-processing dissolve area so the map can be filtered on that: Added 20181208:
 ToDo: 059: Sibling data points are not selected-able nor have a hover tooltip: Added 20181208:
 ToDo: 061: Add a legend for the 'sibling count' visualization: Added 20181209:
 ToDo: 062: Create a 'global configuration' that can be loaded at runtime - including details generated from the preprocessing stage: Added 20181209:
 ToDo: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: 
-ToDo: 069: Think about create some form of point density - can this relate to the spatial index?
-ToDo: 072: Add scale to map and units to details for area.
+ToDo: 069: Think about create some form of point density - can this relate to the spatial index? Added 20181211:
+ToDo: 072: Add scale to map and units to details for area Added 20181215:
 
 
 InProgress: 010: Add Logging: https://bokeh.pydata.org/en/latest/docs/reference/util.html#bokeh-util-logconfig: Added 20181122: Started 20181122:
 InProgress: 018: Consider how to use visualization to represent area / number of tweets within ellipse etc - maybe add to the hover tool?: Added: 20181130: Started 20181202
 InProgress: 027: Create a better layout: Added 20181130: Started 20181130:
-InProgress: 029: Consider adding filters/sliders for some bins of 'num of local data points', 'ellipse area' and other measures: Added 20181201: Started 20181207
 InProgress: 032: Consider optimization as a whole over the entire 50K data set (x 3): Added 20181202:
 InProgress: 034: BBug: A user is able to select multiple data points when the scale is zoomed out enough - only won't ability to select a single one: Added 20181202: Started 20181203:
 InProgress: 042: Can I format the text on the hover tooltip? Added 20181203: Started 20181203:
@@ -55,6 +65,7 @@ Done: 024: Allow the user to select a point by entering the ID in a text book. T
 Done: 025: Understand why data point ID 2760872119 is not within it's ellipse? Surely this can't happen as the data point is the location for ellipse? Added 20181130: Started 20181130: Completed 20181130
 Done: 026: On text, have single ID (idx) string - then parse this backend: Added 20181130: Started 20181130: Completed 20181130
 Done: 028: Consider using check boxes to define which ellipses to show for a selected data point: Added 20181130: Started 20181130: Completed 20181211
+Done: 029: Consider adding filters/sliders for some bins of 'num of local data points', 'ellipse area' and other measures: Added 20181201: Started 20181207: Completed 20181217
 Done: 030: Confirm spatial references / projections being used: Added 20181201: Started 20181201: Completed 20181201
 Done: 031: BBug: When changing the dataset, the selected data point is no longer displayed in red: Added 20181202: Started 20181202: Completed 20181202
 Done: 033: Need to save the pre-processed data out to a file and then load into app: Added 20181202: Started 20181203: Completed 20181205
@@ -69,6 +80,7 @@ Done: 046: BBug: The reset tool appears to distort glyphs after being used? Adde
 Done: 048: Consider storing 'a' and 'b' instead of 'width' and 'height' to reduce the amount of divisions: Added 20181204: Started 20181204: Completed 20181205
 Done: 051: On changing the sibling count slider, clear all selections: Added 2081207: Started 20181207: Completed 20181208
 Done: 052: Add a glyph that represents the selected point, as issue when changing slider and showing selected point using internal mechanism: Added 2081207: Started 20181207: Completed 20181208
+Done: 053: Add a slide for distance between working and non working: Added 20181208: Completed 20181217
 Done: 055: When changing datasets, re-apply the count filter: Added 20181208: Started 20181208: Completed 20181208
 Done: 057: Add numerical count and %s respect to number of points for each slider: Added 20181208: Started 20181208: Completed 20181208
 Done: 060: Consider adding text input for the sliders. For example unable to explicit slide to '1': Added 20181208: Started 20181211: Completed 20181211
@@ -78,6 +90,9 @@ Done: 067: Create a Git repo around the first version: Added 20181211: Started 2
 Done: 070: Restructure code to use a controller to interface from the widgets to the data: Added 20181212: Started 20181212: Completed 20181212
 Done: 071: Can I dynamically update user info: Added 20181215: Started 20181215: Completed 20181215:
 Done: 073: Consider showing area/count for both working and non-working together: Added 20181217: Started 20181217: Completed 20181217
+Done: 074: BBug: Sibling ellipses not being cleared when toggle blend turned off: Added 20181217: Started 20181217: Completed 20181217
+Done: 075: BBug: IndexError: Added 20181217: Started Added 20181217: Completed 20181217
+Done: 076: Add medians distance to user info: Added 20181217: Started 20191217: Completed 20181217:
 
 
 OnGoing:
@@ -230,9 +245,21 @@ Done: 028: Consider using check boxes to define which ellipses to show for a sel
 Consider various states such as the checkbox for the selected data set should always be selected.
 20181211: Used radio buttons. Work better than the drop down.
 
-InProgress: 029: Consider adding filters/sliders for some bins of 'num of local data points', 'ellipse area' and other measures: Added 20181201: Started 20181207
+Done: 029: Consider adding filters/sliders for some bins of 'num of local data points', 'ellipse area' and other measures: Added 20181201: Started 20181207: Completed 20181217
 20181208: Range Sliders for sibling count and area.
 Add for 'distance between working and non working', and for 'ratio'.
+20181217:
+Theta/Angle ranges from -pi/2 to +pi/2 and NaN
+Ratio from 0 then 0.70 to 9E+05 and Infinity / NaN
+Distance: 0 to 841 and a single NaN - can we calculate this distance? (User-ID: 1210087572)
+Set NaN values to -1
+Observations:
+- when ratio is 0 then the area is also 0
+- when ratio is Infinity - area is 0
+- when ratio is Nan - area is Nan or 0
+Regards the distance, I could just add another column to each of the datasets - would mean not having to create a separate 'distance' file and all the required 'wiring'.
+If distance is NaN, then it is currently set to -1.
+Added filters for medians distance and ratio.
 
 Done: 030: Confirm spatial references / projections being used: Added 20181201: Started 20181201: Completed 20181201
 Remember: We have (latitude, longitude) angles converted into (x, y) coordinates.
@@ -321,11 +348,11 @@ raise ValueError(msg) Traceback (most recent call last):
   File "C:\Users\simon\Google Drive\UW Classes\11 GEOG5880 Intro Python Spatial Analysis\UW\Final Project\Chen Xu\Tweet-Spatial-Analysis\main.py", line 56, in <module>
     patch_dissolve_renderer = p.patch(x='x', y='y', source=tweet_data_controller.patch_dissolve, fill_color="wheat", line_color="wheat", alpha='alpha')
   File "fakesource", line 5, in patch
-20181217: I can change the ine and fill alpha by directly modifying the attributes via the renderer. Is this a bit of a hack? Yeah - but seems the only way I'll be able to do it for a patch.
+20181217: I can change the line and fill alpha by directly modifying the attributes via the renderer. Is this a bit of a hack? Yeah - but seems the only way I'll be able to do it for a patch.
 Add alpha to sibling points. Implemented by modifing the renderer directly.
 Blending functionality is in place - need to tidy up the toggle states wrt what is shown.
 Can blend selected circle, sde ellipse, sibling ellipses and path.
-
+One observation of modifying the renderer directly is that I'm NOT having to re-calculate the points / patch - which is much faster.
 
 Done: 039: When displaying the dissolve - consider still overlaying the original ellipse so the extent of new area can clearly be seen: Added 20181202: Started 20181203: Completed 20181204
 Can already draw the SDE ellipse - so is this an implementation of drawing the dissolve, and then drawing the line of the SDE ellipse?
@@ -416,9 +443,13 @@ Thought: On selecting, create coordinates of each of the three datasets.
 20181208 Was able to add an on_change to the circle selected CDS.
 This then triggered a callback.
 
+Done: 053: Add a slide for distance between working and non working: Added 20181208: Completed 20181217
+This was completed as part of 029
+
 InProgress: 054: Consider adding connecting lines between working and non working (with direction): Added 2081207: Started 20181207
 By including direction maybe this can provide some form of insight into commuting and distance travelled?
 20181207: Need to clean this column up before trying to processing.
+20181217: How am I going to add this? Separate JSON file? (working) Start / (non-working) End point + distance + id?
 
 Done: 055: When changing datasets, re-apply the count filter: Added 20181208: Started 20181208: Completed 20181208
 Filter re-applied. But there is a noticeable flicker as all circles are drawn and then the filter is applied.
@@ -482,3 +513,11 @@ Consider displaying the area and number of siblings as well - although these wil
 Also, why do I need separate widgets for these? Can I just not now use a single one?
 Modified to use a single Div that also allows text formatting such as new line <br> and bold <b>.
 Added area and count. Updated when changing datasets.
+
+Done: 075: BBug: IndexError: Added 20181217: Started Added 20181217: Completed 20181217
+Browser Console: [bokeh] Unhandled ERROR reply to AC220859020043EE93948406B9B81461: IndexError('index 0 is out of bounds for axis 0 with size 0')
+Output.txt: 2018-12-17 16:20:10,529 ERROR: error handling message Message 'PATCH-DOC' (revision 1) content: {'events': [{'kind': 'ModelChanged', 'model': {'type': 'RadioButtonGroup', 'id': '1023'}, 'attr': 'active', 'new': 1}], 'references': []}:
+IndexError('index 0 is out of bounds for axis 0 with size 0')
+Start looking from the radio_button_data_type_change callback in the MapWidgets class.
+Starting with working as active and toggle blend active, the error appeared when toggle blend was pressed i.e. made active.
+Solved. Was calling turn_blend_on and subsequent update calls that used circle_idx before it had been set.

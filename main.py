@@ -83,7 +83,7 @@ def callback_hover(hover_idx = tweet_data_controller.hover_idx):
     if len(indices) > 0:
         hover_idx.data['idx'] = [indices[0]]
 
-hover_tool = HoverTool(tooltips=[('id', "@id"), ('area', '@area'), ('count', '@count')], callback=CustomJS.from_py_func(callback_hover), renderers=[circles_renderer])
+hover_tool = HoverTool(tooltips=[('id', "@id"), ('area', '@area'), ('count', '@count'), ('distance', '@distance'), ('ratio', '@ratio')], callback=CustomJS.from_py_func(callback_hover), renderers=[circles_renderer])
 
 # This is only called when a glyph is tapped on.
 # Tapping on the 'bare' map isn't registered.
@@ -108,7 +108,7 @@ def callback_tap(   hover_idx = tweet_data_controller.hover_idx,
     toggle_se.active = False
     toggle_d.active = False
     toggle_b.active = False
-    ba = False
+    ba.active = False
 
 tap_tool = TapTool(callback = CustomJS.from_py_func(callback_tap), renderers=[circles_renderer])
 p.add_tools(hover_tool, tap_tool)
@@ -134,8 +134,8 @@ p.js_on_event(events.PanEnd, CustomJS.from_py_func(pan_end))
 
 lhs = column(   map_widgets.radio_button_data_type, map_widgets.text_selection_details,
                 map_widgets.toggle_sde_ellipse, map_widgets.toggle_sibling_ellipses, map_widgets.toggle_dissolve,
-                map_widgets.text_input, map_widgets.button_find,
-                map_widgets.toggle_blend, map_widgets.slider_blend)
+                map_widgets.toggle_blend, map_widgets.slider_blend,
+                map_widgets.text_input, map_widgets.button_find)
 
 rhs = column(   row(    column(map_widgets.button_count_start_minus, map_widgets.button_count_start_plus, width=50),
                         map_widgets.range_slider_count,
@@ -143,6 +143,12 @@ rhs = column(   row(    column(map_widgets.button_count_start_minus, map_widgets
                 row(    column(map_widgets.button_area_start_minus, map_widgets.button_area_start_plus, width=50),
                         map_widgets.range_slider_area,
                         column(map_widgets.button_area_end_minus, map_widgets.button_area_end_plus)),
+                row(    column(map_widgets.button_distance_start_minus, map_widgets.button_distance_start_plus, width=50),
+                        map_widgets.range_slider_distance,
+                        column(map_widgets.button_distance_end_minus, map_widgets.button_distance_end_plus)),
+                row(    column(map_widgets.button_ratio_start_minus, map_widgets.button_ratio_start_plus, width=50),
+                        map_widgets.range_slider_ratio,
+                        column(map_widgets.button_ratio_end_minus, map_widgets.button_ratio_end_plus)),
                 map_widgets.text_count,
                 map_widgets.filters_active)
 

@@ -31,7 +31,7 @@ def calculate_ellipse_a_and_b_from_area_and_ratio(area, xy_ratio):
     # Convert a and b into meters.
     a = sqrt((area * xy_ratio) / pi) * 1000.0
     b = sqrt(area / (xy_ratio * pi)) * 1000.0
-    return a, b
+    return a, b, xy_ratio
 
 def calculate_distance(x0, y0, x1, y1):
     return sqrt((x0 - x1)**2 + (y0 - y1)**2)

@@ -98,19 +98,19 @@ class TweetDataPreProcessing:
         self.tweet_data_all = TweetData("all")
         self.tweet_data_all.create_dataframe(self.df, 'User-ID', 'latitude-mean-all-tweets',
                                                 'longitude-mean-all-tweets', 'area-all-tweets', 'x/y-all-tweets',
-                                                'theta-all-tweets')
+                                                'theta-all-tweets', 'medians-distance')
         logger.info(self.tweet_data_all)
 
         self.tweet_data_working = TweetData("working")
         self.tweet_data_working.create_dataframe(self.df, 'User-ID', 'latitude-median-working-tweets',
                                             'longitude-median-working-tweets', 'area-working-tweets',
-                                            'x/y-working-tweets', 'theta-working-tweets')
+                                            'x/y-working-tweets', 'theta-working-tweets', 'medians-distance')
         logger.info(self.tweet_data_working)
 
         self.tweet_data_non_working = TweetData("non-working")
         self.tweet_data_non_working.create_dataframe(self.df, 'User-ID', 'latitude-median-nonworking-tweets',
                                                 'longitude-median-nonworking-tweets', 'area-nonworking-tweets',
-                                                'x/y-nonworking-tweets', 'theta-nonworking-tweets')
+                                                'x/y-nonworking-tweets', 'theta-nonworking-tweets', 'medians-distance')
 
         logger.info(self.tweet_data_non_working)
 
@@ -205,34 +205,6 @@ def main():
     pre_processor.write_to_json(pre_processor.tweet_data_working.df, "tweets_median_working.json")
     pre_processor.write_to_json(pre_processor.tweet_data_all.df, "tweet_mean_all.json")
 
-    '''
-        id_value = 20610093 # 16 all
-        #id_value = 42727314
-        #id_value = 123012870 # 57 all
-        #id_value = 176260469
-        #tweet_data = pre_processor.df_tweet_data_non_working
-        #tweet_data = pre_processor.df_tweet_data_working
-        tweet_data = pre_processor.df_tweet_data_all
-        id_df = tweet_data.df.loc[tweet_data.df['id'] == id_value]
-        print(id_df)
-        idx = id_df.index[0]
-        xo = id_df.x[idx]
-        yo = id_df.y[idx]
-    
-        a = id_df.a[idx]
-        b = id_df.b[idx]
-        theta = id_df.angle[idx]
-        print("(" + str(xo) + ", " + str(yo) + ") : " + str(a) + " : " + str(b) + " : " + str(theta))
-        count = 0
-        for row in tweet_data.df.itertuples():
-            if row.id != id_value:
-                xp = row.x
-                yp = row.y
-                if is_point_inside_ellipse(xo, yo, a, b, theta, xp, yp):
-                    count += 1
-                    print(row.id)
-        print("Count: " + str(count))
-    '''
 
 if __name__ == '__main__':
     main()

@@ -34,9 +34,10 @@ class TweetData:
                          longitude_column_name,
                          area_column_name,
                          x_y_ratio,
-                         angle_column_name):
+                         angle_column_name,
+                         distance_name):
 
-        self.df = pd.DataFrame(columns=['id', 'lat', 'lon', 'x', 'y', 'area', 'a', 'b', 'angle'])
+        self.df = pd.DataFrame(columns=['id', 'lat', 'lon', 'x', 'y', 'area', 'a', 'b', 'angle', 'distance', 'ratio'])
 
         # Keep an eye open for: A value is trying to be set on a copy of a slice from a DataFrame
         # Caveats in the documentation: http://pandas.pydata.org/pandas-docs/stable/indexing.html#indexing-view-versus-copy
@@ -46,11 +47,17 @@ class TweetData:
         self.df['lon'] = data_df[longitude_column_name].copy(True)
         self.df['area'] = data_df[area_column_name].copy(True)
         self.df['angle'] = data_df[angle_column_name].copy(True)
+        self.df['distance'] = data_df[distance_name].copy(True)
 
         for row_idx in range(0, data_df.shape[0]):
             # If the area is nan, then set it to -1 to indicate it is undefined.
             if math.isnan(self.df['area'][row_idx]):
+                logger.warning("idx: %s : id %s has area NaN.", row_idx, self.df['id'][row_idx])
                 self.df.loc[row_idx, 'area'] = -1.0
+
+            if math.isnan(self.df['distance'][row_idx]):
+                logger.warning("idx: %s : id %s has distance NaN.", row_idx, self.df['id'][row_idx])
+                self.df.loc[row_idx, 'distance'] = -1.0
 
             # If any angles are nan, then clean to 0.0
             #if (math.isnan(self.df['angle'][row_idx])):
@@ -60,11 +67,12 @@ class TweetData:
                 self.df['lon'][row_idx],
                 self.df['lat'][row_idx])
 
-            self.df.loc[row_idx, 'a'], self.df.loc[row_idx, 'b'] = self.calculate_ellipse_properties(
-                self.df['id'][row_idx],
-                row_idx,
-                self.df['area'][row_idx],
-                data_df[x_y_ratio][row_idx])
+            self.df.loc[row_idx, 'a'], self.df.loc[row_idx, 'b'], self.df.loc[row_idx, 'ratio'] = \
+                self.calculate_ellipse_properties(
+                    self.df['id'][row_idx],
+                    row_idx,
+                    self.df['area'][row_idx],
+                    data_df[x_y_ratio][row_idx])
 
         self.max_a = self.df['a'].max()
         self.max_b = self.df['b'].max()
@@ -159,20 +167,20 @@ class TweetData:
         # So, where the pandas index starts from 0, the starting row in excel or notepad++ is actually 2.
         if area == 0.0 or area == -1:
             logger.warning("id: %s (%s): The ellipse area is %s - can not calculate 'a' or 'b'.", row_id, idx, area)
-            return -1, -1
+            return -1, -1, -1
         else:
             if xy_ratio == "Infinity":
                 logger.warning("id %s (%s): The ellipse x/y ratio is 'Infinity' - can not calculate 'a' or 'b'.", row_id, idx)
-                return -1, -1
+                return -1, -1, -1
 
             xy_ratio_f = float(xy_ratio)
             if math.isnan(xy_ratio_f):
                 logger.warning("id %s (%s): The ellipse x/y ratio is 'nan' - can not calculate 'a' or 'b'.", row_id, idx)
-                return -1, -1
+                return -1, -1, -1
 
             if math.isinf(xy_ratio_f):
                 logger.warning("id %s (idx): The ellipse x/y ratio is 'inf' - can not calculate 'a' or 'b'.", row_id, idx)
-                return -1, -1
+                return -1, -1, -1
 
             return calculate_ellipse_a_and_b_from_area_and_ratio(area, xy_ratio_f)
 
@@ -202,7 +210,6 @@ class MapTweetData:
         new_data['x'] = []
         new_data['y'] = []
         new_data['id'] = []
-
         return new_data
 
     def update_selected_circle(self, circle_id):
@@ -321,14 +328,20 @@ class MapTweetData:
 
 class FilterSettings:
 
-    def __init__(self, count_start, count_end, area_start, area_end):
+    def __init__(self, count_start, count_end, area_start, area_end, distance_start, distance_end, ratio_start, ratio_end, ratio_max_unbounded):
         self.count_start = count_start
         self.count_end = count_end
         self.count_active = True
         self.area_start = area_start
         self.area_end = area_end
         self.area_active = True
-
+        self.distance_start = distance_start
+        self.distance_end = distance_end
+        self.distance_active = True
+        self.ratio_start = ratio_start
+        self.ratio_end = ratio_end
+        self.ratio_max_unbounded = ratio_max_unbounded
+        self.ratio_active = True
 
 class TweetDataController:
 
@@ -336,8 +349,8 @@ class TweetDataController:
         self.all = MapTweetData(pre_processor.tweet_data_all.df)
         self.working = MapTweetData(pre_processor.tweet_data_working.df)
         self.non_working = MapTweetData(pre_processor.tweet_data_non_working.df)
-        self.active_dataset = self.all
-        self.blend_dataset = None
+        self.active_dataset = self.working
+        self.blend_dataset = self.non_working
 
         self.user_info = user_info
         self.selection_details = None
@@ -350,57 +363,16 @@ class TweetDataController:
         df_hover_idx = pd.DataFrame(data_hover_idx)
         self.hover_idx.data = self.hover_idx.from_df(df_hover_idx)
 
-        self.circles = ColumnDataSource(data=dict(x=[], y=[], id=[]))
+        self.circles = ColumnDataSource(data=dict(x=[], y=[], id=[], distance=[]))
         self.circles.data = self.circles.from_df(self.active_dataset.tweet_data_df)
 
         self.selected_circle = ColumnDataSource(data=dict(x=[], y=[], id=[]))
-        sc_data = {
-            'x': [],
-            'y': [],
-            'id': []
-        }
-        df_selected_circle = pd.DataFrame(sc_data)
-        self.selected_circle.data = self.selected_circle.from_df(df_selected_circle)
         self.selected_circle.on_change('data', self.selected_circle_changed)
 
         self.sde_ellipse = ColumnDataSource(data=dict(x=[], y=[], width=[], height=[], angle=[]))
-        sde_e_data = {
-            'x': [],
-            'y': [],
-            'width': [],
-            'height': [],
-            'angle': []
-        }
-        df_sde_ellipse = pd.DataFrame(sde_e_data)
-        self.sde_ellipse.data = self.sde_ellipse.from_df(df_sde_ellipse)
-
         self.siblings = ColumnDataSource(data=dict(x=[], y=[]))
-        s_data = {
-            'x': [],
-            'y': []
-        }
-        df_siblings = pd.DataFrame(s_data)
-        self.siblings.data = self.siblings.from_df(df_siblings)
-
-
         self.sibling_ellipses = ColumnDataSource(data=dict(x=[], y=[], width=[], height=[], angle=[]))
-        se_data = {
-            'x': [],
-            'y': [],
-            'width': [],
-            'height': [],
-            'angle': [],
-        }
-        df_sibling_ellipses = pd.DataFrame(se_data)
-        self.sibling_ellipses.data = self.sibling_ellipses.from_df(df_sibling_ellipses)
-
         self.patch_dissolve = ColumnDataSource(data=dict(x=[], y=[]))
-        patch_data = {
-            'x': [],
-            'y': []
-        }
-        df_patch = pd.DataFrame(patch_data)
-        self.patch_dissolve.data = self.patch_dissolve.from_df(df_patch)
 
         self.selected_circle_blend = ColumnDataSource(data=dict(x=[], y=[], id=[]))
         self.sde_ellipse_blend = ColumnDataSource(data=dict(x=[], y=[], width=[], height=[], angle=[], alpha=[]))
@@ -410,7 +382,7 @@ class TweetDataController:
 
         self.find_circle = ColumnDataSource(data=dict(id=[], x=[], y=[]))
 
-        self.filter_settings = FilterSettings(0, 600, 0, 131000)
+        self.filter_settings = FilterSettings(0, 600, 0, 131000, 0, 850, 0, 100, 99)
 
         self.circle_id = -1
         self.circle_idx = -1
@@ -474,8 +446,11 @@ class TweetDataController:
 
         area_working = self.working.tweet_data_df['area'][self.circle_idx]
         count_working = self.working.tweet_data_df['count'][self.circle_idx]
+        ratio_working = self.working.tweet_data_df['ratio'][self.circle_idx]
         area_non_working = self.non_working.tweet_data_df['area'][self.circle_idx]
         count_non_working = self.non_working.tweet_data_df['count'][self.circle_idx]
+        ratio_non_working = self.non_working.tweet_data_df['ratio'][self.circle_idx]
+        distance = self.working.tweet_data_df['distance'][self.circle_idx]
 
         print("Selected Circle Change: idx: " + str(self.circle_idx))
 
@@ -486,18 +461,20 @@ class TweetDataController:
         details_str += "<b>Working</b>:<br/>"
         details_str += "<b>&nbsp;&nbsp;Area</b>: " + str(area_working) + "<br/>"
         details_str += "<b>&nbsp;&nbsp;Count</b>: " + str(count_working) + "<br/>"
+        details_str += "<b>&nbsp;&nbsp;Ratio</b>: " + str(ratio_working) + "<br/>"
         details_str += "<b>Non Working</b>:<br/>"
         details_str += "<b>&nbsp;&nbsp;Area</b>: " + str(area_non_working) + "<br/>"
-        details_str += "<b>&nbsp;&nbsp;Count</b>: " + str(count_non_working)
+        details_str += "<b>&nbsp;&nbsp;Count</b>: " + str(count_non_working) + "<br/>"
+        details_str += "<b>&nbsp;&nbsp;Ratio</b>: " + str(ratio_non_working) + "<br/>"
+        details_str += "<b>Distance</b>: " + str(distance)
 
         self.selection_details.text = details_str
 
     def clear_selected_circle(self):
-        new_data = dict()
-        new_data['x'] = []
-        new_data['y'] = []
-        new_data['id'] = []
-        self.selected_circle.data = new_data
+        self.selected_circle.data = self.active_dataset.clear_selected_circle()
+        if self.blend:
+            if self.blend_dataset is not None:
+                self.selected_circle_blend.data = self.blend_dataset.clear_selected_circle()
 
     def update_selected_circle(self):
         if self.circle_id > -1:
@@ -509,8 +486,9 @@ class TweetDataController:
 
     def clear_sde_ellipse(self):
         self.sde_ellipse.data = self.active_dataset.clear_sde_ellipse()
-        if self.blend_dataset is not None:
-            self.sde_ellipse_blend.data = self.blend_dataset.clear_sde_ellipse()
+        if self.blend:
+            if self.blend_dataset is not None:
+                self.sde_ellipse_blend.data = self.blend_dataset.clear_sde_ellipse()
 
     def update_sde_ellipse(self):
         print("Update SDE Ellipse: " + str(self.circle_idx))
@@ -611,15 +589,33 @@ class TweetDataController:
         self.filter_settings.area_end = area_end
         self.apply_filters()
 
+    def filter_circles_by_distance(self, distance_start, distance_end):
+        self.filter_settings.distance_start = distance_start
+        self.filter_settings.distance_end = distance_end
+        self.apply_filters()
+
+    def filter_circles_by_ratio(self, ratio_start, ratio_end):
+        self.filter_settings.ratio_start = ratio_start
+        self.filter_settings.ratio_end = ratio_end
+        self.apply_filters()
+
     def filters_active(self, active_list):
         self.filter_settings.count_active = False
         self.filter_settings.area_active = False
+        self.filter_settings.distance_active = False
+        self.filter_settings.ratio_active = False
         for filter_check_value in active_list:
             if filter_check_value is 0:
                 self.filter_settings.count_active = True
 
             if filter_check_value is 1:
                 self.filter_settings.area_active = True
+
+            if filter_check_value is 2:
+                self.filter_settings.distance_active = True
+
+            if filter_check_value is 3:
+                self.filter_settings.ratio_active = True
 
         self.apply_filters()
 
@@ -635,22 +631,36 @@ class TweetDataController:
                         (subset_df['area'] >= self.filter_settings.area_start)
                     &   (subset_df['area'] <= self.filter_settings.area_end)]
 
+        if self.filter_settings.distance_active:
+            subset_df = subset_df.loc[
+                        (subset_df['distance'] >= self.filter_settings.distance_start)
+                    &   (subset_df['distance'] <= self.filter_settings.distance_end)]
+
+        if self.filter_settings.ratio_active:
+            if self.filter_settings.ratio_end > self.filter_settings.ratio_max_unbounded:
+                subset_df = subset_df.loc[(subset_df['ratio'] >= self.filter_settings.ratio_start)]
+            else:
+                subset_df = subset_df.loc[
+                            (subset_df['ratio'] >= self.filter_settings.ratio_start)
+                        &   (subset_df['ratio'] <= self.filter_settings.ratio_end)]
+
         self.circles.data = self.circles.from_df(subset_df)
 
     def turn_blend_on(self, ellipse_active, siblings_active, dissolve_active):
         print("Turn Blend On:")
         self.blend_active = True
-        if self.blend_dataset is not None:
-            self.selected_circle_blend.data, dummy_circle_idx = self.blend_dataset.update_selected_circle(self.circle_id)
-            if ellipse_active:
-                self.sde_ellipse_blend.data = self.blend_dataset.update_sde_ellipse(self.circle_idx)
-                self.siblings_blend.data = self.blend_dataset.update_siblings(self.circle_idx)
+        if self.circle_idx > -1:
+            if self.blend_dataset is not None:
+                self.selected_circle_blend.data, dummy_circle_idx = self.blend_dataset.update_selected_circle(self.circle_id)
+                if ellipse_active:
+                    self.sde_ellipse_blend.data = self.blend_dataset.update_sde_ellipse(self.circle_idx)
+                    self.siblings_blend.data = self.blend_dataset.update_siblings(self.circle_idx)
 
-            if siblings_active:
-                self.sibling_ellipses_blend.data = self.blend_dataset.update_sibling_ellipses(self.circle_idx)
+                if siblings_active:
+                    self.sibling_ellipses_blend.data = self.blend_dataset.update_sibling_ellipses(self.circle_idx)
 
-            if dissolve_active:
-                self.patch_dissolve_blend.data = self.blend_dataset.update_dissolve(self.circle_idx)
+                if dissolve_active:
+                    self.patch_dissolve_blend.data = self.blend_dataset.update_dissolve(self.circle_idx)
 
     def turn_blend_off(self):
         print("Turn Blend Off:")
@@ -659,6 +669,7 @@ class TweetDataController:
             self.selected_circle_blend.data = self.blend_dataset.clear_selected_circle()
             self.sde_ellipse_blend.data = self.blend_dataset.clear_sde_ellipse()
             self.siblings_blend.data = self.blend_dataset.clear_siblings()
+            self.sibling_ellipses_blend.data = self.blend_dataset.clear_sibling_ellipses()
             self.patch_dissolve_blend.data = self.blend_dataset.clear_dissolve()
             self.reset_renderer_properties()
 
