@@ -250,7 +250,7 @@ class MapTweetData:
 
     def update_siblings(self, circle_idx):
         print("Update Siblings: " + str(circle_idx))
-        print(str(circle_idx) + " : " + str(self.tweet_data_df['idxs'][circle_idx]))
+        #print(str(circle_idx) + " : " + str(self.tweet_data_df['idxs'][circle_idx]))
         new_data = dict()
         new_data['x'] = []
         new_data['y'] = []
@@ -366,6 +366,9 @@ class TweetDataController:
         self.circles = ColumnDataSource(data=dict(x=[], y=[], id=[], distance=[]))
         self.circles.data = self.circles.from_df(self.active_dataset.tweet_data_df)
 
+        self.lod_dummy = ColumnDataSource(data=dict(x=[], y=[], lod=[]))
+        self.lod_dummy.on_change('data', self.lod_dummy_changed)
+
         self.selected_circle = ColumnDataSource(data=dict(x=[], y=[], id=[]))
         self.selected_circle.on_change('data', self.selected_circle_changed)
 
@@ -390,6 +393,7 @@ class TweetDataController:
 
         self.blend_active = False
 
+        self.cr = None
         self.csr = None
         self.csbr = None
         self.er = None
@@ -422,6 +426,19 @@ class TweetDataController:
         self.ser.glyph.line_alpha = 1.0
         self.pdr.glyph.line_alpha = 0.4
         self.pdr.glyph.fill_alpha = 0.4
+
+    def lod_dummy_changed(self, attrname, old, new):
+        #print("LOD Dummy Change: " + str(new))
+        if len(new['lod']) > 0:
+            lod_value = new['lod'][0]
+
+            if lod_value is 0:
+                print("LOD Dummy Callback: Start")
+                self.cr.visible = False
+
+            if lod_value is 1:
+                print("LOD Dummy Callback: End")
+                self.cr.visible = True
 
     def selected_circle_changed(self, attrname, old, new):
         #print("Selected Circle Change: " + str(new))

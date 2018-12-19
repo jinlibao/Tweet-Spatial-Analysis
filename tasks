@@ -2,10 +2,10 @@ See: PEP 350 -- Codetags: https://www.python.org/dev/peps/pep-0350/
 
 Working on since last commit:
 Tasks:
-Completed:
-006: Potentially compare working against non-working on same graph: Added 20181122: Completed 20181218 - implemented as part of 038
-075: BBug: IndexError: Added 20181217: Started Added 20181217: Completed 20181217: Reopened 20181217: Completed 20181218
-077: Ratio min value can so -1.1 - add hack fix as with max value: Added 20181218: Started 20181218: Completed 20181218
+
+Working on:
+InProgress: 032: Consider optimization as a whole over the entire 50K data set (x 3)
+Using the LOD Start/End events to turn the circle renderer off/on
 
 Next Id: 078
 ToDo: 007: Consider some form of quad-tree pre optimization of data: Added 20181122
@@ -27,7 +27,7 @@ ToDo: 072: Add scale to map and units to details for area Added 20181215:
 InProgress: 010: Add Logging: https://bokeh.pydata.org/en/latest/docs/reference/util.html#bokeh-util-logconfig: Added 20181122: Started 20181122:
 InProgress: 018: Consider how to use visualization to represent area / number of tweets within ellipse etc - maybe add to the hover tool?: Added: 20181130: Started 20181202
 InProgress: 027: Create a better layout: Added 20181130: Started 20181130:
-InProgress: 032: Consider optimization as a whole over the entire 50K data set (x 3): Added 20181202:
+InProgress: 032: Consider optimization as a whole over the entire 50K data set (x 3): Added 20181202: : Started 20181202:
 InProgress: 034: BBug: A user is able to select multiple data points when the scale is zoomed out enough - only won't ability to select a single one: Added 20181202: Started 20181203:
 InProgress: 042: Can I format the text on the hover tooltip? Added 20181203: Started 20181203:
 InProgress: 049: Consider adding statistical descriptive details to the page: Added 20181205: Started 20181212:
@@ -267,7 +267,7 @@ This occurs when the user clicks on the map but no circle is selected i.e. unsel
 So, actually, I should be clearing the ellipse and circles inside ellipse instead.
 This doesn't appear to be a problem any more?
 
-InProgress: 032: Consider optimization as a whole over the entire 50K data set (x 3): Added 20181202:
+InProgress: 032: Consider optimization as a whole over the entire 50K data set (x 3): Added 20181202: Started 20181202
 Related to task 063
 On home desktop, 10K points is slow. It loads within less than 10s which is good, but zooming and panning is jerky.
 How many points have a count less than 0?
@@ -280,6 +280,10 @@ Can I maybe turn rendering off / down-sample while moving/zooming?
 Once a point is selected - remove points outside a certain range?
 Only show datapoint and siblings? i.e. only points in it's ellipse?
 20181215: Started looking at the LOD/Pan events.
+20181218: Created a lod dummy renderer that is need to detect the change in the related CDS, which then calls the on_change function.
+Can set the visible attribute of the circle renderer to tre/false to turn drawing on/off.
+LOD events are also called when the map is panned - so no need to also implement specific pan events.
+Need to test with 10,000 points to understand performance.
 
 Done: 033: Need to save the pre-processed data out to a file and then load into app: Added 20181202: Started 20181203: Completed 20181205
 Look at Bokeh's Mapping Geo Data: https://bokeh.pydata.org/en/latest/docs/user_guide/geo.html for some direction.

@@ -50,6 +50,10 @@ circles_renderer = p.circle(x='x', y='y', source=tweet_data_controller.circles, 
 circles_renderer.selection_glyph = Circle(fill_alpha=0.0, fill_color="olivedrab", line_color=None)
 circles_renderer.nonselection_glyph = Circle(fill_alpha=0.2, fill_color="blue", line_color=None)
 
+# This is a dummy renderer needed to enable changes on the tweet_data_controller.lod_dummy source to be emitted.
+# and its related on_change callback to be called.
+lod_dummy_renderer = p.circle(x='x', y='y', source=tweet_data_controller.lod_dummy, fill_color='white', line_color=None, fill_alpha=0.0, size=1)
+
 patch_dissolve_renderer = p.patch(x='x', y='y', source=tweet_data_controller.patch_dissolve, fill_color="wheat", line_color="wheat", line_alpha=0.4, fill_alpha=0.4)
 sde_ellipse_renderer = p.ellipse(x='x', y='y', width='width', height='height', angle='angle', source=tweet_data_controller.sde_ellipse, fill_color="#cab2d6", line_alpha=0.5, fill_alpha=0.5)
 sibling_ellipses_renderer = p.ellipse(x='x', y='y', width='width', height='height', angle='angle', source=tweet_data_controller.sibling_ellipses, line_color="darkmagenta", fill_alpha=0.0)
@@ -64,6 +68,7 @@ selected_circle_blend_renderer = p.circle(x='x', y='y', source=tweet_data_contro
 
 find_circle_renderer = p.circle(x='x', y='y', source=tweet_data_controller.find_circle, line_color="#410967", fill_color="orange", fill_alpha=0.0, size=15)
 
+tweet_data_controller.cr = circles_renderer
 tweet_data_controller.csr = selected_circle_renderer
 tweet_data_controller.csbr = selected_circle_blend_renderer
 tweet_data_controller.er = sde_ellipse_renderer
@@ -113,24 +118,37 @@ def callback_tap(   hover_idx = tweet_data_controller.hover_idx,
 tap_tool = TapTool(callback = CustomJS.from_py_func(callback_tap), renderers=[circles_renderer])
 p.add_tools(hover_tool, tap_tool)
 
-def lod_start(circles = tweet_data_controller.circles):
-    print("LOD Start:")
-
-def lod_end(circles = tweet_data_controller.circles):
-    print("LOD End:")
+def lod_start(ld = tweet_data_controller.lod_dummy):
+    #print("LOD Start:")
+    #print("B:" + str(ld.data['lod'][0]))
+    new_data = dict()
+    new_data['x'] = [0]
+    new_data['y'] = [0]
+    new_data['lod'] = [0]
+    ld.data = new_data
+    #print("A:" + str(ld.data['lod'][0]))
 
 p.js_on_event(events.LODStart, CustomJS.from_py_func(lod_start))
+
+def lod_end(ld = tweet_data_controller.lod_dummy):
+    #print("LOD End:")
+    #print("B:" + str(ld.data['lod'][0]))
+    new_data = dict()
+    new_data['x'] = [0]
+    new_data['y'] = [0]
+    new_data['lod'] = [1]
+    ld.data = new_data
+    #print("A:" + str(ld.data['lod'][0]))
+
 p.js_on_event(events.LODEnd, CustomJS.from_py_func(lod_end))
 
-def pan_start(circles = tweet_data_controller.circles):
-    print("Pan Start:")
+#def pan_start(circles = tweet_data_controller.circles):
+#    print("Pan Start:")
+#p.js_on_event(events.PanStart, CustomJS.from_py_func(pan_start))
 
-def pan_end(circles = tweet_data_controller.circles):
-    print("Pan End:")
-
-p.js_on_event(events.PanStart, CustomJS.from_py_func(pan_start))
-p.js_on_event(events.PanEnd, CustomJS.from_py_func(pan_end))
-
+#def pan_end(circles = tweet_data_controller.circles):
+#    print("Pan End:")
+#p.js_on_event(events.PanEnd, CustomJS.from_py_func(pan_end))
 
 lhs = column(   map_widgets.radio_button_data_type, map_widgets.text_selection_details,
                 map_widgets.toggle_sde_ellipse, map_widgets.toggle_sibling_ellipses, map_widgets.toggle_dissolve,
