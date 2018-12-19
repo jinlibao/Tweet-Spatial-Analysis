@@ -2,12 +2,12 @@ See: PEP 350 -- Codetags: https://www.python.org/dev/peps/pep-0350/
 
 Working on since last commit:
 Tasks:
+Completed:
+006: Potentially compare working against non-working on same graph: Added 20181122: Completed 20181218 - implemented as part of 038
+075: BBug: IndexError: Added 20181217: Started Added 20181217: Completed 20181217: Reopened 20181217: Completed 20181218
+077: Ratio min value can so -1.1 - add hack fix as with max value: Added 20181218: Started 20181218: Completed 20181218
 
-
-
-Next Id: 077
-
-ToDo: 006: Potentially compare working against non-working on same graph: Added 20181122
+Next Id: 078
 ToDo: 007: Consider some form of quad-tree pre optimization of data: Added 20181122
 ToDo: 009: Assess the use of CustomJSHover: https://bokeh.pydata.org/en/latest/docs/reference/models/tools.html#: Added 20181122:
 ToDo: 013: Can I add a main to the main.py file?
@@ -17,11 +17,9 @@ ToDo: 022: Consider recording history of data points selected and allowing the u
 ToDo: 037: If a data point has no siblings de-active the siblings and dissolve toggles: Added 20181202:
 ToDo: 041: After implementing the dissolve functionality, consider adding 'intersection': Added 20181203: 
 ToDo: 043: Consider using Bokeh's DataTable to provide a way to list the siblings within a selected datapoint's ellipse.  Added 20181203
-ToDo: 056: Consider potentially pre-processing dissolve area so the map can be filtered on that: Added 20181208:
 ToDo: 059: Sibling data points are not selected-able nor have a hover tooltip: Added 20181208:
 ToDo: 061: Add a legend for the 'sibling count' visualization: Added 20181209:
 ToDo: 062: Create a 'global configuration' that can be loaded at runtime - including details generated from the preprocessing stage: Added 20181209:
-ToDo: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: 
 ToDo: 069: Think about create some form of point density - can this relate to the spatial index? Added 20181211:
 ToDo: 072: Add scale to map and units to details for area Added 20181215:
 
@@ -35,10 +33,11 @@ InProgress: 042: Can I format the text on the hover tooltip? Added 20181203: Sta
 InProgress: 049: Consider adding statistical descriptive details to the page: Added 20181205: Started 20181212:
 InProgress: 050: Add a colour palette to represent sibling count: Added 20181206: Started 20181207:
 InProgress: 054: Consider adding connecting lines between working and non working (with direction): Added 2081207: Started 20181207
+InProgress: 056: Consider potentially pre-processing dissolve area so the map can be filtered on that: Added 20181208: Started 20181218:
 InProgress: 058: If nothing selected then reset Selected ID text: Added 20181208: Started 20181211:
-InProgress: 063: Consider some form of heat map for clustered tweet data points - representing density: Added 20181210: Started 20181210: 
+InProgress: 063: Consider some form of heat map for clustered tweet data points - representing density: Added 20181210: Started 20181210:
+InProgress: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: Started 20181218:
 InProgress: 068: Think about a map of overlapping SDEs - use grey scale + transparency - maybe convert patches to a raster: Added 20181211: Started 20181211:
-InProgress: 075: BBug: IndexError: Added 20181217: Started Added 20181217: Completed 20181217: Reopened 20181217
 
 
 Done: 001: Draw ellipse on selecting a user: Added 20181122: Started 20181122: Completed 20181126
@@ -46,6 +45,7 @@ Done: 002: Understand mapping of ellipse data to actual drawing: Added 20181122:
 Done: 003: Toggle ellipse on/off: Added 20181122: Started 20181122: Completed 20181202
 Done: 004: Look up how to create dissolve of intersecting areas: Added 20181122: Started 20181127: Completed 20181202
 Done: 005: Switch between working/non-working and medium/mean datasets - drop-down menu: Added 20181122: Started 20181129: Completed 20181130
+Done: 006: Potentially compare working against non-working on same graph: Added 20181122: Completed 20181218
 Done: 008: How much pre-processing regards an individual and the data points within their area? Vs doing on the fly: Added 20181122: Started 20181126: Completed 20181130
 Done: 011: Understand how to make a callback to the server when not using a widget and return values: Added 20181122: Started 20181122: Completed 20181126
 Done: 012: Look at pre-processing the (latitude, longitude) coordinate projections: Added 20181122: Started 20181126: Completed 20181129
@@ -85,7 +85,9 @@ Done: 070: Restructure code to use a controller to interface from the widgets to
 Done: 071: Can I dynamically update user info: Added 20181215: Started 20181215: Completed 20181215:
 Done: 073: Consider showing area/count for both working and non-working together: Added 20181217: Started 20181217: Completed 20181217
 Done: 074: BBug: Sibling ellipses not being cleared when toggle blend turned off: Added 20181217: Started 20181217: Completed 20181217
+Done: 075: BBug: IndexError: Added 20181217: Started Added 20181217: Completed 20181217: Reopened 20181217: Completed 20181218
 Done: 076: Add medians distance to user info: Added 20181217: Started 20191217: Completed 20181217:
+Done: 077: Ratio min value can so -1.1 - add hack fix as with max value: Added 20181218: Started 20181218: Completed 20181218
 
 
 OnGoing:
@@ -448,6 +450,15 @@ Done: 055: When changing datasets, re-apply the count filter: Added 20181208: St
 Filter re-applied. But there is a noticeable flicker as all circles are drawn and then the filter is applied.
 Is there a better way? Potentially - but explore at a later date.
 
+InProgress: 056: Consider potentially pre-processing dissolve area so the map can be filtered on that: Added 20181208: Started 20181218:
+This actually has some weight to it.
+Preprocessing 10000 data points, the max count is 8160
+This will take some seconds (need to test/confirm) to do in really time - and potentially performed multiple times if a point is selected/de-selcted multiple times.
+Results could be 'cached' - but this would need implementing.
+How large would files become? 1,000 400K : 10,000 17 to 20MB : 50,000?
+This also has an impact on load time.
+This does imply that a review on the general pre-processing architecture needs to be considered.
+
 Done: 057: Add numerical count and %s respect to number of points for each slider: Added 20181208: Started 20181208:
 This is the number w.r.t. to all the filters, not individual filters.
 Example: Although starting with 1000 points, as soon as the sibling count is applied, this drops to 996?
@@ -476,6 +487,12 @@ Hierarchical Clustering with Python and Scikit-Learn: https://stackabuse.com/hie
 SciKit Learn: https://scikit-learn.org/stable/modules/generated/sklearn.cluster.AgglomerativeClustering.html
 Rtree 0.8.3: https://pypi.org/project/Rtree/ and http://toblerity.org/rtree/ : Rtree is a ctypes Python wrapper of libspatialindex that provides a number of advanced spatial indexing features for the spatially curious Python user. These features include: Nearest neighbor search, Intersection search, Multi-dimensional indexes, Clustered indexes (store Python pickles directly with index entries), Bulk loading, Deletion, Disk serialization, Custom storage implementation (to implement spatial indexing in ZODB, for example).
 * Learning Geospatial Analysis with Python: Spatial Indexing: p54: Quadtree vs R-Tree
+
+InProgress: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: Started 20181218:
+How much can / should this be processed?
+Creating on the fly/as start up wrt 1,000 / 10,000 / 50,000 points.
+Also consider having non-regular bins - consider sibling counts: e.g. 1, 2, 3, 4, 5, 6-10, 11-20, 21-50, 50-100, >100
+How does this affect the x-axis scale/representation?
 
 Done: 065: BBug with circle_renderer.selection_glyph and point 2429397887 - cheated by setting alpha to 0.0 to work: Added 20181211: Started 20181211: Completed 20181211
 Replicate:
@@ -507,10 +524,11 @@ Also, why do I need separate widgets for these? Can I just not now use a single 
 Modified to use a single Div that also allows text formatting such as new line <br> and bold <b>.
 Added area and count. Updated when changing datasets.
 
-Done: 075: BBug: IndexError: Added 20181217: Started Added 20181217: Completed 20181217
+Done: 075: BBug: IndexError: Added 20181217: Started Added 20181217: Completed 20181217: Reopened 20181217: Completed 20181218
 Browser Console: [bokeh] Unhandled ERROR reply to AC220859020043EE93948406B9B81461: IndexError('index 0 is out of bounds for axis 0 with size 0')
 Output.txt: 2018-12-17 16:20:10,529 ERROR: error handling message Message 'PATCH-DOC' (revision 1) content: {'events': [{'kind': 'ModelChanged', 'model': {'type': 'RadioButtonGroup', 'id': '1023'}, 'attr': 'active', 'new': 1}], 'references': []}:
 IndexError('index 0 is out of bounds for axis 0 with size 0')
 Start looking from the radio_button_data_type_change callback in the MapWidgets class.
 Starting with working as active and toggle blend active, the error appeared when toggle blend was pressed i.e. made active.
 Solved. Was calling turn_blend_on and subsequent update calls that used circle_idx before it had been set.
+20181218: Similar problem in the update_selection_details function. Resolved

@@ -118,6 +118,7 @@ class MapWidgets:
             self.toggle_blend.active = False
             self.tweet_data_controller.blend_active = False
 
+
         self.tweet_data_controller.switch_tweet_dataset(new)
         self.tweet_data_controller.apply_filters()
 
@@ -348,6 +349,9 @@ class MapWidgets:
 
         if value_start > self.range_slider_ratio.start:
             value_start -= 0.1
+            # This is a hack to prevent the end value to reaching -1.1
+            if value_start < self.range_slider_ratio.start:
+                value_start = self.range_slider_ratio.start
 
         new_values = [value_start, value_end]
         self.range_slider_ratio.value = new_values

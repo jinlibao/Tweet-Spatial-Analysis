@@ -123,8 +123,8 @@ class TweetData:
         logger.info("\n%s", self.df.head())
 
     def calculate_colour(self):
-        #max_count = self.max_count
-        count_max = 600.0
+        max_count = self.max_count
+        #count_max = 600.0
 
         #start_r = 178.0
         #start_g = 34.0
@@ -441,34 +441,35 @@ class TweetDataController:
             self.blend_active = False
 
     def update_selection_details(self):
-        id_df = self.active_dataset.tweet_data_df.loc[self.active_dataset.tweet_data_df['id'] == self.circle_id]
-        self.circle_idx = id_df.index[0]
+        if self.circle_id > -1:
+            id_df = self.active_dataset.tweet_data_df.loc[self.active_dataset.tweet_data_df['id'] == self.circle_id]
+            self.circle_idx = id_df.index[0]
 
-        area_working = self.working.tweet_data_df['area'][self.circle_idx]
-        count_working = self.working.tweet_data_df['count'][self.circle_idx]
-        ratio_working = self.working.tweet_data_df['ratio'][self.circle_idx]
-        area_non_working = self.non_working.tweet_data_df['area'][self.circle_idx]
-        count_non_working = self.non_working.tweet_data_df['count'][self.circle_idx]
-        ratio_non_working = self.non_working.tweet_data_df['ratio'][self.circle_idx]
-        distance = self.working.tweet_data_df['distance'][self.circle_idx]
+            area_working = self.working.tweet_data_df['area'][self.circle_idx]
+            count_working = self.working.tweet_data_df['count'][self.circle_idx]
+            ratio_working = self.working.tweet_data_df['ratio'][self.circle_idx]
+            area_non_working = self.non_working.tweet_data_df['area'][self.circle_idx]
+            count_non_working = self.non_working.tweet_data_df['count'][self.circle_idx]
+            ratio_non_working = self.non_working.tweet_data_df['ratio'][self.circle_idx]
+            distance = self.working.tweet_data_df['distance'][self.circle_idx]
 
-        print("Selected Circle Change: idx: " + str(self.circle_idx))
+            print("Selected Circle Change: idx: " + str(self.circle_idx))
 
-        username, profile_text = self.user_info.find_user_profile(int(self.circle_id))
-        details_str = "<b>Selected ID</b>: " + str(self.circle_id) + "<br/>"
-        details_str += "<b>Username</b>: " + str(username) + "<br/>"
-        details_str += "<b>Profile</b>: " + str(profile_text) + "<br/>"
-        details_str += "<b>Working</b>:<br/>"
-        details_str += "<b>&nbsp;&nbsp;Area</b>: " + str(area_working) + "<br/>"
-        details_str += "<b>&nbsp;&nbsp;Count</b>: " + str(count_working) + "<br/>"
-        details_str += "<b>&nbsp;&nbsp;Ratio</b>: " + str(ratio_working) + "<br/>"
-        details_str += "<b>Non Working</b>:<br/>"
-        details_str += "<b>&nbsp;&nbsp;Area</b>: " + str(area_non_working) + "<br/>"
-        details_str += "<b>&nbsp;&nbsp;Count</b>: " + str(count_non_working) + "<br/>"
-        details_str += "<b>&nbsp;&nbsp;Ratio</b>: " + str(ratio_non_working) + "<br/>"
-        details_str += "<b>Distance</b>: " + str(distance)
+            username, profile_text = self.user_info.find_user_profile(int(self.circle_id))
+            details_str = "<b>Selected ID</b>: " + str(self.circle_id) + "<br/>"
+            details_str += "<b>Username</b>: " + str(username) + "<br/>"
+            details_str += "<b>Profile</b>: " + str(profile_text) + "<br/>"
+            details_str += "<b>Working</b>:<br/>"
+            details_str += "<b>&nbsp;&nbsp;Area</b>: " + str(area_working) + "<br/>"
+            details_str += "<b>&nbsp;&nbsp;Count</b>: " + str(count_working) + "<br/>"
+            details_str += "<b>&nbsp;&nbsp;Ratio</b>: " + str(ratio_working) + "<br/>"
+            details_str += "<b>Non Working</b>:<br/>"
+            details_str += "<b>&nbsp;&nbsp;Area</b>: " + str(area_non_working) + "<br/>"
+            details_str += "<b>&nbsp;&nbsp;Count</b>: " + str(count_non_working) + "<br/>"
+            details_str += "<b>&nbsp;&nbsp;Ratio</b>: " + str(ratio_non_working) + "<br/>"
+            details_str += "<b>Distance</b>: " + str(distance)
 
-        self.selection_details.text = details_str
+            self.selection_details.text = details_str
 
     def clear_selected_circle(self):
         self.selected_circle.data = self.active_dataset.clear_selected_circle()

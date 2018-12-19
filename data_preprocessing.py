@@ -12,7 +12,7 @@ pd.set_option('expand_frame_repr', False)
 pd.options.display.max_rows = 999
 # Options and Settings: https://pandas.pydata.org/pandas-docs/stable/options.html
 
-num_of_rows_to_process = 1000
+num_of_rows_to_process = 10000
 # Defines as None to process all rows.
 
 
@@ -95,24 +95,36 @@ class TweetDataPreProcessing:
         #self.identify_rows_with_nan()
         #self.df_details()
 
+        logger.info("Processing: All")
+        print("Processing: All")
         self.tweet_data_all = TweetData("all")
         self.tweet_data_all.create_dataframe(self.df, 'User-ID', 'latitude-mean-all-tweets',
                                                 'longitude-mean-all-tweets', 'area-all-tweets', 'x/y-all-tweets',
                                                 'theta-all-tweets', 'medians-distance')
         logger.info(self.tweet_data_all)
+        logger.info("Processed.")
+        print("Processed.")
 
+        logger.info("Processing: Working")
+        print("Processing: Working")
         self.tweet_data_working = TweetData("working")
         self.tweet_data_working.create_dataframe(self.df, 'User-ID', 'latitude-median-working-tweets',
                                             'longitude-median-working-tweets', 'area-working-tweets',
                                             'x/y-working-tweets', 'theta-working-tweets', 'medians-distance')
         logger.info(self.tweet_data_working)
+        logger.info("Processed.")
+        print("Processed.")
 
+        logger.info("Processing: Non-Working")
+        print("Processing: Non-Working")
         self.tweet_data_non_working = TweetData("non-working")
         self.tweet_data_non_working.create_dataframe(self.df, 'User-ID', 'latitude-median-nonworking-tweets',
                                                 'longitude-median-nonworking-tweets', 'area-nonworking-tweets',
                                                 'x/y-nonworking-tweets', 'theta-nonworking-tweets', 'medians-distance')
 
         logger.info(self.tweet_data_non_working)
+        logger.info("Processed.")
+        print("Processed.")
 
     def read_from_json(self, mean_all, working, non_working):
         self.tweet_data_all = TweetData("all")
@@ -158,7 +170,11 @@ class TweetDataPreProcessing:
             logger.info("\nDataframe NOT defined.")
 
     def write_to_json(self, df, filename):
+        logger.info("Writing to JSON: " + filename)
+        print("Writing to JSON: " + filename)
         df.to_json(filename, orient='records', lines=True)
+        logger.info("Written.")
+        print("Written.")
 
     def __str__(self):
         df_str = "TweetDataPreProcessing:\nFilename: " + str(self.file_details.absolute)
@@ -201,10 +217,13 @@ def main():
     logger.info(pre_processor)
     pre_processor.process()
 
+    logger.info("Writing files to JSON file:")
+    print("Writing files to JSON file:")
     pre_processor.write_to_json(pre_processor.tweet_data_non_working.df, "tweets_median_non_working.json")
     pre_processor.write_to_json(pre_processor.tweet_data_working.df, "tweets_median_working.json")
     pre_processor.write_to_json(pre_processor.tweet_data_all.df, "tweet_mean_all.json")
-
+    logger.info("Files Written.")
+    print("Files Written.")
 
 if __name__ == '__main__':
     main()
