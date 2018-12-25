@@ -1,0 +1,125 @@
+2018-12-23 12:00:15,602 INFO: - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2018-12-23 12:00:15,602 INFO: Tweet Spatial Analysis: Config:
+2018-12-23 12:00:15,604 INFO: Latitude: [37, 43]
+2018-12-23 12:04:56,711 INFO: - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2018-12-23 12:04:56,711 INFO: Tweet Spatial Analysis: Config:
+2018-12-23 12:04:56,720 INFO: Latitude: None
+2018-12-23 12:05:46,722 INFO: - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2018-12-23 12:05:46,723 INFO: Tweet Spatial Analysis: Config:
+2018-12-23 12:05:46,724 INFO: Latitude: None
+2018-12-23 12:06:37,062 INFO: - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2018-12-23 12:06:37,063 INFO: Tweet Spatial Analysis: Config:
+2018-12-23 12:06:37,064 INFO: Range List: ['37,', '43']
+2018-12-23 12:06:37,064 INFO: Latitude: None
+2018-12-23 12:07:20,679 INFO: - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2018-12-23 12:07:20,680 INFO: Tweet Spatial Analysis: Config:
+2018-12-23 12:07:20,681 INFO: Range List: ['37,', '43']
+2018-12-23 12:07:20,681 INFO: Latitude: 37, to 43
+2018-12-23 12:08:16,466 INFO: - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2018-12-23 12:08:16,466 INFO: Tweet Spatial Analysis: Config:
+2018-12-23 12:08:16,467 INFO: Range List: ['37,', '43']
+2018-12-23 12:08:41,748 INFO: - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2018-12-23 12:08:41,748 INFO: Tweet Spatial Analysis: Config:
+2018-12-23 12:08:41,749 INFO: Range List: ['37.0,', '43.0']
+2018-12-23 12:10:00,941 INFO: - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2018-12-23 12:10:00,941 INFO: Tweet Spatial Analysis: Config:
+2018-12-23 12:10:00,942 INFO: Range List: ['37.0,', '43.0']
+2018-12-23 12:10:24,674 INFO: - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2018-12-23 12:10:24,674 INFO: Tweet Spatial Analysis: Config:
+2018-12-23 12:10:24,675 INFO: Range List: ['37.0,', '43.0']
+2018-12-23 12:10:34,867 INFO: - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2018-12-23 12:10:34,867 INFO: Tweet Spatial Analysis: Config:
+2018-12-23 12:10:34,868 INFO: Range List: ['37.0,', '43.0']
+2018-12-23 12:10:51,625 INFO: - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2018-12-23 12:10:51,625 INFO: Tweet Spatial Analysis: Config:
+2018-12-23 12:10:51,626 INFO: Range List: ['37.0,', '43.0']
+2018-12-23 12:11:08,586 INFO: - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2018-12-23 12:11:08,586 INFO: Tweet Spatial Analysis: Config:
+2018-12-23 12:11:08,588 INFO: Range List: ['37.0,', '43.0']
+2018-12-23 12:11:08,588 INFO: Latitude: 7.0 to 3.0
+2018-12-23 12:11:30,088 INFO: - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2018-12-23 12:11:30,089 INFO: Tweet Spatial Analysis: Config:
+2018-12-23 12:11:30,090 INFO: Range List: ['37.0,', '43.0']
+2018-12-23 12:11:30,090 INFO: Latitude: 37.0 to 43.0
+2018-12-23 14:01:28,671 INFO: - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2018-12-23 14:01:28,671 INFO: Tweet Spatial Analysis: Config:
+2018-12-23 14:01:28,673 INFO: Range List: ['37.0,', '43.0']
+2018-12-23 14:01:28,673 INFO: Range List: ['[-78.0,', '-72.0]']
+2018-12-23 14:01:39,392 INFO: - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2018-12-23 14:01:39,393 INFO: Tweet Spatial Analysis: Config:
+2018-12-23 14:01:39,394 INFO: Range List: ['37.0,', '43.0']
+2018-12-23 14:01:39,394 INFO: Range List: ['-78.0,', '-72.0']
+2018-12-23 14:01:39,394 INFO: Latitude: 37.0 to 43.0
+2018-12-23 14:01:39,394 INFO: TweetSpatialAnalysisConfig:
+Filename: tweet_spatial_analysis.ini
+Latitude: 37.0 to 43.0
+Longitude: -78.0 to -72.0
+2018-12-23 14:04:14,368 INFO: - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2018-12-23 14:04:14,368 INFO: Tweet Spatial Analysis: Config:
+2018-12-23 14:04:14,370 INFO: Range List: ['37.0,', '43.0']
+2018-12-23 14:04:14,370 INFO: Range List: ['-78.0,', '-72.0']
+2018-12-23 14:04:14,370 INFO: Range List: ['0,', '8200']
+2018-12-23 14:04:14,370 INFO: Range List: ['0,', '320000']
+2018-12-23 14:04:14,370 INFO: Range List: ['0,', '850']
+2018-12-23 14:04:14,370 INFO: Range List: ['0,', '100']
+2018-12-23 14:04:14,370 INFO: TweetSpatialAnalysisConfig:
+Filename: tweet_spatial_analysis.ini
+Latitude: 37.0 to 43.0
+Longitude: -78.0 to -72.0
+Count: 0.0 to 820.0
+Area: 0.0 to 32000.0
+Distance: 0.0 to 85.0
+Ratio: 0.0 to 10.0
+2018-12-23 14:05:26,376 INFO: - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2018-12-23 14:05:26,376 INFO: Tweet Spatial Analysis: Config:
+2018-12-23 14:05:26,378 INFO: Range List: ['37.0,', '43.0']
+2018-12-23 14:05:26,378 INFO: Range List: ['-78.0,', '-72.0']
+2018-12-23 14:05:26,378 INFO: Range List: ['0,', '8200']
+2018-12-23 14:05:26,378 INFO: Range List: ['0,', '320000']
+2018-12-23 14:05:26,378 INFO: Range List: ['0,', '850']
+2018-12-23 14:05:26,378 INFO: Range List: ['0,', '100']
+2018-12-23 14:05:26,378 INFO: TweetSpatialAnalysisConfig:
+Filename: tweet_spatial_analysis.ini
+Latitude: 37.0 to 43.0
+Longitude: -78.0 to -72.0
+Count: 0.0 to 820.0
+Area: 0.0 to 32000.0
+Distance: 0.0 to 85.0
+Ratio: 0.0 to 10.0
+2018-12-23 14:05:49,645 INFO: - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2018-12-23 14:05:49,645 INFO: Tweet Spatial Analysis: Config:
+2018-12-23 14:05:49,646 INFO: Range List: ['37.0', '43.0']
+2018-12-23 14:05:49,646 INFO: Range List: ['-78.0', '-72.0']
+2018-12-23 14:05:49,646 INFO: Range List: ['0', '8200']
+2018-12-23 14:06:10,419 INFO: - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2018-12-23 14:06:10,419 INFO: Tweet Spatial Analysis: Config:
+2018-12-23 14:06:10,421 INFO: Range List: ['37.0', '43.0']
+2018-12-23 14:06:10,421 INFO: Range List: ['-78.0', '-72.0']
+2018-12-23 14:06:10,421 INFO: Range List: ['0', '8200']
+2018-12-23 14:06:10,421 INFO: Range List: ['0', '320000']
+2018-12-23 14:06:10,421 INFO: Range List: ['0', '850']
+2018-12-23 14:06:10,421 INFO: Range List: ['0', '100']
+2018-12-23 14:06:10,421 INFO: TweetSpatialAnalysisConfig:
+Filename: tweet_spatial_analysis.ini
+Latitude: 37.0 to 43.0
+Longitude: -78.0 to -72.0
+Count: 0.0 to 8200.0
+Area: 0.0 to 320000.0
+Distance: 0.0 to 850.0
+Ratio: 0.0 to 100.0
+2018-12-23 14:33:46,610 INFO: - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+2018-12-23 14:33:46,628 INFO: Tweet Spatial Analysis: Config:
+2018-12-23 14:33:46,629 DEBUG: Range List: ['37.0', '43.0']
+2018-12-23 14:33:46,629 DEBUG: Range List: ['-78.0', '-72.0']
+2018-12-23 14:33:46,629 DEBUG: Range List: ['0', '8200', '1']
+2018-12-23 14:33:46,629 DEBUG: Range List: ['0', '320000', '100']
+2018-12-23 14:33:46,629 DEBUG: Range List: ['0', '850', '10']
+2018-12-23 14:33:46,629 DEBUG: Range List: ['0', '100', '2']
+2018-12-23 14:33:46,629 INFO: TweetSpatialAnalysisConfig:
+Filename: tweet_spatial_analysis.ini
+Latitude: 37.0 to 43.0
+Longitude: -78.0 to -72.0
+Count: 0.0 to 8200.0
+Area: 0.0 to 320000.0
+Distance: 0.0 to 850.0
+Ratio: 0.0 to 100.0

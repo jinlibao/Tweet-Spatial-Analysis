@@ -2,12 +2,17 @@ See: PEP 350 -- Codetags: https://www.python.org/dev/peps/pep-0350/
 
 Working on since last commit:
 Tasks:
+Completed
+062: Create a 'global configuration' that can be loaded at runtime - including details generated from the preprocessing stage: Added 20181209: Started 20181219: Completed 20181224:
+078: Understand the datasets better wrt filters. Using 10,000 datapoints when I reset the filters to their minimum? Related to 062
+079: Adding progress printing to the console when pre-processing the datasets: Added 21081219: Started 20181219: Completed 20181219
+080: BBug: ValueError('Out of range float values are not JSON compliant') when pressing Toggle Siblings: ID: 1416678168: Added 20181219: Started 20181219: Completed 20181224:
 
 Working on:
 InProgress: 032: Consider optimization as a whole over the entire 50K data set (x 3)
 Using the LOD Start/End events to turn the circle renderer off/on
 
-Next Id: 078
+Next Id: 082
 ToDo: 007: Consider some form of quad-tree pre optimization of data: Added 20181122
 ToDo: 009: Assess the use of CustomJSHover: https://bokeh.pydata.org/en/latest/docs/reference/models/tools.html#: Added 20181122:
 ToDo: 013: Can I add a main to the main.py file?
@@ -19,10 +24,10 @@ ToDo: 041: After implementing the dissolve functionality, consider adding 'inter
 ToDo: 043: Consider using Bokeh's DataTable to provide a way to list the siblings within a selected datapoint's ellipse.  Added 20181203
 ToDo: 059: Sibling data points are not selected-able nor have a hover tooltip: Added 20181208:
 ToDo: 061: Add a legend for the 'sibling count' visualization: Added 20181209:
-ToDo: 062: Create a 'global configuration' that can be loaded at runtime - including details generated from the preprocessing stage: Added 20181209:
 ToDo: 069: Think about create some form of point density - can this relate to the spatial index? Added 20181211:
 ToDo: 072: Add scale to map and units to details for area Added 20181215:
-
+ToDo: 080: BBug: ValueError('Out of range float values are not JSON compliant') when pressing Toggle Siblings: ID: 1416678168: Added 20181219:
+ToDo: 081: When blend is on, the blends disappear when the filter is changed? When blend then toggled, only the active data set is then shown. Need to toggle ellipse for both to re-appear. Added 20181224:
 
 InProgress: 010: Add Logging: https://bokeh.pydata.org/en/latest/docs/reference/util.html#bokeh-util-logconfig: Added 20181122: Started 20181122:
 InProgress: 018: Consider how to use visualization to represent area / number of tweets within ellipse etc - maybe add to the hover tool?: Added: 20181130: Started 20181202
@@ -38,6 +43,8 @@ InProgress: 058: If nothing selected then reset Selected ID text: Added 20181208
 InProgress: 063: Consider some form of heat map for clustered tweet data points - representing density: Added 20181210: Started 20181210:
 InProgress: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: Started 20181218:
 InProgress: 068: Think about a map of overlapping SDEs - use grey scale + transparency - maybe convert patches to a raster: Added 20181211: Started 20181211:
+InProgress: 078: Understand the datasets better wrt filters. Using 10,000 datapoints when I reset the filters to their minimum? Added 21081219: Started 20181219:
+InProgress: 080: BBug: ValueError('Out of range float values are not JSON compliant') when pressing Toggle Siblings: ID: 1416678168: Added 20181219: Started 20181219:
 
 
 Done: 001: Draw ellipse on selecting a user: Added 20181122: Started 20181122: Completed 20181126
@@ -78,6 +85,7 @@ Done: 053: Add a slide for distance between working and non working: Added 20181
 Done: 055: When changing datasets, re-apply the count filter: Added 20181208: Started 20181208: Completed 20181208
 Done: 057: Add numerical count and %s respect to number of points for each slider: Added 20181208: Started 20181208: Completed 20181208
 Done: 060: Consider adding text input for the sliders. For example unable to explicit slide to '1': Added 20181208: Started 20181211: Completed 20181211
+Done: 062: Create a 'global configuration' that can be loaded at runtime - including details generated from the preprocessing stage: Added 20181209: Started 20181219: Completed 20181224:
 Done: 065: BBug with circle_renderer.selection_glyph and point 2429397887 - cheated by setting alpha to 0.0 to work: Added 20181211: Started 20181211: Completed 20181211
 Done: 066: Choose different color for the find circle to contrast from other points better: Added 20181211: Stated 20181211: Completed 20181211
 Done: 067: Create a Git repo around the first version: Added 20181211: Started 20181211: Completed 20181211
@@ -88,6 +96,9 @@ Done: 074: BBug: Sibling ellipses not being cleared when toggle blend turned off
 Done: 075: BBug: IndexError: Added 20181217: Started Added 20181217: Completed 20181217: Reopened 20181217: Completed 20181218
 Done: 076: Add medians distance to user info: Added 20181217: Started 20191217: Completed 20181217:
 Done: 077: Ratio min value can so -1.1 - add hack fix as with max value: Added 20181218: Started 20181218: Completed 20181218
+Done: 078: Understand the datasets better wrt filters. Using 10,000 datapoints when I reset the filters to their minimum? Added 21081219: Started 20181219: Completed 20181219
+Done: 079: Adding progress printing to the console when pre-processing the datasets: Added 21081219: Started 20181219: Completed 20181219
+Done: 080: BBug: ValueError('Out of range float values are not JSON compliant') when pressing Toggle Siblings: ID: 1416678168: Added 20181219: Started 20181219: Completed 20181224:
 
 
 OnGoing:
@@ -284,6 +295,16 @@ Only show datapoint and siblings? i.e. only points in it's ellipse?
 Can set the visible attribute of the circle renderer to tre/false to turn drawing on/off.
 LOD events are also called when the map is panned - so no need to also implement specific pan events.
 Need to test with 10,000 points to understand performance.
+20181219: Tested with 10,000 points. There is a few seconds delay from starting to zoom/pan before the points are cleared.
+Considering adding pan events back in.
+20181222: Explore the use of the MouseMove / MouseWheel events. There is a definite delay in detecting the LOD/Pan events and reacting.
+Concerns that the basic UI Event implementation might not be up to the job:
+Generalizing Events: https://github.com/bokeh/bokeh/wiki/Generalizing-Events
+Consider providing buttons to explicitly turn points on/off.
+20181224: Added toggle button to turn data points on/off - or more explicitly make the circle renderer invisible/visible.
+This doesn't actually seem to improve pan/zoom performace - I suspect the data is still being 'processed' even though invisible.
+Go back to making the circle data set empty.
+This works much better. There is a delay 'loading' the circles back up.
 
 Done: 033: Need to save the pre-processed data out to a file and then load into app: Added 20181202: Started 20181203: Completed 20181205
 Look at Bokeh's Mapping Geo Data: https://bokeh.pydata.org/en/latest/docs/user_guide/geo.html for some direction.
@@ -497,6 +518,7 @@ How much can / should this be processed?
 Creating on the fly/as start up wrt 1,000 / 10,000 / 50,000 points.
 Also consider having non-regular bins - consider sibling counts: e.g. 1, 2, 3, 4, 5, 6-10, 11-20, 21-50, 50-100, >100
 How does this affect the x-axis scale/representation?
+20181222: Started looking to research if bin sizes could be defined.
 
 Done: 065: BBug with circle_renderer.selection_glyph and point 2429397887 - cheated by setting alpha to 0.0 to work: Added 20181211: Started 20181211: Completed 20181211
 Replicate:
@@ -536,3 +558,22 @@ Start looking from the radio_button_data_type_change callback in the MapWidgets 
 Starting with working as active and toggle blend active, the error appeared when toggle blend was pressed i.e. made active.
 Solved. Was calling turn_blend_on and subsequent update calls that used circle_idx before it had been set.
 20181218: Similar problem in the update_selection_details function. Resolved
+
+Done: 078: Understand the datasets better wrt filters. Using 10,000 datapoints when I reset the filters to their minimum? Added 21081219: Started 20181219: Completed 20181219
+Issue was infact caused by increase in max count, area and probably distance.
+This can be solved by implementing task 062
+20181223: Approach: Expand the FilterSettings class to be the beginning of the global configuration.
+Created and parsed tweet_spatail_analysis.ini
+
+
+Done: 080: BBug: ValueError('Out of range float values are not JSON compliant') when pressing Toggle Siblings: ID: 1416678168: Added 20181219: Started 20181219: Completed 20181224:
+ERROR: error handling message Message 'PATCH-DOC' (revision 1) content: {'events': [{'kind': 'ModelChanged', 'model': {'type': 'Toggle', 'id': '1019'}, 'attr': 'active', 'new': True}], 'references': []}: ValueError('Out of range float values are not JSON compliant')
+https://github.com/bokeh/bokeh/issues/5439
+https://github.com/bokeh/bokeh/issues/7523
+https://stackoverflow.com/questions/38821132/bokeh-valueerror-out-of-range-float-values-are-not-json-compliant
+Check data for NaN values.
+20181224: Issue appears when toggling siblings
+The following occurs when toggling dissolve:
+ValueError('No Shapely geometry can be created from null value') which I assume is related.
+Use: 1416678168
+Caused by points having 'a' and 'b' values set to -1.0

@@ -102,6 +102,7 @@ class TweetDataPreProcessing:
                                                 'longitude-mean-all-tweets', 'area-all-tweets', 'x/y-all-tweets',
                                                 'theta-all-tweets', 'medians-distance')
         logger.info(self.tweet_data_all)
+        self.write_to_json(self.tweet_data_all.df, "tweet_mean_all.json")
         logger.info("Processed.")
         print("Processed.")
 
@@ -112,6 +113,7 @@ class TweetDataPreProcessing:
                                             'longitude-median-working-tweets', 'area-working-tweets',
                                             'x/y-working-tweets', 'theta-working-tweets', 'medians-distance')
         logger.info(self.tweet_data_working)
+        self.write_to_json(self.tweet_data_working.df, "tweets_median_working.json")
         logger.info("Processed.")
         print("Processed.")
 
@@ -121,8 +123,8 @@ class TweetDataPreProcessing:
         self.tweet_data_non_working.create_dataframe(self.df, 'User-ID', 'latitude-median-nonworking-tweets',
                                                 'longitude-median-nonworking-tweets', 'area-nonworking-tweets',
                                                 'x/y-nonworking-tweets', 'theta-nonworking-tweets', 'medians-distance')
-
         logger.info(self.tweet_data_non_working)
+        self.write_to_json(self.tweet_data_non_working.df, "tweets_median_non_working.json")
         logger.info("Processed.")
         print("Processed.")
 
@@ -217,13 +219,6 @@ def main():
     logger.info(pre_processor)
     pre_processor.process()
 
-    logger.info("Writing files to JSON file:")
-    print("Writing files to JSON file:")
-    pre_processor.write_to_json(pre_processor.tweet_data_non_working.df, "tweets_median_non_working.json")
-    pre_processor.write_to_json(pre_processor.tweet_data_working.df, "tweets_median_working.json")
-    pre_processor.write_to_json(pre_processor.tweet_data_all.df, "tweet_mean_all.json")
-    logger.info("Files Written.")
-    print("Files Written.")
 
 if __name__ == '__main__':
     main()

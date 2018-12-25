@@ -6,11 +6,15 @@ from bokeh.models import Circle, CustomJS, HoverTool, Range1d, TapTool
 from bokeh.plotting import figure
 from bokeh.tile_providers import CARTODBPOSITRON
 
+from configuration_utilities import *
 from data_preprocessing import TweetDataPreProcessing
 from file_utilities import *
 from tweet_data import *
 from user_profile_data import UserProfileDetails
 from widget_utilities import *
+
+tweet_spatial_analysis_config = TweetSpatialAnalysisConfig("Tweet-Spatial-Analysis/tweet_spatial_analysis.ini")
+logger.info(tweet_spatial_analysis_config)
 
 pre_processor = TweetDataPreProcessing(None)
 pre_processor.read_from_json(   "Tweet-Spatial-Analysis/data/tweet_mean_all.json",
@@ -21,15 +25,12 @@ file_open = FileOpen("Tweet-Spatial-Analysis/data", "user-info.csv")
 user_info = UserProfileDetails(file_open)
 user_info.process()
 
-tweet_data_controller = TweetDataController(pre_processor, user_info)
-map_widgets = MapWidgets(tweet_data_controller, user_info)
+tweet_data_controller = TweetDataController(pre_processor, tweet_spatial_analysis_config, user_info)
+map_widgets = MapWidgets(tweet_data_controller, tweet_spatial_analysis_config)
 tweet_data_controller.selection_details = map_widgets.text_selection_details
 
-latitude_range = [37, 43]
-longitude_range = [-78.0, -72.0]
-
-east_min, north_min = lon_lat_to_east_north(longitude_range[0], latitude_range[0])
-east_max, north_max = lon_lat_to_east_north(longitude_range[1], latitude_range[1])
+east_min, north_min = lon_lat_to_east_north(tweet_spatial_analysis_config.longitude[0], tweet_spatial_analysis_config.latitude[0])
+east_max, north_max = lon_lat_to_east_north(tweet_spatial_analysis_config.longitude[1], tweet_spatial_analysis_config.latitude[1])
 # print(str(east_min) + ", " + str(north_min) + " to " + str(east_max) + ", " + str(north_max))
 # -8682920.281875338, 4439106.787250583 to -8015003.337115697, 5311971.846945471
 
@@ -119,38 +120,59 @@ tap_tool = TapTool(callback = CustomJS.from_py_func(callback_tap), renderers=[ci
 p.add_tools(hover_tool, tap_tool)
 
 def lod_start(ld = tweet_data_controller.lod_dummy):
-    #print("LOD Start:")
-    #print("B:" + str(ld.data['lod'][0]))
+    print("LOD Start:")
     new_data = dict()
     new_data['x'] = [0]
     new_data['y'] = [0]
     new_data['lod'] = [0]
     ld.data = new_data
-    #print("A:" + str(ld.data['lod'][0]))
+    ld.change.emit()
 
 p.js_on_event(events.LODStart, CustomJS.from_py_func(lod_start))
 
 def lod_end(ld = tweet_data_controller.lod_dummy):
-    #print("LOD End:")
-    #print("B:" + str(ld.data['lod'][0]))
+    print("LOD End:")
     new_data = dict()
     new_data['x'] = [0]
     new_data['y'] = [0]
     new_data['lod'] = [1]
     ld.data = new_data
-    #print("A:" + str(ld.data['lod'][0]))
+    ld.change.emit()
 
 p.js_on_event(events.LODEnd, CustomJS.from_py_func(lod_end))
 
-#def pan_start(circles = tweet_data_controller.circles):
-#    print("Pan Start:")
-#p.js_on_event(events.PanStart, CustomJS.from_py_func(pan_start))
+def pan_start(ld = tweet_data_controller.lod_dummy):
+    print("Pan Start:")
+    new_data = dict()
+    new_data['x'] = [0]
+    new_data['y'] = [0]
+    new_data['lod'] = [0]
+    ld.data = new_data
 
-#def pan_end(circles = tweet_data_controller.circles):
-#    print("Pan End:")
-#p.js_on_event(events.PanEnd, CustomJS.from_py_func(pan_end))
 
-lhs = column(   map_widgets.radio_button_data_type, map_widgets.text_selection_details,
+p.js_on_event(events.PanStart, CustomJS.from_py_func(pan_start))
+
+def pan_end(ld = tweet_data_controller.lod_dummy):
+    print("Pan End:")
+    new_data = dict()
+    new_data['x'] = [0]
+    new_data['y'] = [0]
+    new_data['lod'] = [1]
+    ld.data = new_data
+
+p.js_on_event(events.PanEnd, CustomJS.from_py_func(pan_end))
+
+#def mouse_move(ld = tweet_data_controller.lod_dummy):
+#    print("Mouse Move:")
+
+#p.js_on_event(events.MouseMove, CustomJS.from_py_func(mouse_move))
+
+#def mouse_wheel(ld = tweet_data_controller.lod_dummy):
+#    print("Mouse Wheel:")
+
+#p.js_on_event(events.MouseWheel, CustomJS.from_py_func(mouse_wheel))
+
+lhs = column(   map_widgets.radio_button_data_type, map_widgets.toggle_data, map_widgets.text_selection_details,
                 map_widgets.toggle_sde_ellipse, map_widgets.toggle_sibling_ellipses, map_widgets.toggle_dissolve,
                 map_widgets.toggle_blend, map_widgets.slider_blend,
                 map_widgets.text_input, map_widgets.button_find)

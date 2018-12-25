@@ -5,8 +5,12 @@ from bokeh.models.widgets import Button, CheckboxGroup, Div, Paragraph, RadioBut
 
 class MapWidgets:
 
-    def __init__(self, tweet_data_controller, user_info):
+    def __init__(self, tweet_data_controller, config):
         self.tweet_data_controller = tweet_data_controller
+        self.config = config
+
+        self.toggle_data = Toggle(label="Toggle Data", active=False, width=150)
+        self.toggle_data.on_click(self.toggle_data_callback)
 
         self.toggle_sde_ellipse = Toggle(label="Toggle Ellipse", active=False, width=150)
         self.toggle_sde_ellipse.on_click(self.toggle_sde_ellipse_callback)
@@ -27,7 +31,7 @@ class MapWidgets:
         self.radio_button_data_type = RadioButtonGroup(labels=['all', 'working', 'non-working'], active=1, width=300)
         self.radio_button_data_type.on_change('active', self.radio_button_data_type_change)
 
-        self.range_slider_count = RangeSlider(start=0, end=600, value=(0, 600), step=1, title="Sibling Count")
+        self.range_slider_count = RangeSlider(start=config.count[0], end=config.count[1], value=(config.count[0], config.count[1]), step=config.count[2], title="Sibling Count")
         self.range_slider_count.on_change('value', self.range_slider_count_change)
         self.button_count_start_minus = Button(label="-", width=15)
         self.button_count_start_minus.on_click(self.button_count_start_minus_callback)
@@ -38,7 +42,7 @@ class MapWidgets:
         self.button_count_end_plus = Button(label="+", width=15)
         self.button_count_end_plus.on_click(self.button_count_end_plus_callback)
 
-        self.range_slider_area = RangeSlider(start=-100, end=131000, value=(0, 131000), step=100, title="Area Size")
+        self.range_slider_area = RangeSlider(start=config.area[0] - 10, end=config.area[1], value=(config.area[0], config.area[1]), step=config.area[2], title="Area Size")
         self.range_slider_area.on_change('value', self.range_slider_area_change)
         self.button_area_start_minus = Button(label="-", width=15)
         self.button_area_start_minus.on_click(self.button_area_start_minus_callback)
@@ -49,7 +53,7 @@ class MapWidgets:
         self.button_area_end_plus = Button(label="+", width=15)
         self.button_area_end_plus.on_click(self.button_area_end_plus_callback)
 
-        self.range_slider_distance = RangeSlider(start=-1, end=850, value=(0, 850), step=10, title="Distance")
+        self.range_slider_distance = RangeSlider(start=config.distance[0] - 1, end=config.distance[1], value=(config.distance[0], config.distance[1]), step=config.distance[2], title="Distance")
         self.range_slider_distance.on_change('value', self.range_slider_distance_change)
         self.button_distance_start_minus = Button(label="-", width=15)
         self.button_distance_start_minus.on_click(self.button_distance_start_minus_callback)
@@ -60,7 +64,7 @@ class MapWidgets:
         self.button_distance_end_plus = Button(label="+", width=15)
         self.button_distance_end_plus.on_click(self.button_distance_end_plus_callback)
 
-        self.range_slider_ratio = RangeSlider(start=-1, end=100, value=(0, 100), step=2, title="Ratio")
+        self.range_slider_ratio = RangeSlider(start=config.ratio[0] - 1, end=config.ratio[1], value=(config.ratio[0], config.ratio[1]), step=config.ratio[2], title="Ratio")
         self.range_slider_ratio.on_change('value', self.range_slider_ratio_change)
         self.button_ratio_start_minus = Button(label="-", width=15)
         self.button_ratio_start_minus.on_click(self.button_ratio_start_minus_callback)
@@ -85,6 +89,13 @@ class MapWidgets:
 
         self.text_count = Paragraph(text="")
         self.update_text_count()
+
+    def toggle_data_callback(self, arg):
+        print("Toggle Data: Callback:")
+        if arg:
+            self.tweet_data_controller.toggle_data(True)
+        else:
+            self.tweet_data_controller.toggle_data(False)
 
     def toggle_sde_ellipse_callback(self, arg):
         print("Toggle Ellipse: Callback: " + str(self.tweet_data_controller.circle_id) + " : " + str(self.tweet_data_controller.circle_idx))
@@ -118,9 +129,7 @@ class MapWidgets:
             self.toggle_blend.active = False
             self.tweet_data_controller.blend_active = False
 
-
         self.tweet_data_controller.switch_tweet_dataset(new)
-        self.tweet_data_controller.apply_filters()
 
         if self.toggle_sde_ellipse.active:
             self.tweet_data_controller.update_sde_ellipse()
@@ -221,7 +230,7 @@ class MapWidgets:
         value_end = int(self.range_slider_area.value[1])
 
         if value_start > self.range_slider_area.start:
-            value_start -= 100
+            value_start -= int(self.config.area[2])
 
         new_values = [value_start, value_end]
         self.range_slider_area.value = new_values
@@ -235,7 +244,7 @@ class MapWidgets:
         value_end = int(self.range_slider_area.value[1])
 
         if value_start < value_end:
-            value_start += 100
+            value_start += int(self.config.area[2])
 
         new_values = [value_start, value_end]
         self.range_slider_area.value = new_values
@@ -249,7 +258,7 @@ class MapWidgets:
         value_end = int(self.range_slider_area.value[1])
 
         if value_end > value_start:
-            value_end -= 100
+            value_end -= int(self.config.area[2])
 
         new_values = [value_start, value_end]
         self.range_slider_area.value = new_values
@@ -263,7 +272,7 @@ class MapWidgets:
         value_end = int(self.range_slider_area.value[1])
 
         if value_end < self.range_slider_area.end:
-            value_end += 100
+            value_end += int(self.config.area[2])
 
         new_values = [value_start, value_end]
         self.range_slider_area.value = new_values

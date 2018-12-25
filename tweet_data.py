@@ -8,6 +8,14 @@ from shapely_utilities import *
 
 logger = logging.getLogger()
 
+def print_progress_to_console(idx):
+    if idx == 0:
+        print("", end="")
+    elif idx % 1000 == 0:
+        print("*", end="")
+    elif idx % 100 == 0:
+        print(".", end="")
+
 class TweetData:
 
     def __init__(self, data_name):
@@ -74,6 +82,9 @@ class TweetData:
                     self.df['area'][row_idx],
                     data_df[x_y_ratio][row_idx])
 
+            print_progress_to_console(row_idx)
+
+        print("")
         self.max_a = self.df['a'].max()
         self.max_b = self.df['b'].max()
         self.max_area = self.df['area'].max()
@@ -84,10 +95,13 @@ class TweetData:
         logger.info("\n%s", self.df.head())
 
     def find_datapoints_enclosed_with_ellipse(self):
+        logger.info("Find Datapoints Enclosed within Ellipse.")
+        print("Find Datapoints Enclosed within Ellipse.")
         row_idx = 0
         counts = []
         grouped_ids_list = []
         grouped_idxs_list = []
+
         for row in self.df.itertuples():
             selected_point_id = row.id
             xo = row.x
@@ -106,8 +120,6 @@ class TweetData:
                         grouped_idxs.append(row2_idx)
                 row2_idx += 1
 
-            row_idx += 1
-
             count = len(grouped_ids)
             counts.append(count)
             grouped_ids_list.append(grouped_ids)
@@ -116,6 +128,10 @@ class TweetData:
             if count > self.max_count:
                 self.max_count = count
 
+            print_progress_to_console(row_idx)
+            row_idx += 1
+
+        print("")
         self.df['count'] = counts
         self.df['ids'] = grouped_ids_list
         self.df['idxs'] = grouped_idxs_list
@@ -123,6 +139,9 @@ class TweetData:
         logger.info("\n%s", self.df.head())
 
     def calculate_colour(self):
+        logger.info("Calculating Color.")
+        print("Calculating Color.")
+
         max_count = self.max_count
         #count_max = 600.0
 
@@ -147,6 +166,7 @@ class TweetData:
         interval_g = (end_g - start_g)
         interval_b = (end_b - start_b)
 
+        row_idx = 0
         colours = []
         for row in self.df.itertuples():
             count = row.count
@@ -158,6 +178,10 @@ class TweetData:
             colour_hex_str = "#" + str(point_r) + str(point_g) + str(point_b)
             colours.append(colour_hex_str)
 
+            print_progress_to_console(row_idx)
+            row_idx += 1
+
+        print("")
         self.df['color'] = colours
 
     # Using the x/y ratio and area calculate the major and minor axes for the ellipse.
@@ -270,7 +294,7 @@ class MapTweetData:
 
     def update_sibling_ellipses(self, circle_idx):
         print("Update Sibling Ellipses: " + str(circle_idx))
-        print(self.tweet_data_df['idxs'][circle_idx])
+        #print(self.tweet_data_df['idxs'][circle_idx])
         new_data = dict()
         new_data['x'] = []
         new_data['y'] = []
@@ -278,11 +302,12 @@ class MapTweetData:
         new_data['height'] = []
         new_data['angle'] = []
         for row_idx in self.tweet_data_df['idxs'][circle_idx]:
-            new_data['x'].append(self.tweet_data_df['x'][row_idx])
-            new_data['y'].append(self.tweet_data_df['y'][row_idx])
-            new_data['width'].append(self.tweet_data_df['a'][row_idx] * 2.0)
-            new_data['height'].append(self.tweet_data_df['b'][row_idx] * 2.0)
-            new_data['angle'].append(self.tweet_data_df['angle'][row_idx])
+            if self.tweet_data_df['a'][row_idx] > 0.0:
+                new_data['x'].append(self.tweet_data_df['x'][row_idx])
+                new_data['y'].append(self.tweet_data_df['y'][row_idx])
+                new_data['width'].append(self.tweet_data_df['a'][row_idx] * 2.0)
+                new_data['height'].append(self.tweet_data_df['b'][row_idx] * 2.0)
+                new_data['angle'].append(self.tweet_data_df['angle'][row_idx])
         return new_data
 
     def clear_dissolve(self):
@@ -301,11 +326,12 @@ class MapTweetData:
         ellipses['b'] = []
         ellipses['angle'] = []
         for row_idx in self.tweet_data_df['idxs'][circle_idx]:
-            ellipses['x'].append(self.tweet_data_df['x'][row_idx])
-            ellipses['y'].append(self.tweet_data_df['y'][row_idx])
-            ellipses['a'].append(self.tweet_data_df['a'][row_idx])
-            ellipses['b'].append(self.tweet_data_df['b'][row_idx])
-            ellipses['angle'].append(self.tweet_data_df['angle'][row_idx])
+            if self.tweet_data_df['a'][row_idx] > 0.0:
+                ellipses['x'].append(self.tweet_data_df['x'][row_idx])
+                ellipses['y'].append(self.tweet_data_df['y'][row_idx])
+                ellipses['a'].append(self.tweet_data_df['a'][row_idx])
+                ellipses['b'].append(self.tweet_data_df['b'][row_idx])
+                ellipses['angle'].append(self.tweet_data_df['angle'][row_idx])
 
         # Need to remember to include the datapoints own ellipse details. Otherwise the following error occurs:
         # AttributeError("'MultiPolygon' object has no attribute 'exterior'")
@@ -328,30 +354,31 @@ class MapTweetData:
 
 class FilterSettings:
 
-    def __init__(self, count_start, count_end, area_start, area_end, distance_start, distance_end, ratio_start, ratio_end, ratio_max_unbounded):
-        self.count_start = count_start
-        self.count_end = count_end
+    def __init__(self, config):
+        self.count_start = config.count[0]
+        self.count_end = config.count[1]
         self.count_active = True
-        self.area_start = area_start
-        self.area_end = area_end
+        self.area_start = config.area[0]
+        self.area_end = config.area[1]
         self.area_active = True
-        self.distance_start = distance_start
-        self.distance_end = distance_end
+        self.distance_start = config.distance[0]
+        self.distance_end = config.distance[1]
         self.distance_active = True
-        self.ratio_start = ratio_start
-        self.ratio_end = ratio_end
-        self.ratio_max_unbounded = ratio_max_unbounded
+        self.ratio_start = config.ratio[0]
+        self.ratio_end = config.ratio[1]
+        self.ratio_max_unbounded = config.ratio[1] - 1.0
         self.ratio_active = True
 
 class TweetDataController:
 
-    def __init__(self, pre_processor, user_info):
+    def __init__(self, pre_processor, config, user_info):
         self.all = MapTweetData(pre_processor.tweet_data_all.df)
         self.working = MapTweetData(pre_processor.tweet_data_working.df)
         self.non_working = MapTweetData(pre_processor.tweet_data_non_working.df)
         self.active_dataset = self.working
         self.blend_dataset = self.non_working
 
+        self.config = config
         self.user_info = user_info
         self.selection_details = None
 
@@ -385,15 +412,15 @@ class TweetDataController:
 
         self.find_circle = ColumnDataSource(data=dict(id=[], x=[], y=[]))
 
-        self.filter_settings = FilterSettings(0, 600, 0, 131000, 0, 850, 0, 100, 99)
+        self.filter_settings = FilterSettings(self.config)
 
         self.circle_id = -1
         self.circle_idx = -1
         self.find_circle_idx = -1
 
         self.blend_active = False
+        self.circles_active = True
 
-        self.cr = None
         self.csr = None
         self.csbr = None
         self.er = None
@@ -427,6 +454,26 @@ class TweetDataController:
         self.pdr.glyph.line_alpha = 0.4
         self.pdr.glyph.fill_alpha = 0.4
 
+    def clear_circles(self):
+        print("Clear Circles:")
+        new_data = dict()
+        new_data['x'] = []
+        new_data['y'] = []
+        new_data['id'] = []
+        new_data['distance'] = []
+        new_data['color'] = []
+        self.circles.data = new_data
+
+    def toggle_data(self, toggle_on):
+        if toggle_on:
+            print("Toggle Data: On")
+            self.clear_circles()
+            self.circles_active = False
+        else:
+            print("Toggle Data: Off")
+            self.circles_active = True
+            self.apply_filters()
+
     def lod_dummy_changed(self, attrname, old, new):
         #print("LOD Dummy Change: " + str(new))
         if len(new['lod']) > 0:
@@ -434,11 +481,11 @@ class TweetDataController:
 
             if lod_value is 0:
                 print("LOD Dummy Callback: Start")
-                self.cr.visible = False
+                self.clear_circles()
 
             if lod_value is 1:
                 print("LOD Dummy Callback: End")
-                self.cr.visible = True
+                self.apply_filters()
 
     def selected_circle_changed(self, attrname, old, new):
         #print("Selected Circle Change: " + str(new))
@@ -587,7 +634,8 @@ class TweetDataController:
             print("Switching to 'median non-working'.")
             self.blend_dataset = self.working
 
-        self.circles.data = self.circles.from_df(self.active_dataset.tweet_data_df)
+        #self.circles.data = self.circles.from_df(self.active_dataset.tweet_data_df)
+        self.apply_filters()
 
         self.update_selected_circle()
         self.update_selection_details()
@@ -638,31 +686,32 @@ class TweetDataController:
         self.apply_filters()
 
     def apply_filters(self):
-        subset_df = self.active_dataset.tweet_data_df
-        if self.filter_settings.count_active:
-            subset_df = subset_df.loc[
-                        (subset_df['count'] >= self.filter_settings.count_start)
-                    &   (subset_df['count'] <= self.filter_settings.count_end)]
-
-        if self.filter_settings.area_active:
-            subset_df = subset_df.loc[
-                        (subset_df['area'] >= self.filter_settings.area_start)
-                    &   (subset_df['area'] <= self.filter_settings.area_end)]
-
-        if self.filter_settings.distance_active:
-            subset_df = subset_df.loc[
-                        (subset_df['distance'] >= self.filter_settings.distance_start)
-                    &   (subset_df['distance'] <= self.filter_settings.distance_end)]
-
-        if self.filter_settings.ratio_active:
-            if self.filter_settings.ratio_end > self.filter_settings.ratio_max_unbounded:
-                subset_df = subset_df.loc[(subset_df['ratio'] >= self.filter_settings.ratio_start)]
-            else:
+        if self.circles_active:
+            subset_df = self.active_dataset.tweet_data_df
+            if self.filter_settings.count_active:
                 subset_df = subset_df.loc[
-                            (subset_df['ratio'] >= self.filter_settings.ratio_start)
-                        &   (subset_df['ratio'] <= self.filter_settings.ratio_end)]
+                            (subset_df['count'] >= self.filter_settings.count_start)
+                        &   (subset_df['count'] <= self.filter_settings.count_end)]
 
-        self.circles.data = self.circles.from_df(subset_df)
+            if self.filter_settings.area_active:
+                subset_df = subset_df.loc[
+                            (subset_df['area'] >= self.filter_settings.area_start)
+                        &   (subset_df['area'] <= self.filter_settings.area_end)]
+
+            if self.filter_settings.distance_active:
+                subset_df = subset_df.loc[
+                            (subset_df['distance'] >= self.filter_settings.distance_start)
+                        &   (subset_df['distance'] <= self.filter_settings.distance_end)]
+
+            if self.filter_settings.ratio_active:
+                if self.filter_settings.ratio_end > self.filter_settings.ratio_max_unbounded:
+                    subset_df = subset_df.loc[(subset_df['ratio'] >= self.filter_settings.ratio_start)]
+                else:
+                    subset_df = subset_df.loc[
+                                (subset_df['ratio'] >= self.filter_settings.ratio_start)
+                            &   (subset_df['ratio'] <= self.filter_settings.ratio_end)]
+
+            self.circles.data = self.circles.from_df(subset_df)
 
     def turn_blend_on(self, ellipse_active, siblings_active, dissolve_active):
         print("Turn Blend On:")
