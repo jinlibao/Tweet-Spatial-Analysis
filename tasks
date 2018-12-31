@@ -2,17 +2,12 @@ See: PEP 350 -- Codetags: https://www.python.org/dev/peps/pep-0350/
 
 Working on since last commit:
 Tasks:
-Completed:
-Done: 049: Consider adding statistical descriptive details to the page: Added 20181205: Started 20181212: Completed 20181226:
-
 Working on:
-InProgress: 032: Consider optimization as a whole over the entire 50K data set (x 3)
-Using the LOD Start/End events to turn the circle renderer off/on
-
 InProgress: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: Started 20181218:
+InProgress: 084: Take another looking at adding tabs now that we have a figure for the count histogram: Added 20181231: Started 20181231:
 
 
-Next Id: 083
+Next Id: 085
 ToDo: 007: Consider some form of quad-tree pre optimization of data: Added 20181122
 ToDo: 009: Assess the use of CustomJSHover: https://bokeh.pydata.org/en/latest/docs/reference/models/tools.html#: Added 20181122:
 ToDo: 013: Can I add a main to the main.py file?
@@ -26,9 +21,9 @@ ToDo: 059: Sibling data points are not selected-able nor have a hover tooltip: A
 ToDo: 061: Add a legend for the 'sibling count' visualization: Added 20181209:
 ToDo: 069: Think about create some form of point density - can this relate to the spatial index? Added 20181211:
 ToDo: 072: Add scale to map and units to details for area Added 20181215:
-ToDo: 080: BBug: ValueError('Out of range float values are not JSON compliant') when pressing Toggle Siblings: ID: 1416678168: Added 20181219:
 ToDo: 081: When blend is on, the blends disappear when the filter is changed? When blend then toggled, only the active data set is then shown. Need to toggle ellipse for both to re-appear. Added 20181224:
 ToDo: 082: Take another look at Uncaught Error: reference {"id":"1004","type":"ColumnDataSource"} isn't known (not in Document?)
+ToDo: 083: Look at pre-processing the dissolve area to be able to filter on this: Added 20181231:
 
 
 InProgress: 010: Add Logging: https://bokeh.pydata.org/en/latest/docs/reference/util.html#bokeh-util-logconfig: Added 20181122: Started 20181122:
@@ -44,8 +39,7 @@ InProgress: 058: If nothing selected then reset Selected ID text: Added 20181208
 InProgress: 063: Consider some form of heat map for clustered tweet data points - representing density: Added 20181210: Started 20181210:
 InProgress: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: Started 20181218:
 InProgress: 068: Think about a map of overlapping SDEs - use grey scale + transparency - maybe convert patches to a raster: Added 20181211: Started 20181211:
-InProgress: 078: Understand the datasets better wrt filters. Using 10,000 datapoints when I reset the filters to their minimum? Added 21081219: Started 20181219:
-InProgress: 080: BBug: ValueError('Out of range float values are not JSON compliant') when pressing Toggle Siblings: ID: 1416678168: Added 20181219: Started 20181219:
+InProgress: 084: Take another looking at adding tabs now that we have a figure for the count histogram: Added 20181231: Started 20181231:
 
 
 Done: 001: Draw ellipse on selecting a user: Added 20181122: Started 20181122: Completed 20181126
@@ -529,6 +523,9 @@ How does this affect the x-axis scale/representation?
 Integrate the count histogram into the TweetDataController and MapWidgets classes.
 20181230: Histogram working correctly and changes when active dataset is changed.
 Add hover over the quads
+20181231: Consider putting the count histogram into a separate class?
+And a second histogram - SDE area.
+Second chart added. Need to look at creating 'histogram class'.
 
 Done: 065: BBug with circle_renderer.selection_glyph and point 2429397887 - cheated by setting alpha to 0.0 to work: Added 20181211: Started 20181211: Completed 20181211
 Replicate:
@@ -589,3 +586,7 @@ The following occurs when toggling dissolve:
 ValueError('No Shapely geometry can be created from null value') which I assume is related.
 Use: 1416678168
 Caused by points having 'a' and 'b' values set to -1.0
+
+InProgress: 084: Take another looking at adding tabs now that we have a figure for the count histogram: Added 20181231: Started 20181231:
+Followed https://bokeh.pydata.org/en/latest/docs/reference/models/widgets.panels.html and it worked.
+Successfully added a second histogram to the tab.

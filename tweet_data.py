@@ -256,6 +256,27 @@ class MapTweetData:
 
         self.df_histogram_cds = pd.DataFrame(data_histogram_cds)
 
+        hist, edges = np.histogram(self.tweet_data_df['area'], bins=50)
+        print(hist)
+
+        bin_list_len = len(hist)
+        bottom_list = [0] * bin_list_len
+        fill_color_list = ['red'] * bin_list_len
+        line_color_list = ['black'] * bin_list_len
+        id = [-1] * bin_list_len
+
+        data_histogram_area_cds = {
+            'bottom': bottom_list,
+            'top': hist,
+            'left': edges[:-1],
+            'right': edges[1:],
+            'fill_color': fill_color_list,
+            'line_color': line_color_list,
+            'id': id
+        }
+
+        self.df_histogram_area_cds = pd.DataFrame(data_histogram_area_cds)
+
     def clear_selected_circle(self):
         new_data = dict()
         new_data['x'] = []
@@ -459,10 +480,10 @@ class TweetDataController:
         self.sr = None
         self.sbr = None
         self.chr = None
+        self.chr2 = None
 
         self.histogram_cds = ColumnDataSource(data=dict(bottom=[], top=[], left=[], right=[], fill_color=[], line_color=[]))
         self.histogram_cds.data = self.histogram_cds.from_df(self.active_dataset.df_histogram_cds)
-        #self.histogram_cds.on_change('data', self.selected_count_changed)
 
         self.hover_histogram_count_idx = ColumnDataSource(data=dict(idx=[]))
         data_hover_histogram_count_idx = {
@@ -473,6 +494,19 @@ class TweetDataController:
 
         self.selected_count = ColumnDataSource(data=dict(x=[], y=[], idx=[]))
         self.selected_count.on_change('data', self.selected_count_changed)
+
+        self.histogram_area_cds = ColumnDataSource(data=dict(bottom=[], top=[], left=[], right=[], fill_color=[], line_color=[]))
+        self.histogram_area_cds.data = self.histogram_area_cds.from_df(self.active_dataset.df_histogram_area_cds)
+
+        self.hover_histogram_area_idx = ColumnDataSource(data=dict(idx=[]))
+        data_hover_histogram_area_idx = {
+            'idx': [-1]
+        }
+        df_hover_histogram_area_idx = pd.DataFrame(data_hover_histogram_area_idx)
+        self.hover_histogram_area_idx.data = self.hover_histogram_area_idx.from_df(df_hover_histogram_area_idx)
+
+        self.selected_area = ColumnDataSource(data=dict(x=[], y=[], idx=[]))
+        self.selected_area.on_change('data', self.selected_area_changed)
 
     def find_id(self, id_value):
         print("Find: ID: " + str(id_value))
@@ -549,6 +583,10 @@ class TweetDataController:
     def selected_count_changed(self, attrname, old, new):
         if len(new['idx']) > 0:
             print("Selected Histogram Count: idx: " + str(new['idx']))
+
+    def selected_area_changed(self, attrname, old, new):
+        if len(new['idx']) > 0:
+            print("Selected Histogram Area: idx: " + str(new['idx']))
 
     def update_selection_details(self):
         if self.circle_id > -1:

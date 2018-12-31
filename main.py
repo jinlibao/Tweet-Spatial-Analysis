@@ -2,7 +2,7 @@
 from bokeh import events
 from bokeh.io import curdoc
 from bokeh.layouts import Column, Row
-from bokeh.models import Circle, CustomJS, HoverTool, Range1d, TapTool
+from bokeh.models import Circle, CustomJS, HoverTool, Range1d, TapTool, Panel, Tabs
 from bokeh.plotting import figure
 from bokeh.tile_providers import CARTODBPOSITRON
 
@@ -130,7 +130,7 @@ count_histogram_renderer = p2.quad( bottom='bottom',
                                     source = tweet_data_controller.histogram_cds,
                                     fill_color='fill_color', line_color='line_color')
 
-histogram_count_dummy_renderer = p.circle(x='x', y='y', source=tweet_data_controller.selected_count, fill_color='white', line_color=None, fill_alpha=0.0, size=1)
+histogram_count_dummy_renderer = p2.circle(x='x', y='y', source=tweet_data_controller.selected_count, fill_color='white', line_color=None, fill_alpha=0.0, size=1)
 
 tweet_data_controller.chr = count_histogram_renderer
 
@@ -155,6 +155,47 @@ def callback_tap2(  hhci = tweet_data_controller.hover_histogram_count_idx,
 
 tap_tool2 = TapTool(callback = CustomJS.from_py_func(callback_tap2), renderers=[count_histogram_renderer])
 p2.add_tools(tap_tool2, hover_tool2)
+
+
+
+p3 = figure(    plot_height = 300, plot_width = 600,
+                title = 'Area of SDE',
+                x_axis_label = 'Area',
+                y_axis_label = 'Count',
+                tools=["pan,wheel_zoom"],)
+
+area_histogram_renderer = p3.quad( bottom='bottom',
+                                    top='top',
+                                    left='left',
+                                    right='right',
+                                    source = tweet_data_controller.histogram_area_cds,
+                                    fill_color='fill_color', line_color='line_color')
+
+histogram_area_dummy_renderer = p3.circle(x='x', y='y', source=tweet_data_controller.selected_area, fill_color='white', line_color=None, fill_alpha=0.0, size=1)
+
+tweet_data_controller.chr2 = area_histogram_renderer
+
+def callback_hover3(hhci = tweet_data_controller.hover_histogram_area_idx):
+    indices = cb_data.index["1d"].indices
+    if len(indices) > 0:
+        print([indices[0]])
+        hhci.data['idx'] = [indices[0]]
+
+hover_tool3 = HoverTool(tooltips=[('count', "@top")], callback=CustomJS.from_py_func(callback_hover3), renderers=[area_histogram_renderer])
+
+def callback_tap3(  hhci = tweet_data_controller.hover_histogram_area_idx,
+                    sc = tweet_data_controller.selected_area
+                    ):
+    idx = hhci.data['idx']
+
+    new_data = dict()
+    new_data['x'] = [0]
+    new_data['y'] = [0]
+    new_data['idx'] = [idx[0]]
+    sc.data = new_data
+
+tap_tool3 = TapTool(callback = CustomJS.from_py_func(callback_tap3), renderers=[area_histogram_renderer])
+p3.add_tools(tap_tool3, hover_tool3)
 
 
 def lod_start(ld = tweet_data_controller.lod_dummy):
@@ -215,7 +256,8 @@ lhs = Column(   map_widgets.radio_button_data_type, map_widgets.toggle_data, map
                 map_widgets.toggle_blend, map_widgets.slider_blend,
                 map_widgets.text_input, map_widgets.button_find)
 
-rhs = Column(   Row(    Column(map_widgets.button_count_start_minus, map_widgets.button_count_start_plus, width=50),
+filter_sliders \
+    = Column(   Row(    Column(map_widgets.button_count_start_minus, map_widgets.button_count_start_plus, width=50),
                         map_widgets.range_slider_count,
                         Column(map_widgets.button_count_end_minus, map_widgets.button_count_end_plus)),
                 Row(    Column(map_widgets.button_area_start_minus, map_widgets.button_area_start_plus, width=50),
@@ -228,10 +270,19 @@ rhs = Column(   Row(    Column(map_widgets.button_count_start_minus, map_widgets
                         map_widgets.range_slider_ratio,
                         Column(map_widgets.button_ratio_end_minus, map_widgets.button_ratio_end_plus)),
                 map_widgets.text_count,
-                map_widgets.filters_active,
-                p2)
+                map_widgets.filters_active)
 
-l = Row(lhs, p, rhs)
+
+filter_histograms = Column(p2, p3)
+
+tab_filter_sliders = Panel(child=filter_sliders, title="Filter by Sliders")
+tab_filter_histograms = Panel(child=filter_histograms, title="Filter by Histograms")
+
+tabs_rhs = Tabs(tabs = [tab_filter_sliders, tab_filter_histograms])
+
+l = Row(lhs, p, tabs_rhs)
 
 curdoc().add_root(l)
 curdoc().title = "Tweet Spatial Analysis"
+
+
