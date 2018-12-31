@@ -2,17 +2,17 @@ See: PEP 350 -- Codetags: https://www.python.org/dev/peps/pep-0350/
 
 Working on since last commit:
 Tasks:
-Completed
-062: Create a 'global configuration' that can be loaded at runtime - including details generated from the preprocessing stage: Added 20181209: Started 20181219: Completed 20181224:
-078: Understand the datasets better wrt filters. Using 10,000 datapoints when I reset the filters to their minimum? Related to 062
-079: Adding progress printing to the console when pre-processing the datasets: Added 21081219: Started 20181219: Completed 20181219
-080: BBug: ValueError('Out of range float values are not JSON compliant') when pressing Toggle Siblings: ID: 1416678168: Added 20181219: Started 20181219: Completed 20181224:
+Completed:
+Done: 049: Consider adding statistical descriptive details to the page: Added 20181205: Started 20181212: Completed 20181226:
 
 Working on:
 InProgress: 032: Consider optimization as a whole over the entire 50K data set (x 3)
 Using the LOD Start/End events to turn the circle renderer off/on
 
-Next Id: 082
+InProgress: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: Started 20181218:
+
+
+Next Id: 083
 ToDo: 007: Consider some form of quad-tree pre optimization of data: Added 20181122
 ToDo: 009: Assess the use of CustomJSHover: https://bokeh.pydata.org/en/latest/docs/reference/models/tools.html#: Added 20181122:
 ToDo: 013: Can I add a main to the main.py file?
@@ -28,6 +28,8 @@ ToDo: 069: Think about create some form of point density - can this relate to th
 ToDo: 072: Add scale to map and units to details for area Added 20181215:
 ToDo: 080: BBug: ValueError('Out of range float values are not JSON compliant') when pressing Toggle Siblings: ID: 1416678168: Added 20181219:
 ToDo: 081: When blend is on, the blends disappear when the filter is changed? When blend then toggled, only the active data set is then shown. Need to toggle ellipse for both to re-appear. Added 20181224:
+ToDo: 082: Take another look at Uncaught Error: reference {"id":"1004","type":"ColumnDataSource"} isn't known (not in Document?)
+
 
 InProgress: 010: Add Logging: https://bokeh.pydata.org/en/latest/docs/reference/util.html#bokeh-util-logconfig: Added 20181122: Started 20181122:
 InProgress: 018: Consider how to use visualization to represent area / number of tweets within ellipse etc - maybe add to the hover tool?: Added: 20181130: Started 20181202
@@ -35,7 +37,6 @@ InProgress: 027: Create a better layout: Added 20181130: Started 20181130:
 InProgress: 032: Consider optimization as a whole over the entire 50K data set (x 3): Added 20181202: : Started 20181202:
 InProgress: 034: BBug: A user is able to select multiple data points when the scale is zoomed out enough - only won't ability to select a single one: Added 20181202: Started 20181203:
 InProgress: 042: Can I format the text on the hover tooltip? Added 20181203: Started 20181203:
-InProgress: 049: Consider adding statistical descriptive details to the page: Added 20181205: Started 20181212:
 InProgress: 050: Add a colour palette to represent sibling count: Added 20181206: Started 20181207:
 InProgress: 054: Consider adding connecting lines between working and non working (with direction): Added 2081207: Started 20181207
 InProgress: 056: Consider potentially pre-processing dissolve area so the map can be filtered on that: Added 20181208: Started 20181218:
@@ -79,6 +80,7 @@ Done: 044: Present user profiles: Added 20181203: Started 20181204: Completed 20
 Done: 045: Consider the width and height for the ellipse. The measures I have are in non-projected space - but when I draw the ellipse they are in project space - surely I need to project the width and height lengths: Added 20181203: Started 20181203: Completed 20181204
 Done: 046: BBug: The reset tool appears to distort glyphs after being used? Added 20181204: Started 20181204: Completed 20181204
 Done: 048: Consider storing 'a' and 'b' instead of 'width' and 'height' to reduce the amount of divisions: Added 20181204: Started 20181204: Completed 20181205
+Done: 049: Consider adding statistical descriptive details to the page: Added 20181205: Started 20181212: Completed 20181226:
 Done: 051: On changing the sibling count slider, clear all selections: Added 2081207: Started 20181207: Completed 20181208
 Done: 052: Add a glyph that represents the selected point, as issue when changing slider and showing selected point using internal mechanism: Added 2081207: Started 20181207: Completed 20181208
 Done: 053: Add a slide for distance between working and non working: Added 20181208: Completed 20181217
@@ -102,9 +104,6 @@ Done: 080: BBug: ValueError('Out of range float values are not JSON compliant') 
 
 
 OnGoing:
-OnGoing: 002: Understand mapping of ellipse data to actual drawing: Added 20181122: Started 20181129: Completed 20181129
-OnGoing: 012: Look at pre-processing the (latitude, longitude) coordinate projections: Added 20181122: Started 20181126: Completed 20181129
-OnGoing: 055: When changing datasets, re-apply the count filter: Added 20181208: Started 20181208: Completed 20181208
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Interesting IDs:
@@ -445,10 +444,17 @@ Done: 048: Consider storing 'a' and 'b' instead of 'width' and 'height' to reduc
 How many calculations are there? This only involves pre processing (finding siblings) and when finding the dissolve - so minimal really.
 Made the change. I think it confirms better the expected standard data defined for an ellipses.
 
-InProgress: 049: Consider adding statistical descriptive details to the page: Added 20181205: Started 20181212:
+Done: 049: Consider adding statistical descriptive details to the page: Added 20181205: Started 20181212: Completed 20181226:
 Add interactivity for clicking on histogram bars to act as 'filters' on the map.
 When doing this, adjust the filter sliders appropriately.
 Would these graphs potentially live in a separate tab? The existing page is starting to get 'busy'.
+20181226: Looks like Tabs require Panels:
+ValueError: expected an element of List(Instance(Panel)), got seq with invalid items [Column(id='1202', ...), Column(id='1237', ...)]
+Issues:
+Improve the layout subsystem #8085: https://github.com/bokeh/bokeh/pull/8085
+Tabs Only Renders Right When At Least One Tab Contains A Figure #5169: https://github.com/bokeh/bokeh/issues/5169
+Initial tests adding tabs or trying to interatively add/remove widgets have not be successful. Leave tabs for the time being.
+Finish this task and focus on 064.
 
 InProgress: 050: Add a colour palette to represent sibling count: Added 20181206: Started 20181207:
 Tried a linear colour scheme and a 1.0 - 1.0/(1.0 + count) version.
@@ -519,6 +525,10 @@ Creating on the fly/as start up wrt 1,000 / 10,000 / 50,000 points.
 Also consider having non-regular bins - consider sibling counts: e.g. 1, 2, 3, 4, 5, 6-10, 11-20, 21-50, 50-100, >100
 How does this affect the x-axis scale/representation?
 20181222: Started looking to research if bin sizes could be defined.
+20181226: Added basic histogram to the plot in main.py.
+Integrate the count histogram into the TweetDataController and MapWidgets classes.
+20181230: Histogram working correctly and changes when active dataset is changed.
+Add hover over the quads
 
 Done: 065: BBug with circle_renderer.selection_glyph and point 2429397887 - cheated by setting alpha to 0.0 to work: Added 20181211: Started 20181211: Completed 20181211
 Replicate:
@@ -529,6 +539,8 @@ Appears to be connected to circle_renderer.selection_glyph
 Cheated by making alpha 0.0.
 BUT why for this point and hardly any others?
 20181211: Replicated problem in earlier version.
+Issue: ValueError("expected an element of either String, Dict(Enum('expr', 'field', 'value', 'transform'), Either(String, Instance(Transform), Instance(Expression), Float)) or Float, got array([527, 120,  77,  29,  24,  29,  18,  10,   8,   7,  38,  14,  17,\n        36,  18,  10,  11,   5,   0,   1], dtype=int64)")
+
 
 Done: 067: Create a Git repo around the first version: Added 20181211: Started 20181211: Completed 20181211
 Created repository with dev branch.

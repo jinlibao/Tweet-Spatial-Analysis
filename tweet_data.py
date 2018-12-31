@@ -1,5 +1,6 @@
 import logging.config
 import pandas as pd
+import numpy as np
 
 from bokeh.models import ColumnDataSource
 
@@ -226,8 +227,34 @@ class TweetData:
 
 class MapTweetData:
 
-    def __init__(self, tweet_data_df):
-        self.tweet_data_df = tweet_data_df
+    def __init__(self, tweet_data, bins_count_text, bins_count=20):
+        self.name = tweet_data.name
+        print(self.name)
+        self.tweet_data_df = tweet_data.df
+
+        # If bins is an int, it defines the number of equal-width bins in the given range (10, by default).
+        # If bins is a sequence, it defines the bin edges, including the rightmost edge, allowing for non-uniform bin widths.
+        hist, edges = np.histogram(self.tweet_data_df['count'], bins=bins_count)
+        print(hist)
+
+        bin_list_len = len(bins_count) - 1
+        bottom_list = [0] * bin_list_len
+        fill_color_list = ['red'] * bin_list_len
+        line_color_list = ['black'] * bin_list_len
+        id = [-1] * bin_list_len
+
+        data_histogram_cds = {
+            'bottom' : bottom_list,
+            'top' : hist,
+            'left' : edges[:-1],
+            'right' : edges[1:],
+            'fill_color' : fill_color_list,
+            'line_color' : line_color_list,
+            'bins_text' : bins_count_text,
+            'id' : id
+        }
+
+        self.df_histogram_cds = pd.DataFrame(data_histogram_cds)
 
     def clear_selected_circle(self):
         new_data = dict()
@@ -372,9 +399,9 @@ class FilterSettings:
 class TweetDataController:
 
     def __init__(self, pre_processor, config, user_info):
-        self.all = MapTweetData(pre_processor.tweet_data_all.df)
-        self.working = MapTweetData(pre_processor.tweet_data_working.df)
-        self.non_working = MapTweetData(pre_processor.tweet_data_non_working.df)
+        self.all = MapTweetData(pre_processor.tweet_data_all, config.bins_count_text, config.bins_count)
+        self.working = MapTweetData(pre_processor.tweet_data_working, config.bins_count_text, config.bins_count)
+        self.non_working = MapTweetData(pre_processor.tweet_data_non_working, config.bins_count_text, config.bins_count)
         self.active_dataset = self.working
         self.blend_dataset = self.non_working
 
@@ -431,6 +458,21 @@ class TweetDataController:
         self.pdbr = None
         self.sr = None
         self.sbr = None
+        self.chr = None
+
+        self.histogram_cds = ColumnDataSource(data=dict(bottom=[], top=[], left=[], right=[], fill_color=[], line_color=[]))
+        self.histogram_cds.data = self.histogram_cds.from_df(self.active_dataset.df_histogram_cds)
+        #self.histogram_cds.on_change('data', self.selected_count_changed)
+
+        self.hover_histogram_count_idx = ColumnDataSource(data=dict(idx=[]))
+        data_hover_histogram_count_idx = {
+            'idx': [-1]
+        }
+        df_hover_histogram_count_idx = pd.DataFrame(data_hover_histogram_count_idx)
+        self.hover_histogram_count_idx.data = self.hover_histogram_count_idx.from_df(df_hover_histogram_count_idx)
+
+        self.selected_count = ColumnDataSource(data=dict(x=[], y=[], idx=[]))
+        self.selected_count.on_change('data', self.selected_count_changed)
 
     def find_id(self, id_value):
         print("Find: ID: " + str(id_value))
@@ -503,6 +545,10 @@ class TweetDataController:
             self.clear_dissolve()
             self.reset_renderer_properties()
             self.blend_active = False
+
+    def selected_count_changed(self, attrname, old, new):
+        if len(new['idx']) > 0:
+            print("Selected Histogram Count: idx: " + str(new['idx']))
 
     def update_selection_details(self):
         if self.circle_id > -1:
@@ -620,25 +666,29 @@ class TweetDataController:
         self.clear_dissolve()
         self.clear_find_circle()
 
+    def update_histograms(self):
+        print(self.active_dataset.name)
+        self.chr.data_source.data = self.histogram_cds.from_df(self.active_dataset.df_histogram_cds)
+
+
     def switch_tweet_dataset(self, value):
         if value == 0:
-            self.active_dataset = self.all
             print("Switching to 'mean all'.")
+            self.active_dataset = self.all
             self.blend_dataset = None
         elif value == 1:
-            self.active_dataset = self.working
             print("Switching to 'median working'.")
+            self.active_dataset = self.working
             self.blend_dataset = self.non_working
         else:
-            self.active_dataset = self.non_working
             print("Switching to 'median non-working'.")
+            self.active_dataset = self.non_working
             self.blend_dataset = self.working
 
-        #self.circles.data = self.circles.from_df(self.active_dataset.tweet_data_df)
         self.apply_filters()
-
         self.update_selected_circle()
         self.update_selection_details()
+        self.update_histograms()
 
     def num_of_points_active(self):
         active = len(self.circles.data['id'])
@@ -766,3 +816,4 @@ class TweetDataController:
             if dissolve_active:
                 self.pdbr.glyph.line_alpha = 1.0 - blend_ratio
                 self.pdbr.glyph.fill_alpha = 1.0 - blend_ratio
+

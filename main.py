@@ -1,7 +1,7 @@
 
 from bokeh import events
 from bokeh.io import curdoc
-from bokeh.layouts import column, row
+from bokeh.layouts import Column, Row
 from bokeh.models import Circle, CustomJS, HoverTool, Range1d, TapTool
 from bokeh.plotting import figure
 from bokeh.tile_providers import CARTODBPOSITRON
@@ -31,8 +31,6 @@ tweet_data_controller.selection_details = map_widgets.text_selection_details
 
 east_min, north_min = lon_lat_to_east_north(tweet_spatial_analysis_config.longitude[0], tweet_spatial_analysis_config.latitude[0])
 east_max, north_max = lon_lat_to_east_north(tweet_spatial_analysis_config.longitude[1], tweet_spatial_analysis_config.latitude[1])
-# print(str(east_min) + ", " + str(north_min) + " to " + str(east_max) + ", " + str(north_max))
-# -8682920.281875338, 4439106.787250583 to -8015003.337115697, 5311971.846945471
 
 # Configuring Plot Tools: https://bokeh.pydata.org/en/latest/docs/user_guide/tools.html
 p = figure(plot_width=800, plot_height=800,
@@ -95,7 +93,7 @@ hover_tool = HoverTool(tooltips=[('id', "@id"), ('area', '@area'), ('count', '@c
 # Tapping on the 'bare' map isn't registered.
 def callback_tap(   hover_idx = tweet_data_controller.hover_idx,
                     circles = tweet_data_controller.circles,
-                    selected_circle=tweet_data_controller.selected_circle,
+                    selected_circle = tweet_data_controller.selected_circle,
                     toggle_sde_e = map_widgets.toggle_sde_ellipse,
                     toggle_se = map_widgets.toggle_sibling_ellipses,
                     toggle_d = map_widgets.toggle_dissolve,
@@ -118,6 +116,46 @@ def callback_tap(   hover_idx = tweet_data_controller.hover_idx,
 
 tap_tool = TapTool(callback = CustomJS.from_py_func(callback_tap), renderers=[circles_renderer])
 p.add_tools(hover_tool, tap_tool)
+
+p2 = figure(    plot_height = 300, plot_width = 600,
+                title = 'Number of Siblings within a Tweet Data Point',
+                x_axis_label = 'Number of Siblings',
+                y_axis_label = 'Tweets with Count',
+                tools=["pan,wheel_zoom"],)
+
+count_histogram_renderer = p2.quad( bottom='bottom',
+                                    top='top',
+                                    left='left',
+                                    right='right',
+                                    source = tweet_data_controller.histogram_cds,
+                                    fill_color='fill_color', line_color='line_color')
+
+histogram_count_dummy_renderer = p.circle(x='x', y='y', source=tweet_data_controller.selected_count, fill_color='white', line_color=None, fill_alpha=0.0, size=1)
+
+tweet_data_controller.chr = count_histogram_renderer
+
+def callback_hover2(hhci = tweet_data_controller.hover_histogram_count_idx):
+    indices = cb_data.index["1d"].indices
+    if len(indices) > 0:
+        print([indices[0]])
+        hhci.data['idx'] = [indices[0]]
+
+hover_tool2 = HoverTool(tooltips=[('count', "@top"), ('bin', "@bins_text")], callback=CustomJS.from_py_func(callback_hover2), renderers=[count_histogram_renderer])
+
+def callback_tap2(  hhci = tweet_data_controller.hover_histogram_count_idx,
+                    sc = tweet_data_controller.selected_count
+                    ):
+    idx = hhci.data['idx']
+
+    new_data = dict()
+    new_data['x'] = [0]
+    new_data['y'] = [0]
+    new_data['idx'] = [idx[0]]
+    sc.data = new_data
+
+tap_tool2 = TapTool(callback = CustomJS.from_py_func(callback_tap2), renderers=[count_histogram_renderer])
+p2.add_tools(tap_tool2, hover_tool2)
+
 
 def lod_start(ld = tweet_data_controller.lod_dummy):
     print("LOD Start:")
@@ -172,27 +210,28 @@ p.js_on_event(events.PanEnd, CustomJS.from_py_func(pan_end))
 
 #p.js_on_event(events.MouseWheel, CustomJS.from_py_func(mouse_wheel))
 
-lhs = column(   map_widgets.radio_button_data_type, map_widgets.toggle_data, map_widgets.text_selection_details,
+lhs = Column(   map_widgets.radio_button_data_type, map_widgets.toggle_data, map_widgets.text_selection_details,
                 map_widgets.toggle_sde_ellipse, map_widgets.toggle_sibling_ellipses, map_widgets.toggle_dissolve,
                 map_widgets.toggle_blend, map_widgets.slider_blend,
                 map_widgets.text_input, map_widgets.button_find)
 
-rhs = column(   row(    column(map_widgets.button_count_start_minus, map_widgets.button_count_start_plus, width=50),
+rhs = Column(   Row(    Column(map_widgets.button_count_start_minus, map_widgets.button_count_start_plus, width=50),
                         map_widgets.range_slider_count,
-                        column(map_widgets.button_count_end_minus, map_widgets.button_count_end_plus)),
-                row(    column(map_widgets.button_area_start_minus, map_widgets.button_area_start_plus, width=50),
+                        Column(map_widgets.button_count_end_minus, map_widgets.button_count_end_plus)),
+                Row(    Column(map_widgets.button_area_start_minus, map_widgets.button_area_start_plus, width=50),
                         map_widgets.range_slider_area,
-                        column(map_widgets.button_area_end_minus, map_widgets.button_area_end_plus)),
-                row(    column(map_widgets.button_distance_start_minus, map_widgets.button_distance_start_plus, width=50),
+                        Column(map_widgets.button_area_end_minus, map_widgets.button_area_end_plus)),
+                Row(    Column(map_widgets.button_distance_start_minus, map_widgets.button_distance_start_plus, width=50),
                         map_widgets.range_slider_distance,
-                        column(map_widgets.button_distance_end_minus, map_widgets.button_distance_end_plus)),
-                row(    column(map_widgets.button_ratio_start_minus, map_widgets.button_ratio_start_plus, width=50),
+                        Column(map_widgets.button_distance_end_minus, map_widgets.button_distance_end_plus)),
+                Row(    Column(map_widgets.button_ratio_start_minus, map_widgets.button_ratio_start_plus, width=50),
                         map_widgets.range_slider_ratio,
-                        column(map_widgets.button_ratio_end_minus, map_widgets.button_ratio_end_plus)),
+                        Column(map_widgets.button_ratio_end_minus, map_widgets.button_ratio_end_plus)),
                 map_widgets.text_count,
-                map_widgets.filters_active)
+                map_widgets.filters_active,
+                p2)
 
-l = row(lhs, p, rhs)
+l = Row(lhs, p, rhs)
 
 curdoc().add_root(l)
 curdoc().title = "Tweet Spatial Analysis"
