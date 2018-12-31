@@ -1,11 +1,11 @@
 import logging.config
 import pandas as pd
-import numpy as np
 
 from bokeh.models import ColumnDataSource
 
 from analysis_utilities import *
 from shapely_utilities import *
+from histogram_utilities import *
 
 logger = logging.getLogger()
 
@@ -227,55 +227,15 @@ class TweetData:
 
 class MapTweetData:
 
-    def __init__(self, tweet_data, bins_count_text, bins_count=20):
+    def __init__(self, tweet_data, config):
         self.name = tweet_data.name
         print(self.name)
         self.tweet_data_df = tweet_data.df
 
-        # If bins is an int, it defines the number of equal-width bins in the given range (10, by default).
-        # If bins is a sequence, it defines the bin edges, including the rightmost edge, allowing for non-uniform bin widths.
-        hist, edges = np.histogram(self.tweet_data_df['count'], bins=bins_count)
-        print(hist)
-
-        bin_list_len = len(bins_count) - 1
-        bottom_list = [0] * bin_list_len
-        fill_color_list = ['red'] * bin_list_len
-        line_color_list = ['black'] * bin_list_len
-        id = [-1] * bin_list_len
-
-        data_histogram_cds = {
-            'bottom' : bottom_list,
-            'top' : hist,
-            'left' : edges[:-1],
-            'right' : edges[1:],
-            'fill_color' : fill_color_list,
-            'line_color' : line_color_list,
-            'bins_text' : bins_count_text,
-            'id' : id
-        }
-
-        self.df_histogram_cds = pd.DataFrame(data_histogram_cds)
-
-        hist, edges = np.histogram(self.tweet_data_df['area'], bins=50)
-        print(hist)
-
-        bin_list_len = len(hist)
-        bottom_list = [0] * bin_list_len
-        fill_color_list = ['red'] * bin_list_len
-        line_color_list = ['black'] * bin_list_len
-        id = [-1] * bin_list_len
-
-        data_histogram_area_cds = {
-            'bottom': bottom_list,
-            'top': hist,
-            'left': edges[:-1],
-            'right': edges[1:],
-            'fill_color': fill_color_list,
-            'line_color': line_color_list,
-            'id': id
-        }
-
-        self.df_histogram_area_cds = pd.DataFrame(data_histogram_area_cds)
+        self.histogram_count = HistogramData(self.tweet_data_df['count'], bins_text_list=config.bins_count_text, bins_list=config.bins_count)
+        self.histogram_area = HistogramData(self.tweet_data_df['area'], bins_list=100)
+        self.histogram_distance = HistogramData(self.tweet_data_df['distance'], bins_list=50)
+        self.histogram_ratio = HistogramData(self.tweet_data_df['ratio'], bins_text_list=config.bins_ratio_text, bins_list=config.bins_ratio)
 
     def clear_selected_circle(self):
         new_data = dict()
@@ -417,12 +377,13 @@ class FilterSettings:
         self.ratio_max_unbounded = config.ratio[1] - 1.0
         self.ratio_active = True
 
+
 class TweetDataController:
 
     def __init__(self, pre_processor, config, user_info):
-        self.all = MapTweetData(pre_processor.tweet_data_all, config.bins_count_text, config.bins_count)
-        self.working = MapTweetData(pre_processor.tweet_data_working, config.bins_count_text, config.bins_count)
-        self.non_working = MapTweetData(pre_processor.tweet_data_non_working, config.bins_count_text, config.bins_count)
+        self.all = MapTweetData(pre_processor.tweet_data_all, config)
+        self.working = MapTweetData(pre_processor.tweet_data_working, config)
+        self.non_working = MapTweetData(pre_processor.tweet_data_non_working, config)
         self.active_dataset = self.working
         self.blend_dataset = self.non_working
 
@@ -479,34 +440,15 @@ class TweetDataController:
         self.pdbr = None
         self.sr = None
         self.sbr = None
-        self.chr = None
-        self.chr2 = None
+        self.hr_count = None
+        self.hr_area = None
+        self.hr_distance = None
+        self.hr_ratio = None
 
-        self.histogram_cds = ColumnDataSource(data=dict(bottom=[], top=[], left=[], right=[], fill_color=[], line_color=[]))
-        self.histogram_cds.data = self.histogram_cds.from_df(self.active_dataset.df_histogram_cds)
-
-        self.hover_histogram_count_idx = ColumnDataSource(data=dict(idx=[]))
-        data_hover_histogram_count_idx = {
-            'idx': [-1]
-        }
-        df_hover_histogram_count_idx = pd.DataFrame(data_hover_histogram_count_idx)
-        self.hover_histogram_count_idx.data = self.hover_histogram_count_idx.from_df(df_hover_histogram_count_idx)
-
-        self.selected_count = ColumnDataSource(data=dict(x=[], y=[], idx=[]))
-        self.selected_count.on_change('data', self.selected_count_changed)
-
-        self.histogram_area_cds = ColumnDataSource(data=dict(bottom=[], top=[], left=[], right=[], fill_color=[], line_color=[]))
-        self.histogram_area_cds.data = self.histogram_area_cds.from_df(self.active_dataset.df_histogram_area_cds)
-
-        self.hover_histogram_area_idx = ColumnDataSource(data=dict(idx=[]))
-        data_hover_histogram_area_idx = {
-            'idx': [-1]
-        }
-        df_hover_histogram_area_idx = pd.DataFrame(data_hover_histogram_area_idx)
-        self.hover_histogram_area_idx.data = self.hover_histogram_area_idx.from_df(df_hover_histogram_area_idx)
-
-        self.selected_area = ColumnDataSource(data=dict(x=[], y=[], idx=[]))
-        self.selected_area.on_change('data', self.selected_area_changed)
+        self.histogram_controller_count = HistogramController(self.active_dataset.histogram_count.df_histogram_cds)
+        self.histogram_controller_area = HistogramController(self.active_dataset.histogram_area.df_histogram_cds)
+        self.histogram_controller_distance = HistogramController(self.active_dataset.histogram_distance.df_histogram_cds)
+        self.histogram_controller_ratio = HistogramController(self.active_dataset.histogram_ratio.df_histogram_cds)
 
     def find_id(self, id_value):
         print("Find: ID: " + str(id_value))
@@ -706,8 +648,10 @@ class TweetDataController:
 
     def update_histograms(self):
         print(self.active_dataset.name)
-        self.chr.data_source.data = self.histogram_cds.from_df(self.active_dataset.df_histogram_cds)
-
+        self.hr_count.data_source.data = self.histogram_controller_count.cds.from_df(self.active_dataset.histogram_count.df_histogram_cds)
+        self.hr_area.data_source.data = self.histogram_controller_area.cds.from_df(self.active_dataset.histogram_area.df_histogram_cds)
+        self.hr_distance.data_source.data = self.histogram_controller_distance.cds.from_df(self.active_dataset.histogram_distance.df_histogram_cds)
+        self.hr_ratio.data_source.data = self.histogram_controller_ratio.cds.from_df(self.active_dataset.histogram_ratio.df_histogram_cds)
 
     def switch_tweet_dataset(self, value):
         if value == 0:

@@ -117,34 +117,20 @@ def callback_tap(   hover_idx = tweet_data_controller.hover_idx,
 tap_tool = TapTool(callback = CustomJS.from_py_func(callback_tap), renderers=[circles_renderer])
 p.add_tools(hover_tool, tap_tool)
 
-p2 = figure(    plot_height = 300, plot_width = 600,
-                title = 'Number of Siblings within a Tweet Data Point',
-                x_axis_label = 'Number of Siblings',
-                y_axis_label = 'Tweets with Count',
-                tools=["pan,wheel_zoom"],)
 
-count_histogram_renderer = p2.quad( bottom='bottom',
-                                    top='top',
-                                    left='left',
-                                    right='right',
-                                    source = tweet_data_controller.histogram_cds,
-                                    fill_color='fill_color', line_color='line_color')
-
-histogram_count_dummy_renderer = p2.circle(x='x', y='y', source=tweet_data_controller.selected_count, fill_color='white', line_color=None, fill_alpha=0.0, size=1)
-
-tweet_data_controller.chr = count_histogram_renderer
-
-def callback_hover2(hhci = tweet_data_controller.hover_histogram_count_idx):
+def callback_hover_count(
+        hhci = tweet_data_controller.histogram_controller_count.hover_idx
+    ):
     indices = cb_data.index["1d"].indices
     if len(indices) > 0:
         print([indices[0]])
         hhci.data['idx'] = [indices[0]]
 
-hover_tool2 = HoverTool(tooltips=[('count', "@top"), ('bin', "@bins_text")], callback=CustomJS.from_py_func(callback_hover2), renderers=[count_histogram_renderer])
+def callback_tap_count(
+        hhci = tweet_data_controller.histogram_controller_count.hover_idx,
+        sc = tweet_data_controller.histogram_controller_count.selected
+    ):
 
-def callback_tap2(  hhci = tweet_data_controller.hover_histogram_count_idx,
-                    sc = tweet_data_controller.selected_count
-                    ):
     idx = hhci.data['idx']
 
     new_data = dict()
@@ -153,39 +139,25 @@ def callback_tap2(  hhci = tweet_data_controller.hover_histogram_count_idx,
     new_data['idx'] = [idx[0]]
     sc.data = new_data
 
-tap_tool2 = TapTool(callback = CustomJS.from_py_func(callback_tap2), renderers=[count_histogram_renderer])
-p2.add_tools(tap_tool2, hover_tool2)
+histogram_plot_count = HistogramPlot(tweet_data_controller.histogram_controller_count, callback_hover_count, callback_tap_count,
+                                     "Number of Siblings within a Tweet Data Point", "Number of Siblings", "Tweets with Count")
+tweet_data_controller.hr_count = histogram_plot_count.r
 
 
 
-p3 = figure(    plot_height = 300, plot_width = 600,
-                title = 'Area of SDE',
-                x_axis_label = 'Area',
-                y_axis_label = 'Count',
-                tools=["pan,wheel_zoom"],)
-
-area_histogram_renderer = p3.quad( bottom='bottom',
-                                    top='top',
-                                    left='left',
-                                    right='right',
-                                    source = tweet_data_controller.histogram_area_cds,
-                                    fill_color='fill_color', line_color='line_color')
-
-histogram_area_dummy_renderer = p3.circle(x='x', y='y', source=tweet_data_controller.selected_area, fill_color='white', line_color=None, fill_alpha=0.0, size=1)
-
-tweet_data_controller.chr2 = area_histogram_renderer
-
-def callback_hover3(hhci = tweet_data_controller.hover_histogram_area_idx):
+def callback_hover_area(
+        hhci = tweet_data_controller.histogram_controller_area.hover_idx
+    ):
     indices = cb_data.index["1d"].indices
     if len(indices) > 0:
         print([indices[0]])
         hhci.data['idx'] = [indices[0]]
 
-hover_tool3 = HoverTool(tooltips=[('count', "@top")], callback=CustomJS.from_py_func(callback_hover3), renderers=[area_histogram_renderer])
+def callback_tap_area(
+        hhci = tweet_data_controller.histogram_controller_area.hover_idx,
+        sc = tweet_data_controller.histogram_controller_area.selected
+    ):
 
-def callback_tap3(  hhci = tweet_data_controller.hover_histogram_area_idx,
-                    sc = tweet_data_controller.selected_area
-                    ):
     idx = hhci.data['idx']
 
     new_data = dict()
@@ -194,8 +166,58 @@ def callback_tap3(  hhci = tweet_data_controller.hover_histogram_area_idx,
     new_data['idx'] = [idx[0]]
     sc.data = new_data
 
-tap_tool3 = TapTool(callback = CustomJS.from_py_func(callback_tap3), renderers=[area_histogram_renderer])
-p3.add_tools(tap_tool3, hover_tool3)
+histogram_plot_area = HistogramPlot(tweet_data_controller.histogram_controller_area, callback_hover_area, callback_tap_area, "Area of SDE", "Area", "Count")
+tweet_data_controller.hr_area = histogram_plot_area.r
+
+
+def callback_hover_distance(
+        hhci = tweet_data_controller.histogram_controller_distance.hover_idx
+    ):
+    indices = cb_data.index["1d"].indices
+    if len(indices) > 0:
+        print([indices[0]])
+        hhci.data['idx'] = [indices[0]]
+
+def callback_tap_distance(
+        hhci = tweet_data_controller.histogram_controller_distance.hover_idx,
+        sc = tweet_data_controller.histogram_controller_distance.selected
+    ):
+
+    idx = hhci.data['idx']
+
+    new_data = dict()
+    new_data['x'] = [0]
+    new_data['y'] = [0]
+    new_data['idx'] = [idx[0]]
+    sc.data = new_data
+
+histogram_plot_distance = HistogramPlot(tweet_data_controller.histogram_controller_distance, callback_hover_distance, callback_tap_distance, "Distance between W and Non-W", "Distance", "Count")
+tweet_data_controller.hr_distance = histogram_plot_distance.r
+
+
+def callback_hover_ratio(
+        hhci = tweet_data_controller.histogram_controller_ratio.hover_idx
+    ):
+    indices = cb_data.index["1d"].indices
+    if len(indices) > 0:
+        print([indices[0]])
+        hhci.data['idx'] = [indices[0]]
+
+def callback_tap_ratio(
+        hhci = tweet_data_controller.histogram_controller_ratio.hover_idx,
+        sc = tweet_data_controller.histogram_controller_ratio.selected
+    ):
+
+    idx = hhci.data['idx']
+
+    new_data = dict()
+    new_data['x'] = [0]
+    new_data['y'] = [0]
+    new_data['idx'] = [idx[0]]
+    sc.data = new_data
+
+histogram_plot_ratio = HistogramPlot(tweet_data_controller.histogram_controller_ratio, callback_hover_ratio, callback_tap_ratio, "X/Y Ratio", "Ratio", "Count")
+tweet_data_controller.hr_ratio = histogram_plot_ratio.r
 
 
 def lod_start(ld = tweet_data_controller.lod_dummy):
@@ -273,12 +295,12 @@ filter_sliders \
                 map_widgets.filters_active)
 
 
-filter_histograms = Column(p2, p3)
+filter_histograms = Column(histogram_plot_count.p, histogram_plot_area.p, histogram_plot_distance.p, histogram_plot_ratio.p)
 
 tab_filter_sliders = Panel(child=filter_sliders, title="Filter by Sliders")
 tab_filter_histograms = Panel(child=filter_histograms, title="Filter by Histograms")
 
-tabs_rhs = Tabs(tabs = [tab_filter_sliders, tab_filter_histograms])
+tabs_rhs = Tabs(tabs = [tab_filter_sliders, tab_filter_histograms, ])
 
 l = Row(lhs, p, tabs_rhs)
 

@@ -19,9 +19,12 @@ class TweetSpatialAnalysisConfig:
         self.area = self.parse_range_str(config['RANGES']['area'])
         self.distance = self.parse_range_str(config['RANGES']['distance'])
         self.ratio = self.parse_range_str(config['RANGES']['ratio'])
+
         self.bins_count = self.parse_range_str(config['HISTOGRAMS']['bins_count'])
-        self.bins_count_text = []
-        self.create_bins_count_text()
+        self.bins_count_text = self.create_bins_text(self.bins_count)
+
+        self.bins_ratio = self.parse_range_str(config['HISTOGRAMS']['bins_ratio'])
+        self.bins_ratio_text = self.create_bins_text(self.bins_ratio)
 
     def parse_range_str(self, range_str):
         range_list = range_str.split()
@@ -32,21 +35,24 @@ class TweetSpatialAnalysisConfig:
 
         return range_list_floats
 
-    def create_bins_count_text(self):
-        for idx in range(0, len(self.bins_count) - 1):
+    def create_bins_text(self, bins_list):
+        bins_text = []
+        for idx in range(0, len(bins_list) - 1):
             #print(idx)
-            #print(len(self.bins_count))
-            if self.bins_count[idx + 1] - self.bins_count[idx] == 1:
-                self.bins_count_text.append(str(int(self.bins_count[idx])))
+            #print(len(bins_list))
+            if bins_list[idx + 1] - bins_list[idx] == 1:
+                bins_text.append(str(int(bins_list[idx])))
             else:
                 #print(str(int(self.bins_count[idx])))
                 #print(str(int(self.bins_count[idx + 1])))
-                if idx == len(self.bins_count) - 2:
-                    text = str(int(self.bins_count[idx])) + " - " + str(int(self.bins_count[idx + 1]))
+                if idx == len(bins_list) - 2:
+                    text = str(int(bins_list[idx])) + " - " + str(int(bins_list[idx + 1]))
                 else:
-                    text = str(int(self.bins_count[idx])) + " - " + str(int(self.bins_count[idx + 1] - 1))
+                    text = str(int(bins_list[idx])) + " - " + str(int(bins_list[idx + 1] - 1))
 
-                self.bins_count_text.append(text)
+                bins_text.append(text)
+
+        return bins_text
 
     def __str__(self):
         config_str = "TweetSpatialAnalysisConfig:\nFilename: " + str(self.filename)
@@ -60,6 +66,8 @@ class TweetSpatialAnalysisConfig:
         config_str += "\nHistograms:"
         config_str += "\nBins Count: " + str(self.bins_count)
         config_str += "\nBins Count Text: " + str(self.bins_count_text)
+        config_str += "\nBins Ratio: " + str(self.bins_ratio)
+        config_str += "\nBins Ratio Text: " + str(self.bins_ratio_text)
 
         return config_str
 

@@ -4,8 +4,7 @@ Working on since last commit:
 Tasks:
 Working on:
 InProgress: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: Started 20181218:
-InProgress: 084: Take another looking at adding tabs now that we have a figure for the count histogram: Added 20181231: Started 20181231:
-
+Done: 084: Take another looking at adding tabs now that we have a figure for the count histogram: Added 20181231: Started 20181231: Completed 20181231:
 
 Next Id: 085
 ToDo: 007: Consider some form of quad-tree pre optimization of data: Added 20181122
@@ -39,7 +38,6 @@ InProgress: 058: If nothing selected then reset Selected ID text: Added 20181208
 InProgress: 063: Consider some form of heat map for clustered tweet data points - representing density: Added 20181210: Started 20181210:
 InProgress: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: Started 20181218:
 InProgress: 068: Think about a map of overlapping SDEs - use grey scale + transparency - maybe convert patches to a raster: Added 20181211: Started 20181211:
-InProgress: 084: Take another looking at adding tabs now that we have a figure for the count histogram: Added 20181231: Started 20181231:
 
 
 Done: 001: Draw ellipse on selecting a user: Added 20181122: Started 20181122: Completed 20181126
@@ -95,7 +93,7 @@ Done: 077: Ratio min value can so -1.1 - add hack fix as with max value: Added 2
 Done: 078: Understand the datasets better wrt filters. Using 10,000 datapoints when I reset the filters to their minimum? Added 21081219: Started 20181219: Completed 20181219
 Done: 079: Adding progress printing to the console when pre-processing the datasets: Added 21081219: Started 20181219: Completed 20181219
 Done: 080: BBug: ValueError('Out of range float values are not JSON compliant') when pressing Toggle Siblings: ID: 1416678168: Added 20181219: Started 20181219: Completed 20181224:
-
+Done: 084: Take another looking at adding tabs now that we have a figure for the count histogram: Added 20181231: Started 20181231: Completed 20181231:
 
 OnGoing:
 
@@ -526,6 +524,10 @@ Add hover over the quads
 20181231: Consider putting the count histogram into a separate class?
 And a second histogram - SDE area.
 Second chart added. Need to look at creating 'histogram class'.
+Created Histogram Plot, Controller and Data classes. The JavaScript related callbacks for Hover and Tap have to be functions so are ecxplicitly defined rather than being in a class.
+Was able to add third 'distance' histogram in under five minutes.
+Remember that this only represents the distance between working and non-working so does NOT change when the dataset is changed.
+Added fourth ratio histogram.
 
 Done: 065: BBug with circle_renderer.selection_glyph and point 2429397887 - cheated by setting alpha to 0.0 to work: Added 20181211: Started 20181211: Completed 20181211
 Replicate:
@@ -587,6 +589,6 @@ ValueError('No Shapely geometry can be created from null value') which I assume 
 Use: 1416678168
 Caused by points having 'a' and 'b' values set to -1.0
 
-InProgress: 084: Take another looking at adding tabs now that we have a figure for the count histogram: Added 20181231: Started 20181231:
+Done: 084: Take another looking at adding tabs now that we have a figure for the count histogram: Added 20181231: Started 20181231: Completed 20181231:
 Followed https://bokeh.pydata.org/en/latest/docs/reference/models/widgets.panels.html and it worked.
 Successfully added a second histogram to the tab.
