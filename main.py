@@ -19,7 +19,8 @@ logger.info(tweet_spatial_analysis_config)
 pre_processor = TweetDataPreProcessing(None)
 pre_processor.read_from_json(   "Tweet-Spatial-Analysis/data/tweet_mean_all.json",
                                 "Tweet-Spatial-Analysis/data/tweets_median_working.json",
-                                "Tweet-Spatial-Analysis/data/tweets_median_non_working.json")
+                                "Tweet-Spatial-Analysis/data/tweets_median_non_working.json",
+                                tweet_spatial_analysis_config)
 
 file_open = FileOpen("Tweet-Spatial-Analysis/data", "user-info.csv")
 user_info = UserProfileDetails(file_open)
@@ -34,14 +35,18 @@ east_max, north_max = lon_lat_to_east_north(tweet_spatial_analysis_config.longit
 
 # Configuring Plot Tools: https://bokeh.pydata.org/en/latest/docs/user_guide/tools.html
 p = figure(plot_width=800, plot_height=800,
-           tools=["pan,wheel_zoom,save"],
+           tools=["pan, wheel_zoom"],
            x_range=Range1d(east_min, east_max), y_range=Range1d(north_min, north_max),
            title="Tweet Spatial Analysis", toolbar_location="above",
            output_backend="webgl",
-           lod_factor=10, lod_threshold=100)
+           lod_factor=10, lod_threshold=100,
+           x_axis_type="mercator", y_axis_type="mercator")
 p.add_tile(CARTODBPOSITRON)
+p.xaxis[0].axis_label = 'West - East: WSG 84 Web Mercator'
+p.yaxis[0].axis_label = 'South - North: WSG 84 Web Mercator'
 
 circles_renderer = p.circle(x='x', y='y', source=tweet_data_controller.circles, fill_color='color', line_color=None, fill_alpha=0.9, size=5)
+
 # There is either something I'm missing, or potentially a problem with bokeh:
 # Related to task 065: BBug with circle_renderer.selection_glyph and point 2429397887 - cheated by setting alpha to 0.0 to work:
 # To replicate: Find 2429397887, Switch to working, Switch back to all - erronous point appears with id 2429397887 ?
@@ -78,6 +83,13 @@ tweet_data_controller.pdr = patch_dissolve_renderer
 tweet_data_controller.pdbr = patch_dissolve_blend_renderer
 tweet_data_controller.sr = siblings_renderer
 tweet_data_controller.sbr = siblings_blend_renderer
+
+# Fake a Legend
+for idx in range(0, len(tweet_data_controller.histogram_controller_count.cds.data['fill_color'])):
+    legend_text = tweet_data_controller.histogram_controller_count.cds.data['bins_text'][idx]
+    legend_color = tweet_data_controller.histogram_controller_count.cds.data['fill_color'][idx]
+    p.circle(0, 0, legend=legend_text, fill_color=legend_color, alpha = 0.75, size = 1, line_color=None)
+p.legend.background_fill_alpha = 0.25
 
 # Causes:
 # Uncaught Error: reference {"id":"1005","type":"ColumnDataSource"} isn't known (not in Document?)

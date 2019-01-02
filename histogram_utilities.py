@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 
 from bokeh.models import ColumnDataSource, CustomJS, HoverTool, TapTool
+from bokeh.palettes import plasma
 from bokeh.plotting import figure
 
 
@@ -11,11 +12,12 @@ class HistogramData:
         # If bins is an int, it defines the number of equal-width bins in the given range (10, by default).
         # If bins is a sequence, it defines the bin edges, including the rightmost edge, allowing for non-uniform bin widths.
         hist, edges = np.histogram(data_df, bins=bins_list)
-        print(hist)
 
         bin_list_len = len(hist)
         bottom_list = [0] * bin_list_len
-        fill_color_list = ['red'] * bin_list_len
+        #fill_color_list = ['red'] * bin_list_len
+        fill_color_list = plasma(bin_list_len)
+        fill_color_list.reverse()
         line_color_list = ['black'] * bin_list_len
         id_list = [-1] * bin_list_len
 
@@ -72,7 +74,7 @@ class HistogramPlot:
                             title=title,
                             x_axis_label=x_axis_label,
                             y_axis_label=y_axis_label,
-                            tools=["pan,wheel_zoom"], )
+                            tools=["pan, wheel_zoom"], )
 
         self.r = self.p.quad(   bottom='bottom',
                                 top='top',

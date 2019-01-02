@@ -3,6 +3,8 @@ import logging
 import logging.config
 import numpy as np
 
+from bokeh.palettes import plasma
+
 from file_utilities import *
 from tweet_data import *
 
@@ -13,7 +15,7 @@ pd.options.display.max_rows = 999
 # Options and Settings: https://pandas.pydata.org/pandas-docs/stable/options.html
 
 num_of_rows_to_process = 10000
-# Defines as None to process all rows.
+# Define as None to process all rows.
 
 
 class TweetDataPreProcessing:
@@ -128,15 +130,32 @@ class TweetDataPreProcessing:
         logger.info("Processed.")
         print("Processed.")
 
-    def read_from_json(self, mean_all, working, non_working):
+    def process_color(self, tweet_data_df, config):
+
+        fill_color_list = plasma(len(config.bins_count))
+        fill_color_list.reverse()
+
+        for idx in range(0, tweet_data_df.shape[0]):
+            count = tweet_data_df['count'][idx]
+            for idx2 in range(0, len(config.bins_count)-1):
+                if count < config.bins_count[idx2]:
+                    tweet_data_df.loc[idx, 'color'] = fill_color_list[idx2 - 1]
+                    break
+                else:
+                    tweet_data_df.loc[idx, 'color'] = fill_color_list[idx2]
+
+    def read_from_json(self, mean_all, working, non_working, config):
         self.tweet_data_all = TweetData("all")
         self.tweet_data_all.read_from_json(mean_all)
+        self.process_color(self.tweet_data_all.df, config)
 
         self.tweet_data_working = TweetData("working")
         self.tweet_data_working.read_from_json(working)
+        self.process_color(self.tweet_data_working.df, config)
 
         self.tweet_data_non_working = TweetData("non-working")
         self.tweet_data_non_working.read_from_json(non_working)
+        self.process_color(self.tweet_data_non_working.df, config)
 
     def identify_rows_with_nan(self):
         logger.info("Identify rows with NaN values:")

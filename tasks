@@ -2,9 +2,14 @@ See: PEP 350 -- Codetags: https://www.python.org/dev/peps/pep-0350/
 
 Working on since last commit:
 Tasks:
+Completed:
+Done: 061: Add a legend for the 'sibling count' visualization: Added 20181209: Started 20190101: Completed 20190101
+Done: 072: Add scale to map and units to details for area Added 20181215: Started 20190101: Completed 20190101
+
 Working on:
+InProgress: 050: Add a colour palette to represent sibling count: Added 20181206: Started 20181207:
 InProgress: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: Started 20181218:
-Done: 084: Take another looking at adding tabs now that we have a figure for the count histogram: Added 20181231: Started 20181231: Completed 20181231:
+
 
 Next Id: 085
 ToDo: 007: Consider some form of quad-tree pre optimization of data: Added 20181122
@@ -17,9 +22,7 @@ ToDo: 037: If a data point has no siblings de-active the siblings and dissolve t
 ToDo: 041: After implementing the dissolve functionality, consider adding 'intersection': Added 20181203: 
 ToDo: 043: Consider using Bokeh's DataTable to provide a way to list the siblings within a selected datapoint's ellipse.  Added 20181203
 ToDo: 059: Sibling data points are not selected-able nor have a hover tooltip: Added 20181208:
-ToDo: 061: Add a legend for the 'sibling count' visualization: Added 20181209:
 ToDo: 069: Think about create some form of point density - can this relate to the spatial index? Added 20181211:
-ToDo: 072: Add scale to map and units to details for area Added 20181215:
 ToDo: 081: When blend is on, the blends disappear when the filter is changed? When blend then toggled, only the active data set is then shown. Need to toggle ellipse for both to re-appear. Added 20181224:
 ToDo: 082: Take another look at Uncaught Error: reference {"id":"1004","type":"ColumnDataSource"} isn't known (not in Document?)
 ToDo: 083: Look at pre-processing the dissolve area to be able to filter on this: Added 20181231:
@@ -79,12 +82,14 @@ Done: 053: Add a slide for distance between working and non working: Added 20181
 Done: 055: When changing datasets, re-apply the count filter: Added 20181208: Started 20181208: Completed 20181208
 Done: 057: Add numerical count and %s respect to number of points for each slider: Added 20181208: Started 20181208: Completed 20181208
 Done: 060: Consider adding text input for the sliders. For example unable to explicit slide to '1': Added 20181208: Started 20181211: Completed 20181211
+Done: 061: Add a legend for the 'sibling count' visualization: Added 20181209: Started 20190101: Completed 20190101
 Done: 062: Create a 'global configuration' that can be loaded at runtime - including details generated from the preprocessing stage: Added 20181209: Started 20181219: Completed 20181224:
 Done: 065: BBug with circle_renderer.selection_glyph and point 2429397887 - cheated by setting alpha to 0.0 to work: Added 20181211: Started 20181211: Completed 20181211
 Done: 066: Choose different color for the find circle to contrast from other points better: Added 20181211: Stated 20181211: Completed 20181211
 Done: 067: Create a Git repo around the first version: Added 20181211: Started 20181211: Completed 20181211
 Done: 070: Restructure code to use a controller to interface from the widgets to the data: Added 20181212: Started 20181212: Completed 20181212
 Done: 071: Can I dynamically update user info: Added 20181215: Started 20181215: Completed 20181215:
+Done: 072: Add scale to map and units to details for area Added 20181215: Started 20190101: Completed 20190101
 Done: 073: Consider showing area/count for both working and non-working together: Added 20181217: Started 20181217: Completed 20181217
 Done: 074: BBug: Sibling ellipses not being cleared when toggle blend turned off: Added 20181217: Started 20181217: Completed 20181217
 Done: 075: BBug: IndexError: Added 20181217: Started Added 20181217: Completed 20181217: Reopened 20181217: Completed 20181218
@@ -450,7 +455,12 @@ Finish this task and focus on 064.
 
 InProgress: 050: Add a colour palette to represent sibling count: Added 20181206: Started 20181207:
 Tried a linear colour scheme and a 1.0 - 1.0/(1.0 + count) version.
-There is prodominently a high grouping between 0 and the low 10s - maybe create a more tailed palette that specifically bins the palette?
+There is predominently a high grouping between 0 and the low 10s - maybe create a more tailed palette that specifically bins the palette?
+20181231: Using the palettes and functionality defined in: https://bokeh.pydata.org/en/latest/docs/reference/palettes.html#bokeh-palettes
+Start with the histograms.
+20190101: Is it worth considering having a separate colour for when count is 0?
+Added 'Perceptualy Uniform Sequential colormaps' plasma palette.
+Need to move the color definition for each point to the pre-processing stage.
 
 Done: 051: On changing the sibling count slider, clear all selections: Added 2081207: Started 20181207: Completed 20181208
 Appears to be working.
@@ -499,6 +509,10 @@ Add buttons either side of the slider with '-' and '+' to add 1 to the current s
 Added buttons to the count slider as we need the +-1 precision when selecting. Do we need the same level of precision for the area slider?
 Lets say yes, as we do have tweets with an area of -1, so it might be useful to view areas from say -100 to 0 - again difficult to get this level of precision just with a slide.
 
+Done: 061: Add a legend for the 'sibling count' visualization: Added 20181209: Started 20190101: Completed 20190101
+Created a 'fake' legend using the histogram count data.
+Currently a title can not be added to the legend.
+
 InProgress: 063: Consider some form of heat map for clustered tweet data points - representing density: Added 20181210: Started 20181210: 
 Related to task 032
 Influenced by:
@@ -528,6 +542,7 @@ Created Histogram Plot, Controller and Data classes. The JavaScript related call
 Was able to add third 'distance' histogram in under five minutes.
 Remember that this only represents the distance between working and non-working so does NOT change when the dataset is changed.
 Added fourth ratio histogram.
+20190101: Still need to add filter by functionality.
 
 Done: 065: BBug with circle_renderer.selection_glyph and point 2429397887 - cheated by setting alpha to 0.0 to work: Added 20181211: Started 20181211: Completed 20181211
 Replicate:
@@ -560,6 +575,10 @@ Consider displaying the area and number of siblings as well - although these wil
 Also, why do I need separate widgets for these? Can I just not now use a single one?
 Modified to use a single Div that also allows text formatting such as new line <br> and bold <b>.
 Added area and count. Updated when changing datasets.
+
+Done: 072: Add scale to map and units to details for area Added 20181215: Started 20190101: Completed 20190101
+Add axis labels and projection: epsg:3857: WSG 84 Web Mercator
+Added axis labels
 
 Done: 075: BBug: IndexError: Added 20181217: Started Added 20181217: Completed 20181217: Reopened 20181217: Completed 20181218
 Browser Console: [bokeh] Unhandled ERROR reply to AC220859020043EE93948406B9B81461: IndexError('index 0 is out of bounds for axis 0 with size 0')
