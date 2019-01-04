@@ -87,8 +87,9 @@ class HistogramPlot:
                                         source=self.histogram_controller.selected,
                                         fill_color='white', line_color=None, fill_alpha=0.0, size=1)
 
-        hover_tool = HoverTool(tooltips=[('count', "@top"), ('bin', "@bins_text")],
-                                callback=CustomJS.from_py_func(callback_hover), renderers=[self.r])
+        hover_tool = HoverTool( tooltips=[('count', "@top"), ('bin', "@bins_text")],
+                                callback=CustomJS.from_py_func(callback_hover), renderers=[self.r],
+                                point_policy = "follow_mouse")
 
         tap_tool = TapTool(callback=CustomJS.from_py_func(callback_tap), renderers=[self.r])
         self.p.add_tools(tap_tool, hover_tool)

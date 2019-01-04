@@ -3,15 +3,14 @@ See: PEP 350 -- Codetags: https://www.python.org/dev/peps/pep-0350/
 Working on since last commit:
 Tasks:
 Completed:
-Done: 061: Add a legend for the 'sibling count' visualization: Added 20181209: Started 20190101: Completed 20190101
-Done: 072: Add scale to map and units to details for area Added 20181215: Started 20190101: Completed 20190101
+085: Can I get the hover data to follow the mouse? On histograms the info can always be seen:
 
 Working on:
-InProgress: 050: Add a colour palette to represent sibling count: Added 20181206: Started 20181207:
-InProgress: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: Started 20181218:
+050: Add a colour palette to represent sibling count:
+064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins:
 
 
-Next Id: 085
+Next Id: 086
 ToDo: 007: Consider some form of quad-tree pre optimization of data: Added 20181122
 ToDo: 009: Assess the use of CustomJSHover: https://bokeh.pydata.org/en/latest/docs/reference/models/tools.html#: Added 20181122:
 ToDo: 013: Can I add a main to the main.py file?
@@ -99,6 +98,7 @@ Done: 078: Understand the datasets better wrt filters. Using 10,000 datapoints w
 Done: 079: Adding progress printing to the console when pre-processing the datasets: Added 21081219: Started 20181219: Completed 20181219
 Done: 080: BBug: ValueError('Out of range float values are not JSON compliant') when pressing Toggle Siblings: ID: 1416678168: Added 20181219: Started 20181219: Completed 20181224:
 Done: 084: Take another looking at adding tabs now that we have a figure for the count histogram: Added 20181231: Started 20181231: Completed 20181231:
+Done: 085: Can I get the hover data to follow the mouse? On histograms the info can always be seen: Added 20190102: Started 20190102: Completed 20190102:
 
 OnGoing:
 
@@ -611,3 +611,7 @@ Caused by points having 'a' and 'b' values set to -1.0
 Done: 084: Take another looking at adding tabs now that we have a figure for the count histogram: Added 20181231: Started 20181231: Completed 20181231:
 Followed https://bokeh.pydata.org/en/latest/docs/reference/models/widgets.panels.html and it worked.
 Successfully added a second histogram to the tab.
+
+Done: 085: Can I get the hover data to follow the mouse? On histograms the info can always be seen: Added 20190102: Started 20190102: Completed 20190102:
+Try using the point_policy for the HoverTool.
+This worked.
