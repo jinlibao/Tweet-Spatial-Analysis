@@ -321,7 +321,7 @@ class MapTweetData:
         return new_data
 
     def update_sde_ellipse(self, circle_idx, alpha = 0.5):
-        print("Update SDE Ellipse: " + str(circle_idx) + " : alpha: " + str(alpha))
+        #print("Update SDE Ellipse: " + str(circle_idx) + " : alpha: " + str(alpha))
         new_data = dict()
         new_data['x'] = [self.tweet_data_df['x'][circle_idx]]
         new_data['y'] = [self.tweet_data_df['y'][circle_idx]]
@@ -337,8 +337,7 @@ class MapTweetData:
         return new_data
 
     def update_siblings(self, id):
-        print("Update Siblings: " + str(id))
-
+        #print("Update Siblings: " + str(id))
         new_data = dict()
         new_data['x'] = []
         new_data['y'] = []
@@ -359,8 +358,7 @@ class MapTweetData:
         return new_data
 
     def update_sibling_ellipses(self, id):
-        print("Update Sibling Ellipses: " + str(id))
-
+        #print("Update Sibling Ellipses: " + str(id))
         new_data = dict()
         new_data['x'] = []
         new_data['y'] = []
@@ -385,9 +383,8 @@ class MapTweetData:
         return new_data
 
     def update_dissolve(self, id):
-        print("Update Dissolve: " + str(id))
+        #print("Update Dissolve: " + str(id))
         dissolve_data = self.sibling_data_manager.get_dissolve(id)
-        #print(dissolve_data)
         new_data = dict()
         new_data['x'] = dissolve_data['x']
         new_data['y'] = dissolve_data['y']
@@ -582,6 +579,7 @@ class TweetDataController:
         if self.circle_id > -1:
             id_df = self.active_dataset.tweet_data_df.loc[self.active_dataset.tweet_data_df['id'] == self.circle_id]
             self.circle_idx = id_df.index[0]
+            print("Selected Circle Change: " + str(self.circle_id) + " : " + str(self.circle_idx))
 
             area_working = self.working.tweet_data_df['area'][self.circle_idx]
             count_working = self.working.tweet_data_df['count'][self.circle_idx]
@@ -590,8 +588,6 @@ class TweetDataController:
             count_non_working = self.non_working.tweet_data_df['count'][self.circle_idx]
             ratio_non_working = self.non_working.tweet_data_df['ratio'][self.circle_idx]
             distance = self.working.tweet_data_df['distance'][self.circle_idx]
-
-            print("Selected Circle Change: idx: " + str(self.circle_idx))
 
             username, profile_text = self.user_info.find_user_profile(int(self.circle_id))
             details_str = "<b>Selected ID</b>: " + str(self.circle_id) + "<br/>"
@@ -643,7 +639,7 @@ class TweetDataController:
             self.siblings_blend.data = self.blend_dataset.clear_siblings()
 
     def update_siblings(self):
-        print("Update Siblings: " + str(self.circle_idx))
+        print("Update Siblings: " + str(self.circle_id) + " : " + str(self.circle_idx))
         if self.circle_idx > -1:
             self.siblings.data = self.active_dataset.update_siblings(self.circle_id)
             if self.blend_active:
@@ -656,7 +652,7 @@ class TweetDataController:
             self.sibling_ellipses_blend.data = self.blend_dataset.clear_sibling_ellipses()
 
     def update_sibling_ellipses(self):
-        print("Update Sibling Ellipses: " + str(self.circle_idx))
+        print("Update Sibling Ellipses: " + str(self.circle_id) + " : " + str(self.circle_idx))
         if self.circle_idx > -1:
             self.sibling_ellipses.data = self.active_dataset.update_sibling_ellipses(self.circle_id)
             if self.blend_active:
@@ -669,7 +665,7 @@ class TweetDataController:
             self.patch_dissolve_blend.data = self.blend_dataset.clear_dissolve()
 
     def update_dissolve(self):
-        print("Update Dissolve: " + str(self.circle_idx))
+        print("Update Dissolve: " + str(self.circle_id) + " : " + str(self.circle_idx))
         if self.circle_idx > -1:
             self.patch_dissolve.data = self.active_dataset.update_dissolve(self.circle_id)
             if self.blend_active:

@@ -104,14 +104,14 @@ class MapWidgets:
         self.update_text_count()
 
     def toggle_data_callback(self, arg):
-        print("Toggle Data: Callback:")
+        #print("Toggle Data: Callback:")
         if arg:
             self.tweet_data_controller.toggle_data(True)
         else:
             self.tweet_data_controller.toggle_data(False)
 
     def toggle_sde_ellipse_callback(self, arg):
-        print("Toggle Ellipse: Callback: " + str(self.tweet_data_controller.circle_id) + " : " + str(self.tweet_data_controller.circle_idx))
+        #print("Toggle Ellipse: Callback: " + str(self.tweet_data_controller.circle_id) + " : " + str(self.tweet_data_controller.circle_idx))
         if arg:
             self.tweet_data_controller.update_sde_ellipse()
             self.tweet_data_controller.update_siblings()
@@ -126,7 +126,7 @@ class MapWidgets:
             self.tweet_data_controller.clear_sibling_ellipses()
 
     def toggle_dissolve_callback(self, arg):
-        print("Toggle Dissolve: Callback: " + str(self.tweet_data_controller.circle_id) + " : " + str(self.tweet_data_controller.circle_idx))
+        #print("Toggle Dissolve: Callback: " + str(self.tweet_data_controller.circle_id) + " : " + str(self.tweet_data_controller.circle_idx))
         if arg:
             self.tweet_data_controller.update_dissolve()
         else:
@@ -501,7 +501,7 @@ class MapWidgets:
         self.update_text_count()
 
     def toggle_blend_callback(self, arg):
-        print("Toggle Blend: Callback: " + str(self.tweet_data_controller.circle_id) + " : " + str(self.tweet_data_controller.circle_idx))
+        #print("Toggle Blend: Callback: " + str(self.tweet_data_controller.circle_id) + " : " + str(self.tweet_data_controller.circle_idx))
         if arg:
             self.tweet_data_controller.turn_blend_on(self.toggle_sde_ellipse.active, self.toggle_sibling_ellipses.active, self.toggle_dissolve.active)
             self.slider_blend.disabled = False

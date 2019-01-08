@@ -70,7 +70,7 @@ sibling_ellipses_blend_renderer = p.ellipse(x='x', y='y', width='width', height=
 siblings_blend_renderer = p.circle(x='x', y='y', source=tweet_data_controller.siblings_blend, fill_color="orange", line_color="orange", fill_alpha=0.8, size=3)
 selected_circle_blend_renderer = p.circle(x='x', y='y', source=tweet_data_controller.selected_circle_blend, fill_color="indigo", line_color=None, fill_alpha=1, size=5)
 
-find_circle_renderer = p.circle(x='x', y='y', source=tweet_data_controller.find_circle, line_color="#410967", fill_color="orange", fill_alpha=0.0, size=15)
+find_circle_renderer = p.circle(x='x', y='y', source=tweet_data_controller.find_circle, line_color="darkgreen", fill_color="orange", line_alpha=1.0, fill_alpha=0.0, size=15, line_width=2)
 
 tweet_data_controller.cr = circles_renderer
 tweet_data_controller.csr = selected_circle_renderer

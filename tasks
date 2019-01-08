@@ -3,11 +3,7 @@ See: PEP 350 -- Codetags: https://www.python.org/dev/peps/pep-0350/
 Working on since last commit:
 Tasks:
 Completed:
-091: Make folder to sibling data absolute, rather than local: Added 20190107:
-056: Consider potentially pre-processing dissolve area so the map can be filtered on that:
-083: Look at pre-processing the dissolve area to be able to filter on this:
-086: Explore putting the ids/idxs data pointing to siblings in a separate database:
-089: Look at time to start up with 10K points:
+088: Change the 'Find ID' circle colour. Difficult to view against plasma palette. Maybe change order of draw.
 
 Working on:
 050: Add a colour palette to represent sibling count:
@@ -29,7 +25,6 @@ ToDo: 069: Think about create some form of point density - can this relate to th
 ToDo: 081: When blend is on, the blends disappear when the filter is changed? When blend then toggled, only the active data set is then shown. Need to toggle ellipse for both to re-appear. Added 20181224:
 ToDo: 082: Take another look at Uncaught Error: reference {"id":"1004","type":"ColumnDataSource"} isn't known (not in Document?)
 ToDo: 087: 'Find ID' appears to not be properly working across the data sets? Look ar IDs where no area: Added 20190106
-ToDo: 088: Change the 'Find ID' circle colour. Difficult to view against plasma palette. Maybe change order of draw. Added 20190106
 ToDo: 090: Need to modify the colours when blending to distinguish datasets: Added 20190106
 ToDo: 092: Consider preprocessing defaults. Maybe set area/dissolve to 0 rather than -1: Added 20190106
 
@@ -106,6 +101,7 @@ Done: 083: Look at pre-processing the dissolve area to be able to filter on this
 Done: 084: Take another looking at adding tabs now that we have a figure for the count histogram: Added 20181231: Started 20181231: Completed 20181231
 Done: 085: Can I get the hover data to follow the mouse? On histograms the info can always be seen: Added 20190102: Started 20190102: Completed 20190102
 Done: 086: Explore putting the ids/idxs data pointing to siblings in a separate database: Added 20190105: Started 20190105: Completed 20190107
+Done: 088: Change the 'Find ID' circle colour. Difficult to view against plasma palette. Maybe change order of draw. Added 20190106: Started 20190107: Completed 20190107
 Done: 089: Look at time to start up with 10K points: Added 20190106: Started 20190107: Completed 20190107
 Done: 091: Make folder to sibling data absolute, rather than local: Added 20190107: Started 20190107: Completed 20190107
 
@@ -655,6 +651,10 @@ Do I put this in TweetDataController, or deeper into the MapTweetData?
 The current architecture leaves the update of the siblings at the TweetData level - follow a similar implementation - so the latter.
 Initial tests using 10K points appear promising regards panning/zooming and filter.
 20190107 Further tests appear good. Consider complete and open up another tasks if errors/problems appear.
+
+Done: 088: Change the 'Find ID' circle colour. Difficult to view against plasma palette. Maybe change order of draw. Added 20190106: Started 20190107: Completed 20190107
+CHnaged colour to darkgreen and line width of 2
+It's already drawn last, so should be on top of all other rendering.
 
 Done: 089: Look at time to start up with 10K points: Added 20190106: Started 20190107: Completed 20190107
 Slow startup time caused by re-calculating the colour on start up. Removed this, as it will be put in the pipeline before start up.
