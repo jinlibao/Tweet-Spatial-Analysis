@@ -1,9 +1,12 @@
+import json
 import logging.config
+
 import pandas as pd
 
 from bokeh.models import ColumnDataSource
 
 from analysis_utilities import *
+from file_utilities import *
 from shapely_utilities import *
 from histogram_utilities import *
 
@@ -96,14 +99,14 @@ class TweetData:
         logger.info("\n%s", self.df.head())
 
     def find_datapoints_enclosed_with_ellipse(self):
-        logger.info("Find Datapoints Enclosed within Ellipse.")
-        print("Find Datapoints Enclosed within Ellipse.")
+        logger.info("Find Datapoints Enclosed within Ellipse and Dissolve.")
+        print("Find Datapoints Enclosed within Ellipse and Dissolve.")
         row_idx = 0
         counts = []
-        grouped_ids_list = []
-        grouped_idxs_list = []
+        dissolves = []
 
         for row in self.df.itertuples():
+            siblings_data = dict()
             selected_point_id = row.id
             xo = row.x
             yo = row.y
@@ -123,8 +126,23 @@ class TweetData:
 
             count = len(grouped_ids)
             counts.append(count)
-            grouped_ids_list.append(grouped_ids)
-            grouped_idxs_list.append(grouped_idxs)
+
+            dissolve_data = self.create_dissolve(selected_point_id, row_idx, grouped_idxs)
+            dissolves.append(dissolve_data['area'])
+
+            siblings_data['id'] = selected_point_id
+            siblings_data['idx'] = row_idx
+            siblings_data['count'] = count
+            siblings_data['count'] = count
+            siblings_data['ids'] = grouped_ids
+            siblings_data['idxs'] = grouped_idxs
+            siblings_data['dissolve'] = dissolve_data
+            #print(siblings_data)
+
+            #filename = self.name + "_" + str(selected_point_id) + "_" + str(row_idx) + ".json"
+            filename = self.name + "_" + str(selected_point_id) + ".json"
+            with open("sibling_data/" + filename, 'w') as fp:
+                json.dump(siblings_data, fp)
 
             if count > self.max_count:
                 self.max_count = count
@@ -134,10 +152,45 @@ class TweetData:
 
         print("")
         self.df['count'] = counts
-        self.df['ids'] = grouped_ids_list
-        self.df['idxs'] = grouped_idxs_list
+        self.df['dissolve_area'] = dissolves
 
-        logger.info("\n%s", self.df.head())
+    def create_dissolve(self, id, idx, grouped_idxs):
+        #print("Create Dissolve: " + str(circle_idx))
+        #print(self.tweet_data_df['idxs'][circle_idx])
+        ellipses = dict()
+        ellipses['x'] = []
+        ellipses['y'] = []
+        ellipses['a'] = []
+        ellipses['b'] = []
+        ellipses['angle'] = []
+        for row_idx in grouped_idxs:
+            if self.df['a'][row_idx] > 0.0:
+                ellipses['x'].append(self.df['x'][row_idx])
+                ellipses['y'].append(self.df['y'][row_idx])
+                ellipses['a'].append(self.df['a'][row_idx])
+                ellipses['b'].append(self.df['b'][row_idx])
+                ellipses['angle'].append(self.df['angle'][row_idx])
+
+        # Need to remember to include the datapoints own ellipse details. Otherwise the following error occurs:
+        # AttributeError("'MultiPolygon' object has no attribute 'exterior'")
+        # Probably caused by the sibling ellipses NOT overlapping i.e. separate.
+        if self.df['a'][idx] > 0.0:
+            ellipses['x'].append(self.df['x'][idx])
+            ellipses['y'].append(self.df['y'][idx])
+            ellipses['a'].append(self.df['a'][idx])
+            ellipses['b'].append(self.df['b'][idx])
+            ellipses['angle'].append(self.df['angle'][idx])
+
+        if any(ellipses['x']):
+            new_data = dissolve_ellipses(ellipses)
+        else:
+            new_data = dict()
+            new_data['x'] = []
+            new_data['y'] = []
+            new_data['area'] = 0.0
+            logger.warning("Empty Ellipses: Point ID: %s : a:%s : b:%s : angle:%s : IDXs", id, self.df['a'][idx], self.df['b'][idx], self.df['angle'][idx], str(grouped_idxs))
+
+        return new_data
 
     def calculate_colour(self):
         logger.info("Calculating Color.")
@@ -186,7 +239,7 @@ class TweetData:
         self.df['color'] = colours
 
     # Using the x/y ratio and area calculate the major and minor axes for the ellipse.
-    # If the area is 0.0 or -1, then we can not cacluate these values
+    # If the area is 0.0 or -1, then we can not calculate these values
     def calculate_ellipse_properties(self, row_id, idx, area, xy_ratio):
         # Remember: Viewing the data in excel or notepad++, the first row is the headers, and the row count starts from 1
         # So, where the pandas index starts from 0, the starting row in excel or notepad++ is actually 2.
@@ -236,6 +289,9 @@ class MapTweetData:
         self.histogram_area = HistogramData(self.tweet_data_df['area'], bins_list=100)
         self.histogram_distance = HistogramData(self.tweet_data_df['distance'], bins_list=50)
         self.histogram_ratio = HistogramData(self.tweet_data_df['ratio'], bins_text_list=config.bins_ratio_text, bins_list=config.bins_ratio)
+        self.histogram_dissolve = HistogramData(self.tweet_data_df['dissolve_area'], bins_list=100)
+
+        self.sibling_data_manager = SiblingDataManager(config.sibling_data_folder, self.name)
 
     def clear_selected_circle(self):
         new_data = dict()
@@ -280,13 +336,15 @@ class MapTweetData:
         new_data['y'] = []
         return new_data
 
-    def update_siblings(self, circle_idx):
-        print("Update Siblings: " + str(circle_idx))
-        #print(str(circle_idx) + " : " + str(self.tweet_data_df['idxs'][circle_idx]))
+    def update_siblings(self, id):
+        print("Update Siblings: " + str(id))
+
         new_data = dict()
         new_data['x'] = []
         new_data['y'] = []
-        for row_idx in self.tweet_data_df['idxs'][circle_idx]:
+
+        idxs_list = self.sibling_data_manager.get_sibling_idxs(id)
+        for row_idx in idxs_list:
             new_data['x'].append(self.tweet_data_df['x'][row_idx])
             new_data['y'].append(self.tweet_data_df['y'][row_idx])
         return new_data
@@ -300,16 +358,18 @@ class MapTweetData:
         new_data['angle'] = []
         return new_data
 
-    def update_sibling_ellipses(self, circle_idx):
-        print("Update Sibling Ellipses: " + str(circle_idx))
-        #print(self.tweet_data_df['idxs'][circle_idx])
+    def update_sibling_ellipses(self, id):
+        print("Update Sibling Ellipses: " + str(id))
+
         new_data = dict()
         new_data['x'] = []
         new_data['y'] = []
         new_data['width'] = []
         new_data['height'] = []
         new_data['angle'] = []
-        for row_idx in self.tweet_data_df['idxs'][circle_idx]:
+
+        idxs_list = self.sibling_data_manager.get_sibling_idxs(id)
+        for row_idx in idxs_list:
             if self.tweet_data_df['a'][row_idx] > 0.0:
                 new_data['x'].append(self.tweet_data_df['x'][row_idx])
                 new_data['y'].append(self.tweet_data_df['y'][row_idx])
@@ -324,34 +384,13 @@ class MapTweetData:
         new_data['y'] = []
         return new_data
 
-    def update_dissolve(self, circle_idx):
-        print("Update Dissolve: " + str(circle_idx))
-        #print(self.tweet_data_df['idxs'][circle_idx])
-        ellipses = dict()
-        ellipses['x'] = []
-        ellipses['y'] = []
-        ellipses['a'] = []
-        ellipses['b'] = []
-        ellipses['angle'] = []
-        for row_idx in self.tweet_data_df['idxs'][circle_idx]:
-            if self.tweet_data_df['a'][row_idx] > 0.0:
-                ellipses['x'].append(self.tweet_data_df['x'][row_idx])
-                ellipses['y'].append(self.tweet_data_df['y'][row_idx])
-                ellipses['a'].append(self.tweet_data_df['a'][row_idx])
-                ellipses['b'].append(self.tweet_data_df['b'][row_idx])
-                ellipses['angle'].append(self.tweet_data_df['angle'][row_idx])
-
-        # Need to remember to include the datapoints own ellipse details. Otherwise the following error occurs:
-        # AttributeError("'MultiPolygon' object has no attribute 'exterior'")
-        # Probably caused by the sibling ellipses NOT overlapping i.e. separate.
-        ellipses['x'].append(self.tweet_data_df['x'][circle_idx])
-        ellipses['y'].append(self.tweet_data_df['y'][circle_idx])
-        ellipses['a'].append(self.tweet_data_df['a'][circle_idx])
-        ellipses['b'].append(self.tweet_data_df['b'][circle_idx])
-        ellipses['angle'].append(self.tweet_data_df['angle'][circle_idx])
-
+    def update_dissolve(self, id):
+        print("Update Dissolve: " + str(id))
+        dissolve_data = self.sibling_data_manager.get_dissolve(id)
+        #print(dissolve_data)
         new_data = dict()
-        new_data['x'], new_data['y'] = dissolve_ellipses(ellipses)
+        new_data['x'] = dissolve_data['x']
+        new_data['y'] = dissolve_data['y']
         return new_data
 
     def update_find_circle(self, find_circle_idx):
@@ -359,6 +398,7 @@ class MapTweetData:
         new_data['x'] = [self.tweet_data_df['x'][find_circle_idx]]
         new_data['y'] = [self.tweet_data_df['y'][find_circle_idx]]
         return new_data
+
 
 class FilterSettings:
 
@@ -376,7 +416,9 @@ class FilterSettings:
         self.ratio_end = config.ratio[1]
         self.ratio_max_unbounded = config.ratio[1] - 1.0
         self.ratio_active = True
-
+        self.dissolve_start = config.dissolve[0]
+        self.dissolve_end = config.dissolve[1]
+        self.dissolve_active = True
 
 class TweetDataController:
 
@@ -444,11 +486,13 @@ class TweetDataController:
         self.hr_area = None
         self.hr_distance = None
         self.hr_ratio = None
+        self.hr_dissolve = None
 
         self.histogram_controller_count = HistogramController(self.active_dataset.histogram_count.df_histogram_cds)
         self.histogram_controller_area = HistogramController(self.active_dataset.histogram_area.df_histogram_cds)
         self.histogram_controller_distance = HistogramController(self.active_dataset.histogram_distance.df_histogram_cds)
         self.histogram_controller_ratio = HistogramController(self.active_dataset.histogram_ratio.df_histogram_cds)
+        self.histogram_controller_dissolve = HistogramController(self.active_dataset.histogram_dissolve.df_histogram_cds)
 
     def find_id(self, id_value):
         print("Find: ID: " + str(id_value))
@@ -510,6 +554,10 @@ class TweetDataController:
         if len(new['id']) > 0:
             self.circle_id = new['id'][0]
             print("Selected Circle Change: id: " + str(self.circle_id))
+
+            self.working.sibling_data_manager.get_sibling_data(self.circle_id)
+            self.non_working.sibling_data_manager.get_sibling_data(self.circle_id)
+
             self.update_selection_details()
 
             if self.blend_dataset is not None:
@@ -597,10 +645,10 @@ class TweetDataController:
     def update_siblings(self):
         print("Update Siblings: " + str(self.circle_idx))
         if self.circle_idx > -1:
-            self.siblings.data = self.active_dataset.update_siblings(self.circle_idx)
+            self.siblings.data = self.active_dataset.update_siblings(self.circle_id)
             if self.blend_active:
                 if self.blend_dataset is not None:
-                    self.siblings_blend.data = self.blend_dataset.update_siblings(self.circle_idx)
+                    self.siblings_blend.data = self.blend_dataset.update_siblings(self.circle_id)
 
     def clear_sibling_ellipses(self):
         self.sibling_ellipses.data = self.active_dataset.clear_sibling_ellipses()
@@ -610,10 +658,10 @@ class TweetDataController:
     def update_sibling_ellipses(self):
         print("Update Sibling Ellipses: " + str(self.circle_idx))
         if self.circle_idx > -1:
-            self.sibling_ellipses.data = self.active_dataset.update_sibling_ellipses(self.circle_idx)
+            self.sibling_ellipses.data = self.active_dataset.update_sibling_ellipses(self.circle_id)
             if self.blend_active:
                 if self.blend_dataset is not None:
-                    self.sibling_ellipses_blend.data = self.blend_dataset.update_sibling_ellipses(self.circle_idx)
+                    self.sibling_ellipses_blend.data = self.blend_dataset.update_sibling_ellipses(self.circle_id)
 
     def clear_dissolve(self):
         self.patch_dissolve.data = self.active_dataset.clear_dissolve()
@@ -623,10 +671,10 @@ class TweetDataController:
     def update_dissolve(self):
         print("Update Dissolve: " + str(self.circle_idx))
         if self.circle_idx > -1:
-            self.patch_dissolve.data = self.active_dataset.update_dissolve(self.circle_idx)
+            self.patch_dissolve.data = self.active_dataset.update_dissolve(self.circle_id)
             if self.blend_active:
                 if self.blend_dataset is not None:
-                    self.patch_dissolve_blend.data = self.blend_dataset.update_dissolve(self.circle_idx)
+                    self.patch_dissolve_blend.data = self.blend_dataset.update_dissolve(self.circle_id)
 
     def clear_find_circle(self):
         new_data = dict()
@@ -663,7 +711,7 @@ class TweetDataController:
             self.active_dataset = self.working
             self.blend_dataset = self.non_working
         else:
-            print("Switching to 'median non-working'.")
+            print("Switching to 'median non_working'.")
             self.active_dataset = self.non_working
             self.blend_dataset = self.working
 
@@ -697,11 +745,18 @@ class TweetDataController:
         self.filter_settings.ratio_end = ratio_end
         self.apply_filters()
 
+    def filter_circles_by_dissolve(self, dissolve_start, dissolve_end):
+        self.filter_settings.dissolve_start = dissolve_start
+        self.filter_settings.dissolve_end = dissolve_end
+        self.apply_filters()
+
     def filters_active(self, active_list):
         self.filter_settings.count_active = False
         self.filter_settings.area_active = False
         self.filter_settings.distance_active = False
         self.filter_settings.ratio_active = False
+        self.filter_settings.dissolve_active = False
+
         for filter_check_value in active_list:
             if filter_check_value is 0:
                 self.filter_settings.count_active = True
@@ -714,6 +769,9 @@ class TweetDataController:
 
             if filter_check_value is 3:
                 self.filter_settings.ratio_active = True
+
+            if filter_check_value is 4:
+                self.filter_settings.dissolve_active = True
 
         self.apply_filters()
 
@@ -743,6 +801,11 @@ class TweetDataController:
                                 (subset_df['ratio'] >= self.filter_settings.ratio_start)
                             &   (subset_df['ratio'] <= self.filter_settings.ratio_end)]
 
+            if self.filter_settings.dissolve_active:
+                subset_df = subset_df.loc[
+                            (subset_df['dissolve_area'] >= self.filter_settings.dissolve_start)
+                        &   (subset_df['dissolve_area'] <= self.filter_settings.dissolve_end)]
+
             self.circles.data = self.circles.from_df(subset_df)
 
     def turn_blend_on(self, ellipse_active, siblings_active, dissolve_active):
@@ -753,13 +816,13 @@ class TweetDataController:
                 self.selected_circle_blend.data, dummy_circle_idx = self.blend_dataset.update_selected_circle(self.circle_id)
                 if ellipse_active:
                     self.sde_ellipse_blend.data = self.blend_dataset.update_sde_ellipse(self.circle_idx)
-                    self.siblings_blend.data = self.blend_dataset.update_siblings(self.circle_idx)
+                    self.siblings_blend.data = self.blend_dataset.update_siblings(self.circle_id)
 
                 if siblings_active:
-                    self.sibling_ellipses_blend.data = self.blend_dataset.update_sibling_ellipses(self.circle_idx)
+                    self.sibling_ellipses_blend.data = self.blend_dataset.update_sibling_ellipses(self.circle_id)
 
                 if dissolve_active:
-                    self.patch_dissolve_blend.data = self.blend_dataset.update_dissolve(self.circle_idx)
+                    self.patch_dissolve_blend.data = self.blend_dataset.update_dissolve(self.circle_id)
 
     def turn_blend_off(self):
         print("Turn Blend Off:")
@@ -799,3 +862,78 @@ class TweetDataController:
                 self.pdbr.glyph.line_alpha = 1.0 - blend_ratio
                 self.pdbr.glyph.fill_alpha = 1.0 - blend_ratio
 
+class SiblingDataManager:
+
+    def __init__(self, sibling_data_folder, dataset_name):
+        self.sibling_data_folder = sibling_data_folder
+        self.dataset_name = dataset_name
+
+        self.sibling_data = dict()
+
+    def get_sibling_data(self, id):
+        filename = str(self.dataset_name) + "_" + str(id) + ".json"
+        logger.info("Get Sibling Data: " + filename)
+        if id not in self.sibling_data:
+            self.sibling_data[id] = self.load_sibling_data(filename)
+
+        return self.sibling_data[id]
+
+    def load_sibling_data(self, filename):
+        logger.info("Load Sibling Data: " + filename)
+        file_open = FileOpen(self.sibling_data_folder, filename)
+        logger.info(file_open)
+
+        data = dict()
+        with open(file_open.absolute, 'r') as sibling_file:
+            sibling_json = json.load(sibling_file)
+
+        logger.debug(data)
+        return sibling_json
+
+    def get_sibling_idxs(self, id):
+        sibling_data = self.get_sibling_data(id)
+        return sibling_data['idxs']
+
+    def get_dissolve(self, id):
+        sibling_data = self.get_sibling_data(id)
+        return sibling_data['dissolve']
+
+    def __str__(self):
+        manager_str = "Sibling Data Manager: "
+        manager_str += "\nFolder: " + str(self.sibling_data_folder)
+        manager_str += "\nDataset Name: " + str(self.dataset_name)
+        manager_str += "\nNumber of Sibling Sets: " + str(len(self.sibling_data))
+        return manager_str
+
+
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+import os
+
+def main():
+    logging.basicConfig(
+        filename='logs/tweet_data.log',
+        level=logging.DEBUG,
+        format='%(asctime)s %(levelname)s: %(message)s')
+
+    logger.info("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+    logger.info("Tweet Data:")
+
+    cwd = os.getcwd()
+    sibling_data_folder = cwd + "/sibling_data/"
+    sibling_data_manager = SiblingDataManager(sibling_data_folder, "working")
+    logger.info(sibling_data_manager)
+
+    sibling_data = sibling_data_manager.get_sibling_data(379005817)
+    logger.info(sibling_data)
+    logger.info(sibling_data_manager)
+
+    sibling_data = sibling_data_manager.get_sibling_data(464331848)
+    logger.info(sibling_data)
+    logger.info(sibling_data_manager)
+
+    sibling_data = sibling_data_manager.get_sibling_data(379005817)
+    logger.info(sibling_data)
+    logger.info(sibling_data_manager)
+
+if __name__ == '__main__':
+    main()

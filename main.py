@@ -135,7 +135,7 @@ def callback_hover_count(
     ):
     indices = cb_data.index["1d"].indices
     if len(indices) > 0:
-        print([indices[0]])
+        #print([indices[0]])
         hhci.data['idx'] = [indices[0]]
 
 def callback_tap_count(
@@ -162,7 +162,7 @@ def callback_hover_area(
     ):
     indices = cb_data.index["1d"].indices
     if len(indices) > 0:
-        print([indices[0]])
+        #print([indices[0]])
         hhci.data['idx'] = [indices[0]]
 
 def callback_tap_area(
@@ -187,7 +187,7 @@ def callback_hover_distance(
     ):
     indices = cb_data.index["1d"].indices
     if len(indices) > 0:
-        print([indices[0]])
+        #print([indices[0]])
         hhci.data['idx'] = [indices[0]]
 
 def callback_tap_distance(
@@ -212,7 +212,7 @@ def callback_hover_ratio(
     ):
     indices = cb_data.index["1d"].indices
     if len(indices) > 0:
-        print([indices[0]])
+        #print([indices[0]])
         hhci.data['idx'] = [indices[0]]
 
 def callback_tap_ratio(
@@ -230,6 +230,31 @@ def callback_tap_ratio(
 
 histogram_plot_ratio = HistogramPlot(tweet_data_controller.histogram_controller_ratio, callback_hover_ratio, callback_tap_ratio, "X/Y Ratio", "Ratio", "Count")
 tweet_data_controller.hr_ratio = histogram_plot_ratio.r
+
+
+def callback_hover_dissolve(
+        hhci = tweet_data_controller.histogram_controller_dissolve.hover_idx
+    ):
+    indices = cb_data.index["1d"].indices
+    if len(indices) > 0:
+        #print([indices[0]])
+        hhci.data['idx'] = [indices[0]]
+
+def callback_tap_dissolve(
+        hhci = tweet_data_controller.histogram_controller_dissolve.hover_idx,
+        sc = tweet_data_controller.histogram_controller_dissolve.selected
+    ):
+
+    idx = hhci.data['idx']
+
+    new_data = dict()
+    new_data['x'] = [0]
+    new_data['y'] = [0]
+    new_data['idx'] = [idx[0]]
+    sc.data = new_data
+
+histogram_plot_dissolve = HistogramPlot(tweet_data_controller.histogram_controller_dissolve, callback_hover_ratio, callback_tap_ratio, "Dissolve Area", "Area", "Count")
+tweet_data_controller.hr_dissolve = histogram_plot_dissolve.r
 
 
 def lod_start(ld = tweet_data_controller.lod_dummy):
@@ -303,11 +328,14 @@ filter_sliders \
                 Row(    Column(map_widgets.button_ratio_start_minus, map_widgets.button_ratio_start_plus, width=50),
                         map_widgets.range_slider_ratio,
                         Column(map_widgets.button_ratio_end_minus, map_widgets.button_ratio_end_plus)),
+                Row(    Column(map_widgets.button_dissolve_start_minus, map_widgets.button_dissolve_start_plus, width=50),
+                        map_widgets.range_slider_dissolve,
+                        Column(map_widgets.button_dissolve_end_minus, map_widgets.button_dissolve_end_plus)),
                 map_widgets.text_count,
                 map_widgets.filters_active)
 
 
-filter_histograms = Column(histogram_plot_count.p, histogram_plot_area.p, histogram_plot_distance.p, histogram_plot_ratio.p)
+filter_histograms = Column(histogram_plot_count.p, histogram_plot_area.p, histogram_plot_distance.p, histogram_plot_ratio.p, histogram_plot_dissolve.p)
 
 tab_filter_sliders = Panel(child=filter_sliders, title="Filter by Sliders")
 tab_filter_histograms = Panel(child=filter_histograms, title="Filter by Histograms")

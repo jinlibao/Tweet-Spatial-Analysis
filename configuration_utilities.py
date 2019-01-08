@@ -2,6 +2,9 @@
 import configparser
 import logging
 import logging.config
+import os
+
+from file_utilities import *
 
 logger = logging.getLogger()
 
@@ -19,12 +22,18 @@ class TweetSpatialAnalysisConfig:
         self.area = self.parse_range_str(config['RANGES']['area'])
         self.distance = self.parse_range_str(config['RANGES']['distance'])
         self.ratio = self.parse_range_str(config['RANGES']['ratio'])
+        self.dissolve = self.parse_range_str(config['RANGES']['dissolve'])
 
         self.bins_count = self.parse_range_str(config['HISTOGRAMS']['bins_count'])
         self.bins_count_text = self.create_bins_text(self.bins_count)
 
         self.bins_ratio = self.parse_range_str(config['HISTOGRAMS']['bins_ratio'])
         self.bins_ratio_text = self.create_bins_text(self.bins_ratio)
+
+        absolute_folder = config['SIBLING_DATA']['folder']
+        folder_details = FileOpen(absolute_folder)
+        self.sibling_data_folder = folder_details.folder
+
 
     def parse_range_str(self, range_str):
         range_list = range_str.split()
@@ -68,6 +77,7 @@ class TweetSpatialAnalysisConfig:
         config_str += "\nBins Count Text: " + str(self.bins_count_text)
         config_str += "\nBins Ratio: " + str(self.bins_ratio)
         config_str += "\nBins Ratio Text: " + str(self.bins_ratio_text)
+        config_str += "\nSibling Data: Folder: " + str(self.sibling_data_folder)
 
         return config_str
 

@@ -97,17 +97,6 @@ class TweetDataPreProcessing:
         #self.identify_rows_with_nan()
         #self.df_details()
 
-        logger.info("Processing: All")
-        print("Processing: All")
-        self.tweet_data_all = TweetData("all")
-        self.tweet_data_all.create_dataframe(self.df, 'User-ID', 'latitude-mean-all-tweets',
-                                                'longitude-mean-all-tweets', 'area-all-tweets', 'x/y-all-tweets',
-                                                'theta-all-tweets', 'medians-distance')
-        logger.info(self.tweet_data_all)
-        self.write_to_json(self.tweet_data_all.df, "tweet_mean_all.json")
-        logger.info("Processed.")
-        print("Processed.")
-
         logger.info("Processing: Working")
         print("Processing: Working")
         self.tweet_data_working = TweetData("working")
@@ -119,9 +108,20 @@ class TweetDataPreProcessing:
         logger.info("Processed.")
         print("Processed.")
 
+        logger.info("Processing: All")
+        print("Processing: All")
+        self.tweet_data_all = TweetData("all")
+        self.tweet_data_all.create_dataframe(self.df, 'User-ID', 'latitude-mean-all-tweets',
+                                                'longitude-mean-all-tweets', 'area-all-tweets', 'x/y-all-tweets',
+                                                'theta-all-tweets', 'medians-distance')
+        logger.info(self.tweet_data_all)
+        self.write_to_json(self.tweet_data_all.df, "tweet_mean_all.json")
+        logger.info("Processed.")
+        print("Processed.")
+
         logger.info("Processing: Non-Working")
         print("Processing: Non-Working")
-        self.tweet_data_non_working = TweetData("non-working")
+        self.tweet_data_non_working = TweetData("non_working")
         self.tweet_data_non_working.create_dataframe(self.df, 'User-ID', 'latitude-median-nonworking-tweets',
                                                 'longitude-median-nonworking-tweets', 'area-nonworking-tweets',
                                                 'x/y-nonworking-tweets', 'theta-nonworking-tweets', 'medians-distance')
@@ -131,7 +131,6 @@ class TweetDataPreProcessing:
         print("Processed.")
 
     def process_color(self, tweet_data_df, config):
-
         fill_color_list = plasma(len(config.bins_count))
         fill_color_list.reverse()
 
@@ -147,15 +146,15 @@ class TweetDataPreProcessing:
     def read_from_json(self, mean_all, working, non_working, config):
         self.tweet_data_all = TweetData("all")
         self.tweet_data_all.read_from_json(mean_all)
-        self.process_color(self.tweet_data_all.df, config)
+        #self.process_color(self.tweet_data_all.df, config)
 
         self.tweet_data_working = TweetData("working")
         self.tweet_data_working.read_from_json(working)
-        self.process_color(self.tweet_data_working.df, config)
+        #self.process_color(self.tweet_data_working.df, config)
 
-        self.tweet_data_non_working = TweetData("non-working")
+        self.tweet_data_non_working = TweetData("non_working")
         self.tweet_data_non_working.read_from_json(non_working)
-        self.process_color(self.tweet_data_non_working.df, config)
+        #self.process_color(self.tweet_data_non_working.df, config)
 
     def identify_rows_with_nan(self):
         logger.info("Identify rows with NaN values:")

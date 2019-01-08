@@ -75,7 +75,20 @@ class MapWidgets:
         self.button_ratio_end_plus = Button(label="+", width=15)
         self.button_ratio_end_plus.on_click(self.button_ratio_end_plus_callback)
 
-        self.filters_active = CheckboxGroup(labels=["Filter by Sibling Count", "Filter by Area", "Filter by Distance", "Filter by Ratio"], active=[0, 1, 2, 3])
+        self.range_slider_dissolve = RangeSlider(start=config.dissolve[0] - 1, end=config.dissolve[1],
+                                              value=(config.dissolve[0], config.dissolve[1]), step=config.dissolve[2],
+                                              title="Dissolve Area")
+        self.range_slider_dissolve.on_change('value', self.range_slider_dissolve_change)
+        self.button_dissolve_start_minus = Button(label="-", width=20)
+        self.button_dissolve_start_minus.on_click(self.button_dissolve_start_minus_callback)
+        self.button_dissolve_start_plus = Button(label="+", width=20)
+        self.button_dissolve_start_plus.on_click(self.button_dissolve_start_plus_callback)
+        self.button_dissolve_end_minus = Button(label="-", width=20)
+        self.button_dissolve_end_minus.on_click(self.button_dissolve_end_minus_callback)
+        self.button_dissolve_end_plus = Button(label="+", width=20)
+        self.button_dissolve_end_plus.on_click(self.button_dissolve_end_plus_callback)
+
+        self.filters_active = CheckboxGroup(labels=["Filter by Sibling Count", "Filter by Area", "Filter by Distance", "Filter by Ratio", "Filter by Dissolve Area"], active=[0, 1, 2, 3, 4])
         self.filters_active.on_change('active', self.filters_active_change)
 
         self.toggle_blend = Toggle(label="Toggle Blend", active=False, width=150)
@@ -411,6 +424,69 @@ class MapWidgets:
         self.range_slider_ratio.value = new_values
 
         self.tweet_data_controller.filter_circles_by_ratio(value_start, value_end)
+        self.tweet_data_controller.clear_all()
+        self.update_text_count()
+
+    def range_slider_dissolve_change(self, attrname, old, new):
+        start_dissolve = new[0]
+        end_dissolve = new[1]
+        self.tweet_data_controller.filter_circles_by_dissolve(start_dissolve, end_dissolve)
+        self.tweet_data_controller.clear_all()
+        self.update_text_count()
+
+    def button_dissolve_start_minus_callback(self):
+        value_start = self.range_slider_dissolve.value[0]
+        value_end = self.range_slider_dissolve.value[1]
+
+        if value_start > self.range_slider_dissolve.start:
+            value_start -= 1
+
+        new_values = [value_start, value_end]
+        self.range_slider_dissolve.value = new_values
+
+        self.tweet_data_controller.filter_circles_by_dissolve(value_start, value_end)
+        self.tweet_data_controller.clear_all()
+        self.update_text_count()
+
+    def button_dissolve_start_plus_callback(self):
+        value_start = self.range_slider_dissolve.value[0]
+        value_end = self.range_slider_dissolve.value[1]
+
+        if value_start < value_end:
+            value_start += 1
+
+        new_values = [value_start, value_end]
+        self.range_slider_dissolve.value = new_values
+
+        self.tweet_data_controller.filter_circles_by_dissolve(value_start, value_end)
+        self.tweet_data_controller.clear_all()
+        self.update_text_count()
+
+    def button_dissolve_end_minus_callback(self):
+        value_start = self.range_slider_dissolve.value[0]
+        value_end = self.range_slider_dissolve.value[1]
+
+        if value_end > value_start:
+            value_end -= 1
+
+        new_values = [value_start, value_end]
+        self.range_slider_dissolve.value = new_values
+
+        self.tweet_data_controller.filter_circles_by_dissolve(value_start, value_end)
+        self.tweet_data_controller.clear_all()
+        self.update_text_count()
+
+    def button_dissolve_end_plus_callback(self):
+        value_start = self.range_slider_dissolve.value[0]
+        value_end = self.range_slider_dissolve.value[1]
+
+        if value_end < self.range_slider_dissolve.end:
+            value_end += 1
+
+        new_values = [value_start, value_end]
+        self.range_slider_dissolve.value = new_values
+
+        self.tweet_data_controller.filter_circles_by_dissolve(value_start, value_end)
         self.tweet_data_controller.clear_all()
         self.update_text_count()
 

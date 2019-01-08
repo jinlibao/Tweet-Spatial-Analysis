@@ -12,6 +12,7 @@ import math
 # https://stackoverflow.com/questions/13105915/draw-an-ellipse-using-shapely
 # The angle passed in is measured counter-clockwise from the x-axis, not clockwise
 def define_points_for_ellipse(x, y, a, b, angle):
+    #print(str(x) + " " + str(y) + " " + str(a) + " " + str(b) + " " + str(angle))
     circ = shapely.geometry.Point(x, y).buffer(1)
     ell = shapely.affinity.scale(circ, a, b)
     ellr = shapely.affinity.rotate(ell, angle, use_radians=True)
@@ -47,8 +48,13 @@ def dissolve_ellipses(ellipse_list):
         polygons.append(polygon)
 
     dissolve = cascaded_union(polygons)
-    print("Dissolve Area: " + str(dissolve.area))
-    return list(dissolve.exterior.coords.xy)
+
+    new_data = dict()
+    new_data['x'] = dissolve.exterior.coords.xy[0].tolist()
+    new_data['y'] = dissolve.exterior.coords.xy[1].tolist()
+    new_data['area'] = dissolve.area
+    return new_data
+    #new_data['x'], new_data['y'] = list(dissolve.exterior.coords.xy)
 
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 def main():
