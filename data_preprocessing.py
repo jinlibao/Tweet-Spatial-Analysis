@@ -3,8 +3,9 @@ import logging
 import logging.config
 import numpy as np
 
-from bokeh.palettes import plasma
+#from bokeh.palettes import plasma
 
+from configuration_utilities import *
 from file_utilities import *
 from tweet_data import *
 
@@ -14,14 +15,15 @@ pd.set_option('expand_frame_repr', False)
 pd.options.display.max_rows = 999
 # Options and Settings: https://pandas.pydata.org/pandas-docs/stable/options.html
 
-num_of_rows_to_process = 10000
+num_of_rows_to_process = 1000
 # Define as None to process all rows.
 
 
 class TweetDataPreProcessing:
 
-    def __init__(self, file_details, encoding="utf-8", separator=","):
+    def __init__(self, file_details, config=None, encoding="utf-8", separator=","):
         self.file_details = file_details
+        self.config = config
         self.encoding = encoding
         self.separator = separator
         self.df = None
@@ -99,7 +101,7 @@ class TweetDataPreProcessing:
 
         logger.info("Processing: Working")
         print("Processing: Working")
-        self.tweet_data_working = TweetData("working")
+        self.tweet_data_working = TweetData("working", self.config)
         self.tweet_data_working.create_dataframe(self.df, 'User-ID', 'latitude-median-working-tweets',
                                             'longitude-median-working-tweets', 'area-working-tweets',
                                             'x/y-working-tweets', 'theta-working-tweets', 'medians-distance')
@@ -110,7 +112,7 @@ class TweetDataPreProcessing:
 
         logger.info("Processing: All")
         print("Processing: All")
-        self.tweet_data_all = TweetData("all")
+        self.tweet_data_all = TweetData("all", self.config)
         self.tweet_data_all.create_dataframe(self.df, 'User-ID', 'latitude-mean-all-tweets',
                                                 'longitude-mean-all-tweets', 'area-all-tweets', 'x/y-all-tweets',
                                                 'theta-all-tweets', 'medians-distance')
@@ -121,7 +123,7 @@ class TweetDataPreProcessing:
 
         logger.info("Processing: Non-Working")
         print("Processing: Non-Working")
-        self.tweet_data_non_working = TweetData("non_working")
+        self.tweet_data_non_working = TweetData("non_working", self.config)
         self.tweet_data_non_working.create_dataframe(self.df, 'User-ID', 'latitude-median-nonworking-tweets',
                                                 'longitude-median-nonworking-tweets', 'area-nonworking-tweets',
                                                 'x/y-nonworking-tweets', 'theta-nonworking-tweets', 'medians-distance')
@@ -130,6 +132,7 @@ class TweetDataPreProcessing:
         logger.info("Processed.")
         print("Processed.")
 
+    '''
     def process_color(self, tweet_data_df, config):
         fill_color_list = plasma(len(config.bins_count))
         fill_color_list.reverse()
@@ -142,8 +145,9 @@ class TweetDataPreProcessing:
                     break
                 else:
                     tweet_data_df.loc[idx, 'color'] = fill_color_list[idx2]
+    '''
 
-    def read_from_json(self, mean_all, working, non_working, config):
+    def read_from_json(self, mean_all, working, non_working):
         self.tweet_data_all = TweetData("all")
         self.tweet_data_all.read_from_json(mean_all)
         #self.process_color(self.tweet_data_all.df, config)
@@ -230,10 +234,13 @@ def main():
     logger.info("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
     logger.info("Tweet Data: Pre-Processing:")
 
+    tweet_spatial_analysis_config = TweetSpatialAnalysisConfig("tweet_spatial_analysis.ini")
+    logger.info(tweet_spatial_analysis_config)
+
     file_open = FileOpen("data", "tweet-data.csv")
     logger.info(file_open)
 
-    pre_processor = TweetDataPreProcessing(file_open)
+    pre_processor = TweetDataPreProcessing(file_open, tweet_spatial_analysis_config)
     logger.info(pre_processor)
     pre_processor.process()
 

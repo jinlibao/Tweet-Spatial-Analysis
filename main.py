@@ -3,6 +3,7 @@ from bokeh import events
 from bokeh.io import curdoc
 from bokeh.layouts import Column, Row
 from bokeh.models import Circle, CustomJS, HoverTool, Range1d, TapTool, Panel, Tabs
+from bokeh.palettes import PiYG, RdYlGn
 from bokeh.plotting import figure
 from bokeh.tile_providers import CARTODBPOSITRON
 
@@ -19,8 +20,7 @@ logger.info(tweet_spatial_analysis_config)
 pre_processor = TweetDataPreProcessing(None)
 pre_processor.read_from_json(   "Tweet-Spatial-Analysis/data/tweet_mean_all.json",
                                 "Tweet-Spatial-Analysis/data/tweets_median_working.json",
-                                "Tweet-Spatial-Analysis/data/tweets_median_non_working.json",
-                                tweet_spatial_analysis_config)
+                                "Tweet-Spatial-Analysis/data/tweets_median_non_working.json")
 
 file_open = FileOpen("Tweet-Spatial-Analysis/data", "user-info.csv")
 user_info = UserProfileDetails(file_open)
@@ -58,17 +58,19 @@ circles_renderer.nonselection_glyph = Circle(fill_alpha=0.2, fill_color="blue", 
 # and its related on_change callback to be called.
 lod_dummy_renderer = p.circle(x='x', y='y', source=tweet_data_controller.lod_dummy, fill_color='white', line_color=None, fill_alpha=0.0, size=1)
 
-patch_dissolve_renderer = p.patch(x='x', y='y', source=tweet_data_controller.patch_dissolve, fill_color="wheat", line_color="wheat", line_alpha=0.4, fill_alpha=0.4)
-sde_ellipse_renderer = p.ellipse(x='x', y='y', width='width', height='height', angle='angle', source=tweet_data_controller.sde_ellipse, fill_color="#cab2d6", line_alpha=0.5, fill_alpha=0.5)
-sibling_ellipses_renderer = p.ellipse(x='x', y='y', width='width', height='height', angle='angle', source=tweet_data_controller.sibling_ellipses, line_color="darkmagenta", fill_alpha=0.0)
-siblings_renderer = p.circle(x='x', y='y', source=tweet_data_controller.siblings, fill_color="orange", line_color="orange", fill_alpha=0.8, size=3)
-selected_circle_renderer = p.circle(x='x', y='y', source=tweet_data_controller.selected_circle, fill_color="olivedrab", line_color=None, fill_alpha=1, size=5)
+divergent_colours = RdYlGn[11]
 
-patch_dissolve_blend_renderer = p.patch(x='x', y='y', source=tweet_data_controller.patch_dissolve_blend, fill_color="wheat", line_color="wheat", line_alpha=0.4, fill_alpha=0.4)
-sde_ellipse_blend_renderer = p.ellipse(x='x', y='y', width='width', height='height', angle='angle', source=tweet_data_controller.sde_ellipse_blend, fill_color="#cab2d6", line_alpha=0.5, fill_alpha=0.5)
-sibling_ellipses_blend_renderer = p.ellipse(x='x', y='y', width='width', height='height', angle='angle', source=tweet_data_controller.sibling_ellipses_blend, line_color="darkmagenta", fill_alpha=0.0)
-siblings_blend_renderer = p.circle(x='x', y='y', source=tweet_data_controller.siblings_blend, fill_color="orange", line_color="orange", fill_alpha=0.8, size=3)
-selected_circle_blend_renderer = p.circle(x='x', y='y', source=tweet_data_controller.selected_circle_blend, fill_color="indigo", line_color=None, fill_alpha=1, size=5)
+patch_dissolve_renderer = p.patch(x='x', y='y', source=tweet_data_controller.patch_dissolve, fill_color=divergent_colours[3], line_color=divergent_colours[3], line_alpha=0.4, fill_alpha=0.4)
+sde_ellipse_renderer = p.ellipse(x='x', y='y', width='width', height='height', angle='angle', source=tweet_data_controller.sde_ellipse, fill_color=divergent_colours[2], line_color=divergent_colours[2], line_alpha=0.5, fill_alpha=0.5)
+sibling_ellipses_renderer = p.ellipse(x='x', y='y', width='width', height='height', angle='angle', source=tweet_data_controller.sibling_ellipses, line_color=divergent_colours[1], fill_alpha=0.0)
+siblings_renderer = p.square(x='x', y='y', source=tweet_data_controller.siblings, fill_color=divergent_colours[1], line_color=None, fill_alpha=0.8, size=4)
+selected_circle_renderer = p.circle(x='x', y='y', source=tweet_data_controller.selected_circle, fill_color=divergent_colours[0], line_color=None, fill_alpha=1, size=5)
+
+patch_dissolve_blend_renderer = p.patch(x='x', y='y', source=tweet_data_controller.patch_dissolve_blend, fill_color=divergent_colours[7], line_color=divergent_colours[7], line_alpha=0.4, fill_alpha=0.4)
+sde_ellipse_blend_renderer = p.ellipse(x='x', y='y', width='width', height='height', angle='angle', source=tweet_data_controller.sde_ellipse_blend, fill_color=divergent_colours[8], line_color=divergent_colours[8], line_alpha=0.5, fill_alpha=0.5)
+sibling_ellipses_blend_renderer = p.ellipse(x='x', y='y', width='width', height='height', angle='angle', source=tweet_data_controller.sibling_ellipses_blend, line_color=divergent_colours[9], fill_alpha=0.0)
+siblings_blend_renderer = p.square(x='x', y='y', source=tweet_data_controller.siblings_blend, fill_color=divergent_colours[9], line_color=None, fill_alpha=0.8, size=4)
+selected_circle_blend_renderer = p.circle(x='x', y='y', source=tweet_data_controller.selected_circle_blend, fill_color=divergent_colours[10], line_color=None, fill_alpha=1, size=5)
 
 find_circle_renderer = p.circle(x='x', y='y', source=tweet_data_controller.find_circle, line_color="darkgreen", fill_color="orange", line_alpha=1.0, fill_alpha=0.0, size=15, line_width=2)
 

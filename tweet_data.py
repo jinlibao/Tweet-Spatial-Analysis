@@ -4,6 +4,7 @@ import logging.config
 import pandas as pd
 
 from bokeh.models import ColumnDataSource
+from bokeh.palettes import plasma
 
 from analysis_utilities import *
 from file_utilities import *
@@ -22,12 +23,15 @@ def print_progress_to_console(idx):
 
 class TweetData:
 
-    def __init__(self, data_name):
+    def __init__(self, data_name, config=None):
         self.name = data_name
+        self.config = config
         self.df = None
         self.max_count = -1.0
         self.max_area = -1.0
-        #self.max_xy_ratio = -1.0
+        self.max_distance = -1.0
+        self.max_dissolve = -1.0
+        self.max_ratio = -1.0
         self.max_a = -1.0
         self.max_b = -1.0
 
@@ -65,11 +69,13 @@ class TweetData:
             # If the area is nan, then set it to -1 to indicate it is undefined.
             if math.isnan(self.df['area'][row_idx]):
                 logger.warning("idx: %s : id %s has area NaN.", row_idx, self.df['id'][row_idx])
-                self.df.loc[row_idx, 'area'] = -1.0
+                #self.df.loc[row_idx, 'area'] = -1.0
+                self.df.loc[row_idx, 'area'] = 0.0
 
             if math.isnan(self.df['distance'][row_idx]):
                 logger.warning("idx: %s : id %s has distance NaN.", row_idx, self.df['id'][row_idx])
-                self.df.loc[row_idx, 'distance'] = -1.0
+                #self.df.loc[row_idx, 'distance'] = -1.0
+                self.df.loc[row_idx, 'distance'] = 0.0
 
             # If any angles are nan, then clean to 0.0
             #if (math.isnan(self.df['angle'][row_idx])):
@@ -91,10 +97,12 @@ class TweetData:
         print("")
         self.max_a = self.df['a'].max()
         self.max_b = self.df['b'].max()
+        self.max_ratio = self.df['ratio'].max()
         self.max_area = self.df['area'].max()
+        self.max_distance = self.df['distance'].max()
 
         self.find_datapoints_enclosed_with_ellipse()
-        self.calculate_colour()
+        self.process_color()
 
         logger.info("\n%s", self.df.head())
 
@@ -119,9 +127,10 @@ class TweetData:
             row2_idx = 0
             for row2 in self.df.itertuples():
                 if row2.id != selected_point_id:
-                    if is_point_inside_ellipse(xo, yo, a, b, theta, row2.x, row2.y):
-                        grouped_ids.append(row2.id)
-                        grouped_idxs.append(row2_idx)
+                    if a > 0.0 and b > 0.0:
+                        if is_point_inside_ellipse(xo, yo, a, b, theta, row2.x, row2.y):
+                            grouped_ids.append(row2.id)
+                            grouped_idxs.append(row2_idx)
                 row2_idx += 1
 
             count = len(grouped_ids)
@@ -139,13 +148,9 @@ class TweetData:
             siblings_data['dissolve'] = dissolve_data
             #print(siblings_data)
 
-            #filename = self.name + "_" + str(selected_point_id) + "_" + str(row_idx) + ".json"
             filename = self.name + "_" + str(selected_point_id) + ".json"
             with open("sibling_data/" + filename, 'w') as fp:
                 json.dump(siblings_data, fp)
-
-            if count > self.max_count:
-                self.max_count = count
 
             print_progress_to_console(row_idx)
             row_idx += 1
@@ -153,6 +158,8 @@ class TweetData:
         print("")
         self.df['count'] = counts
         self.df['dissolve_area'] = dissolves
+        self.max_count = self.df['count'].max()
+        self.max_dissolve = self.df['dissolve_area'].max()
 
     def create_dissolve(self, id, idx, grouped_idxs):
         #print("Create Dissolve: " + str(circle_idx))
@@ -188,49 +195,28 @@ class TweetData:
             new_data['x'] = []
             new_data['y'] = []
             new_data['area'] = 0.0
-            logger.warning("Empty Ellipses: Point ID: %s : a:%s : b:%s : angle:%s : IDXs", id, self.df['a'][idx], self.df['b'][idx], self.df['angle'][idx], str(grouped_idxs))
+            logger.warning("Empty Ellipses: Point ID: %s : a:%s : b:%s : angle:%s : IDXs:%s", id, self.df['a'][idx], self.df['b'][idx], self.df['angle'][idx], str(grouped_idxs))
 
         return new_data
 
-    def calculate_colour(self):
-        logger.info("Calculating Color.")
-        print("Calculating Color.")
-
-        max_count = self.max_count
-        #count_max = 600.0
-
-        #start_r = 178.0
-        #start_g = 34.0
-        #start_b = 34.0
-        #end_r = 255.0
-        #end_g = 215.0
-        #end_b = 0.0
-        end_r = 178.0
-        end_g = 34.0
-        end_b = 34.0
-        start_r = 255.0
-        start_g = 215.0
-        start_b = 0.0
-
-        #interval_r = (end_r - start_r) / count_max
-        #interval_g = (end_g - start_g) / count_max
-        #interval_b = (end_b - start_b) / count_max
-
-        interval_r = (end_r - start_r)
-        interval_g = (end_g - start_g)
-        interval_b = (end_b - start_b)
+    def process_color(self):
+        logger.info("Processing Colors:")
+        print("Processing Colors:")
+        fill_color_list = plasma(len(self.config.bins_count))
+        fill_color_list.reverse()
 
         row_idx = 0
         colours = []
-        for row in self.df.itertuples():
-            count = row.count
-            scale_factor = 1.0 - 1.0/(1.0 + count)
+        for idx in range(0, self.df.shape[0]):
+            count = self.df['count'][idx]
+            for idx2 in range(0, len(self.config.bins_count)-1):
+                if count < self.config.bins_count[idx2]:
+                    colour_value = fill_color_list[idx2 - 1]
+                    break
+                else:
+                    colour_value = fill_color_list[idx2]
 
-            point_r = hex(int(start_r + scale_factor * interval_r)).split('x')[-1]
-            point_g = hex(int(start_g + scale_factor * interval_g)).split('x')[-1]
-            point_b = hex(int(start_b + scale_factor * interval_b)).split('x')[-1]
-            colour_hex_str = "#" + str(point_r) + str(point_g) + str(point_b)
-            colours.append(colour_hex_str)
+            colours.append(colour_value)
 
             print_progress_to_console(row_idx)
             row_idx += 1
@@ -245,20 +231,24 @@ class TweetData:
         # So, where the pandas index starts from 0, the starting row in excel or notepad++ is actually 2.
         if area == 0.0 or area == -1:
             logger.warning("id: %s (%s): The ellipse area is %s - can not calculate 'a' or 'b'.", row_id, idx, area)
-            return -1, -1, -1
+            #return -1, -1, -1
+            return 0.0, 0.0, 0.0
         else:
             if xy_ratio == "Infinity":
                 logger.warning("id %s (%s): The ellipse x/y ratio is 'Infinity' - can not calculate 'a' or 'b'.", row_id, idx)
-                return -1, -1, -1
+                #return -1, -1, -1
+                return 0.0, 0.0, 0.0
 
             xy_ratio_f = float(xy_ratio)
             if math.isnan(xy_ratio_f):
                 logger.warning("id %s (%s): The ellipse x/y ratio is 'nan' - can not calculate 'a' or 'b'.", row_id, idx)
-                return -1, -1, -1
+                #return -1, -1, -1
+                return 0.0, 0.0, 0.0
 
             if math.isinf(xy_ratio_f):
                 logger.warning("id %s (idx): The ellipse x/y ratio is 'inf' - can not calculate 'a' or 'b'.", row_id, idx)
-                return -1, -1, -1
+                #return -1, -1, -1
+                return 0.0, 0.0, 0.0
 
             return calculate_ellipse_a_and_b_from_area_and_ratio(area, xy_ratio_f)
 
@@ -275,6 +265,9 @@ class TweetData:
         df_str += "\nMax Area: " + str(self.max_area)
         df_str += "\nMax a: " + str(self.max_a)
         df_str += "\nMax b: " + str(self.max_b)
+        df_str += "\nMax Ratio: " + str(self.max_ratio)
+        df_str += "\nMax Distance: " + str(self.max_distance)
+        df_str += "\nMax Dissolve: " + str(self.max_dissolve)
 
         return df_str
 

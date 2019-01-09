@@ -42,7 +42,7 @@ class MapWidgets:
         self.button_count_end_plus = Button(label="+", width=15)
         self.button_count_end_plus.on_click(self.button_count_end_plus_callback)
 
-        self.range_slider_area = RangeSlider(start=config.area[0] - 10, end=config.area[1], value=(config.area[0], config.area[1]), step=config.area[2], title="Area Size")
+        self.range_slider_area = RangeSlider(start=config.area[0], end=config.area[1], value=(config.area[0], config.area[1]), step=config.area[2], title="Area Size")
         self.range_slider_area.on_change('value', self.range_slider_area_change)
         self.button_area_start_minus = Button(label="-", width=15)
         self.button_area_start_minus.on_click(self.button_area_start_minus_callback)
@@ -53,7 +53,7 @@ class MapWidgets:
         self.button_area_end_plus = Button(label="+", width=15)
         self.button_area_end_plus.on_click(self.button_area_end_plus_callback)
 
-        self.range_slider_distance = RangeSlider(start=config.distance[0] - 1, end=config.distance[1], value=(config.distance[0], config.distance[1]), step=config.distance[2], title="Distance")
+        self.range_slider_distance = RangeSlider(start=config.distance[0], end=config.distance[1], value=(config.distance[0], config.distance[1]), step=config.distance[2], title="Distance")
         self.range_slider_distance.on_change('value', self.range_slider_distance_change)
         self.button_distance_start_minus = Button(label="-", width=15)
         self.button_distance_start_minus.on_click(self.button_distance_start_minus_callback)
@@ -64,7 +64,7 @@ class MapWidgets:
         self.button_distance_end_plus = Button(label="+", width=15)
         self.button_distance_end_plus.on_click(self.button_distance_end_plus_callback)
 
-        self.range_slider_ratio = RangeSlider(start=config.ratio[0] - 1, end=config.ratio[1], value=(config.ratio[0], config.ratio[1]), step=config.ratio[2], title="Ratio")
+        self.range_slider_ratio = RangeSlider(start=config.ratio[0], end=config.ratio[1], value=(config.ratio[0], config.ratio[1]), step=config.ratio[2], title="Ratio")
         self.range_slider_ratio.on_change('value', self.range_slider_ratio_change)
         self.button_ratio_start_minus = Button(label="-", width=15)
         self.button_ratio_start_minus.on_click(self.button_ratio_start_minus_callback)
@@ -75,7 +75,7 @@ class MapWidgets:
         self.button_ratio_end_plus = Button(label="+", width=15)
         self.button_ratio_end_plus.on_click(self.button_ratio_end_plus_callback)
 
-        self.range_slider_dissolve = RangeSlider(start=config.dissolve[0] - 1, end=config.dissolve[1],
+        self.range_slider_dissolve = RangeSlider(start=config.dissolve[0], end=config.dissolve[1],
                                               value=(config.dissolve[0], config.dissolve[1]), step=config.dissolve[2],
                                               title="Dissolve Area")
         self.range_slider_dissolve.on_change('value', self.range_slider_dissolve_change)
