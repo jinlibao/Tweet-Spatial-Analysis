@@ -14,7 +14,7 @@ from tweet_data import *
 from user_profile_data import UserProfileDetails
 from widget_utilities import *
 
-tweet_spatial_analysis_config = TweetSpatialAnalysisConfig("Tweet-Spatial-Analysis/tweet_spatial_analysis.ini")
+tweet_spatial_analysis_config = TweetSpatialAnalysisConfig("Tweet-Spatial-Analysis/conf/tweet_spatial_analysis.ini")
 logger.info(tweet_spatial_analysis_config)
 
 pre_processor = TweetDataPreProcessing(None)
@@ -57,19 +57,20 @@ circles_renderer.nonselection_glyph = Circle(fill_alpha=0.2, fill_color="blue", 
 # This is a dummy renderer needed to enable changes on the tweet_data_controller.lod_dummy source to be emitted.
 # and its related on_change callback to be called.
 lod_dummy_renderer = p.circle(x='x', y='y', source=tweet_data_controller.lod_dummy, fill_color='white', line_color=None, fill_alpha=0.0, size=1)
+tab_dummy_renderer = p.circle(x='x', y='y', source=tweet_data_controller.tab_dummy, fill_color='white', line_color=None, fill_alpha=0.0, size=1)
 
 divergent_colours = RdYlGn[11]
 
 patch_dissolve_renderer = p.patch(x='x', y='y', source=tweet_data_controller.patch_dissolve, fill_color=divergent_colours[3], line_color=divergent_colours[3], line_alpha=0.4, fill_alpha=0.4)
 sde_ellipse_renderer = p.ellipse(x='x', y='y', width='width', height='height', angle='angle', source=tweet_data_controller.sde_ellipse, fill_color=divergent_colours[2], line_color=divergent_colours[2], line_alpha=0.5, fill_alpha=0.5)
 sibling_ellipses_renderer = p.ellipse(x='x', y='y', width='width', height='height', angle='angle', source=tweet_data_controller.sibling_ellipses, line_color=divergent_colours[1], fill_alpha=0.0)
-siblings_renderer = p.square(x='x', y='y', source=tweet_data_controller.siblings, fill_color=divergent_colours[1], line_color=None, fill_alpha=0.8, size=4)
+siblings_renderer = p.circle(x='x', y='y', source=tweet_data_controller.siblings, fill_color=divergent_colours[1], line_color=None, fill_alpha=0.8, size=3)
 selected_circle_renderer = p.circle(x='x', y='y', source=tweet_data_controller.selected_circle, fill_color=divergent_colours[0], line_color=None, fill_alpha=1, size=5)
 
 patch_dissolve_blend_renderer = p.patch(x='x', y='y', source=tweet_data_controller.patch_dissolve_blend, fill_color=divergent_colours[7], line_color=divergent_colours[7], line_alpha=0.4, fill_alpha=0.4)
 sde_ellipse_blend_renderer = p.ellipse(x='x', y='y', width='width', height='height', angle='angle', source=tweet_data_controller.sde_ellipse_blend, fill_color=divergent_colours[8], line_color=divergent_colours[8], line_alpha=0.5, fill_alpha=0.5)
 sibling_ellipses_blend_renderer = p.ellipse(x='x', y='y', width='width', height='height', angle='angle', source=tweet_data_controller.sibling_ellipses_blend, line_color=divergent_colours[9], fill_alpha=0.0)
-siblings_blend_renderer = p.square(x='x', y='y', source=tweet_data_controller.siblings_blend, fill_color=divergent_colours[9], line_color=None, fill_alpha=0.8, size=4)
+siblings_blend_renderer = p.circle(x='x', y='y', source=tweet_data_controller.siblings_blend, fill_color=divergent_colours[9], line_color=None, fill_alpha=0.8, size=3)
 selected_circle_blend_renderer = p.circle(x='x', y='y', source=tweet_data_controller.selected_circle_blend, fill_color=divergent_colours[10], line_color=None, fill_alpha=1, size=5)
 
 find_circle_renderer = p.circle(x='x', y='y', source=tweet_data_controller.find_circle, line_color="darkgreen", fill_color="orange", line_alpha=1.0, fill_alpha=0.0, size=15, line_width=2)
@@ -87,11 +88,13 @@ tweet_data_controller.sr = siblings_renderer
 tweet_data_controller.sbr = siblings_blend_renderer
 
 # Fake a Legend
-for idx in range(0, len(tweet_data_controller.histogram_controller_count.cds.data['fill_color'])):
-    legend_text = tweet_data_controller.histogram_controller_count.cds.data['bins_text'][idx]
-    legend_color = tweet_data_controller.histogram_controller_count.cds.data['fill_color'][idx]
+for idx_legend in range(0, len(tweet_data_controller.histogram_controller_count.cds.data['fill_color'])):
+    legend_text = tweet_data_controller.histogram_controller_count.cds.data['bins_text'][idx_legend]
+    legend_color = tweet_data_controller.histogram_controller_count.cds.data['fill_color'][idx_legend]
     p.circle(0, 0, legend=legend_text, fill_color=legend_color, alpha = 0.75, size = 1, line_color=None)
 p.legend.background_fill_alpha = 0.25
+
+tweet_data_controller.lr = p.legend
 
 # Causes:
 # Uncaught Error: reference {"id":"1005","type":"ColumnDataSource"} isn't known (not in Document?)
@@ -100,6 +103,8 @@ def callback_hover(hover_idx = tweet_data_controller.hover_idx):
     indices = cb_data.index["1d"].indices
     if len(indices) > 0:
         hover_idx.data['idx'] = [indices[0]]
+    else:
+        hover_idx.data['idx'] = [-1]
 
 hover_tool = HoverTool(tooltips=[('id', "@id"), ('area', '@area'), ('count', '@count'), ('distance', '@distance'), ('ratio', '@ratio')], callback=CustomJS.from_py_func(callback_hover), renderers=[circles_renderer])
 
@@ -130,15 +135,16 @@ def callback_tap(   hover_idx = tweet_data_controller.hover_idx,
 
 tap_tool = TapTool(callback = CustomJS.from_py_func(callback_tap), renderers=[circles_renderer])
 p.add_tools(hover_tool, tap_tool)
-
+p.js_on_event(events.Tap, CustomJS.from_py_func(callback_tap))
 
 def callback_hover_count(
         hhci = tweet_data_controller.histogram_controller_count.hover_idx
     ):
     indices = cb_data.index["1d"].indices
     if len(indices) > 0:
-        #print([indices[0]])
         hhci.data['idx'] = [indices[0]]
+    else:
+        hhci.data['idx'] = [-1]
 
 def callback_tap_count(
         hhci = tweet_data_controller.histogram_controller_count.hover_idx,
@@ -146,7 +152,6 @@ def callback_tap_count(
     ):
 
     idx = hhci.data['idx']
-
     new_data = dict()
     new_data['x'] = [0]
     new_data['y'] = [0]
@@ -164,8 +169,9 @@ def callback_hover_area(
     ):
     indices = cb_data.index["1d"].indices
     if len(indices) > 0:
-        #print([indices[0]])
         hhci.data['idx'] = [indices[0]]
+    else:
+        hhci.data['idx'] = [-1]
 
 def callback_tap_area(
         hhci = tweet_data_controller.histogram_controller_area.hover_idx,
@@ -173,7 +179,6 @@ def callback_tap_area(
     ):
 
     idx = hhci.data['idx']
-
     new_data = dict()
     new_data['x'] = [0]
     new_data['y'] = [0]
@@ -189,8 +194,9 @@ def callback_hover_distance(
     ):
     indices = cb_data.index["1d"].indices
     if len(indices) > 0:
-        #print([indices[0]])
         hhci.data['idx'] = [indices[0]]
+    else:
+        hhci.data['idx'] = [-1]
 
 def callback_tap_distance(
         hhci = tweet_data_controller.histogram_controller_distance.hover_idx,
@@ -198,7 +204,6 @@ def callback_tap_distance(
     ):
 
     idx = hhci.data['idx']
-
     new_data = dict()
     new_data['x'] = [0]
     new_data['y'] = [0]
@@ -214,8 +219,9 @@ def callback_hover_ratio(
     ):
     indices = cb_data.index["1d"].indices
     if len(indices) > 0:
-        #print([indices[0]])
         hhci.data['idx'] = [indices[0]]
+    else:
+        hhci.data['idx'] = [-1]
 
 def callback_tap_ratio(
         hhci = tweet_data_controller.histogram_controller_ratio.hover_idx,
@@ -223,7 +229,6 @@ def callback_tap_ratio(
     ):
 
     idx = hhci.data['idx']
-
     new_data = dict()
     new_data['x'] = [0]
     new_data['y'] = [0]
@@ -239,8 +244,9 @@ def callback_hover_dissolve(
     ):
     indices = cb_data.index["1d"].indices
     if len(indices) > 0:
-        #print([indices[0]])
         hhci.data['idx'] = [indices[0]]
+    else:
+        hhci.data['idx'] = [-1]
 
 def callback_tap_dissolve(
         hhci = tweet_data_controller.histogram_controller_dissolve.hover_idx,
@@ -248,14 +254,13 @@ def callback_tap_dissolve(
     ):
 
     idx = hhci.data['idx']
-
     new_data = dict()
     new_data['x'] = [0]
     new_data['y'] = [0]
     new_data['idx'] = [idx[0]]
     sc.data = new_data
 
-histogram_plot_dissolve = HistogramPlot(tweet_data_controller.histogram_controller_dissolve, callback_hover_ratio, callback_tap_ratio, "Dissolve Area", "Area", "Count")
+histogram_plot_dissolve = HistogramPlot(tweet_data_controller.histogram_controller_dissolve, callback_hover_dissolve, callback_tap_dissolve, "Dissolve Area", "Area", "Count")
 tweet_data_controller.hr_dissolve = histogram_plot_dissolve.r
 
 
@@ -312,10 +317,12 @@ p.js_on_event(events.PanEnd, CustomJS.from_py_func(pan_end))
 
 #p.js_on_event(events.MouseWheel, CustomJS.from_py_func(mouse_wheel))
 
-lhs = Column(   map_widgets.radio_button_data_type, map_widgets.toggle_data, map_widgets.text_selection_details,
+lhs = Column(   map_widgets.radio_button_data_type,
+                Row(map_widgets.toggle_data, map_widgets.button_clear),
+                map_widgets.text_selection_details,
                 map_widgets.toggle_sde_ellipse, map_widgets.toggle_sibling_ellipses, map_widgets.toggle_dissolve,
                 map_widgets.toggle_blend, map_widgets.slider_blend,
-                map_widgets.text_input, map_widgets.button_find)
+                map_widgets.text_input, map_widgets.button_find, map_widgets.toggle_legend)
 
 filter_sliders \
     = Column(   Row(    Column(map_widgets.button_count_start_minus, map_widgets.button_count_start_plus, width=50),
@@ -333,8 +340,7 @@ filter_sliders \
                 Row(    Column(map_widgets.button_dissolve_start_minus, map_widgets.button_dissolve_start_plus, width=50),
                         map_widgets.range_slider_dissolve,
                         Column(map_widgets.button_dissolve_end_minus, map_widgets.button_dissolve_end_plus)),
-                map_widgets.text_count,
-                map_widgets.filters_active)
+                map_widgets.filters_active, map_widgets.button_reset_filters)
 
 
 filter_histograms = Column(histogram_plot_count.p, histogram_plot_area.p, histogram_plot_distance.p, histogram_plot_ratio.p, histogram_plot_dissolve.p)
@@ -342,9 +348,20 @@ filter_histograms = Column(histogram_plot_count.p, histogram_plot_area.p, histog
 tab_filter_sliders = Panel(child=filter_sliders, title="Filter by Sliders")
 tab_filter_histograms = Panel(child=filter_histograms, title="Filter by Histograms")
 
-tabs_rhs = Tabs(tabs = [tab_filter_sliders, tab_filter_histograms, ])
+tabs_rhs = Tabs(tabs = [tab_filter_sliders, tab_filter_histograms])
 
-l = Row(lhs, p, tabs_rhs)
+def tab_change( tab = tabs_rhs,
+                td = tweet_data_controller.tab_dummy):
+    #print("TAB Change:")
+    new_data = dict()
+    new_data['x'] = [0]
+    new_data['y'] = [0]
+    new_data['tab'] = [tab.active]
+    td.data = new_data
+
+tabs_rhs.callback = CustomJS.from_py_func(tab_change)
+
+l = Row(lhs, Column(p, map_widgets.text_count), tabs_rhs)
 
 curdoc().add_root(l)
 curdoc().title = "Tweet Spatial Analysis"

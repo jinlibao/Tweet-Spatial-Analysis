@@ -161,7 +161,7 @@ class TweetData:
         self.max_count = self.df['count'].max()
         self.max_dissolve = self.df['dissolve_area'].max()
 
-    def create_dissolve(self, id, idx, grouped_idxs):
+    def create_dissolve(self, id_value, idx, grouped_idxs):
         #print("Create Dissolve: " + str(circle_idx))
         #print(self.tweet_data_df['idxs'][circle_idx])
         ellipses = dict()
@@ -195,7 +195,7 @@ class TweetData:
             new_data['x'] = []
             new_data['y'] = []
             new_data['area'] = 0.0
-            logger.warning("Empty Ellipses: Point ID: %s : a:%s : b:%s : angle:%s : IDXs:%s", id, self.df['a'][idx], self.df['b'][idx], self.df['angle'][idx], str(grouped_idxs))
+            logger.warning("Empty Ellipses: Point ID: %s : a:%s : b:%s : angle:%s : IDXs:%s", id_value, self.df['a'][idx], self.df['b'][idx], self.df['angle'][idx], str(grouped_idxs))
 
         return new_data
 
@@ -313,7 +313,7 @@ class MapTweetData:
         new_data['angle'] = []
         return new_data
 
-    def update_sde_ellipse(self, circle_idx, alpha = 0.5):
+    def update_sde_ellipse(self, circle_idx):
         #print("Update SDE Ellipse: " + str(circle_idx) + " : alpha: " + str(alpha))
         new_data = dict()
         new_data['x'] = [self.tweet_data_df['x'][circle_idx]]
@@ -329,13 +329,13 @@ class MapTweetData:
         new_data['y'] = []
         return new_data
 
-    def update_siblings(self, id):
+    def update_siblings(self, id_value):
         #print("Update Siblings: " + str(id))
         new_data = dict()
         new_data['x'] = []
         new_data['y'] = []
 
-        idxs_list = self.sibling_data_manager.get_sibling_idxs(id)
+        idxs_list = self.sibling_data_manager.get_sibling_idxs(id_value)
         for row_idx in idxs_list:
             new_data['x'].append(self.tweet_data_df['x'][row_idx])
             new_data['y'].append(self.tweet_data_df['y'][row_idx])
@@ -350,7 +350,7 @@ class MapTweetData:
         new_data['angle'] = []
         return new_data
 
-    def update_sibling_ellipses(self, id):
+    def update_sibling_ellipses(self, id_value):
         #print("Update Sibling Ellipses: " + str(id))
         new_data = dict()
         new_data['x'] = []
@@ -359,7 +359,7 @@ class MapTweetData:
         new_data['height'] = []
         new_data['angle'] = []
 
-        idxs_list = self.sibling_data_manager.get_sibling_idxs(id)
+        idxs_list = self.sibling_data_manager.get_sibling_idxs(id_value)
         for row_idx in idxs_list:
             if self.tweet_data_df['a'][row_idx] > 0.0:
                 new_data['x'].append(self.tweet_data_df['x'][row_idx])
@@ -375,9 +375,9 @@ class MapTweetData:
         new_data['y'] = []
         return new_data
 
-    def update_dissolve(self, id):
+    def update_dissolve(self, id_value):
         #print("Update Dissolve: " + str(id))
-        dissolve_data = self.sibling_data_manager.get_dissolve(id)
+        dissolve_data = self.sibling_data_manager.get_dissolve(id_value)
         new_data = dict()
         new_data['x'] = dissolve_data['x']
         new_data['y'] = dissolve_data['y']
@@ -437,6 +437,9 @@ class TweetDataController:
         self.lod_dummy = ColumnDataSource(data=dict(x=[], y=[], lod=[]))
         self.lod_dummy.on_change('data', self.lod_dummy_changed)
 
+        self.tab_dummy = ColumnDataSource(data=dict(x=[], y=[], tab=[]))
+        self.tab_dummy.on_change('data', self.tab_dummy_changed)
+
         self.selected_circle = ColumnDataSource(data=dict(x=[], y=[], id=[]))
         self.selected_circle.on_change('data', self.selected_circle_changed)
 
@@ -477,12 +480,20 @@ class TweetDataController:
         self.hr_distance = None
         self.hr_ratio = None
         self.hr_dissolve = None
+        self.lr = None
 
-        self.histogram_controller_count = HistogramController(self.active_dataset.histogram_count.df_histogram_cds)
-        self.histogram_controller_area = HistogramController(self.active_dataset.histogram_area.df_histogram_cds)
-        self.histogram_controller_distance = HistogramController(self.active_dataset.histogram_distance.df_histogram_cds)
-        self.histogram_controller_ratio = HistogramController(self.active_dataset.histogram_ratio.df_histogram_cds)
-        self.histogram_controller_dissolve = HistogramController(self.active_dataset.histogram_dissolve.df_histogram_cds)
+        self.histogram_controller_count = HistogramController(self.active_dataset.histogram_count.df_histogram_cds, self.filter_circles_by_count)
+        self.histogram_controller_area = HistogramController(self.active_dataset.histogram_area.df_histogram_cds, self.filter_circles_by_area)
+        self.histogram_controller_distance = HistogramController(self.active_dataset.histogram_distance.df_histogram_cds, self.filter_circles_by_distance)
+        self.histogram_controller_ratio = HistogramController(self.active_dataset.histogram_ratio.df_histogram_cds, self.filter_circles_by_ratio)
+        self.histogram_controller_dissolve = HistogramController(self.active_dataset.histogram_dissolve.df_histogram_cds, self.filter_circles_by_dissolve)
+
+        self.tc = None
+        self.count_values = None
+        self.area_values = None
+        self.distance_values = None
+        self.ratio_values = None
+        self.dissolve_values = None
 
     def find_id(self, id_value):
         print("Find: ID: " + str(id_value))
@@ -539,26 +550,54 @@ class TweetDataController:
                 print("LOD Dummy Callback: End")
                 self.apply_filters()
 
+    def tab_dummy_changed(self, attrname, old, new):
+        #print("TAB Dummy Change: " + str(new))
+        if len(new['tab']) > 0:
+            tab_value = new['tab'][0]
+            if tab_value is 0:
+                #print("Sliders Tab:")
+                #print("- - - - -")
+                #print("Count: " + str([self.filter_settings.count_start, self.filter_settings.count_end]))
+                self.count_values.value = [self.filter_settings.count_start, self.filter_settings.count_end]
+                #print("Area: " + str([self.filter_settings.area_start, self.filter_settings.area_end]))
+                self.area_values.value = [self.filter_settings.area_start, self.filter_settings.area_end]
+                #print("Distance: " + str([self.filter_settings.distance_start, self.filter_settings.distance_end]))
+                self.distance_values.value = [self.filter_settings.distance_start, self.filter_settings.distance_end]
+                #print("Ratio: " + str([self.filter_settings.ratio_start, self.filter_settings.ratio_end]))
+                self.ratio_values.value = [self.filter_settings.ratio_start, self.filter_settings.ratio_end]
+                #print("Dissolve: " + str([self.filter_settings.dissolve_start, self.filter_settings.dissolve_end]))
+                self.dissolve_values.value = [self.filter_settings.dissolve_start, self.filter_settings.dissolve_end]
+                #print("* * * * *")
+                self.apply_filters()
+
+            #if tab_value is 1:
+                #print("Histogram Tab:")
+
     def selected_circle_changed(self, attrname, old, new):
         #print("Selected Circle Change: " + str(new))
         if len(new['id']) > 0:
-            self.circle_id = new['id'][0]
-            print("Selected Circle Change: id: " + str(self.circle_id))
+            id_value = new['id'][0]
+            if id_value is None:
+                print("Nothing Selected")
+                self.clear_selection_details()
+            else:
+                self.circle_id = new['id'][0]
+                print("Selected Circle Change: id: " + str(self.circle_id))
 
-            self.working.sibling_data_manager.get_sibling_data(self.circle_id)
-            self.non_working.sibling_data_manager.get_sibling_data(self.circle_id)
+                self.working.sibling_data_manager.get_sibling_data(self.circle_id)
+                self.non_working.sibling_data_manager.get_sibling_data(self.circle_id)
 
-            self.update_selection_details()
+                self.update_selection_details()
 
-            if self.blend_dataset is not None:
-                self.selected_circle_blend.data = self.blend_dataset.clear_selected_circle()
+                if self.blend_dataset is not None:
+                    self.selected_circle_blend.data = self.blend_dataset.clear_selected_circle()
 
-            self.clear_sde_ellipse()
-            self.clear_siblings()
-            self.clear_sibling_ellipses()
-            self.clear_dissolve()
-            self.reset_renderer_properties()
-            self.blend_active = False
+                self.clear_sde_ellipse()
+                self.clear_siblings()
+                self.clear_sibling_ellipses()
+                self.clear_dissolve()
+                self.reset_renderer_properties()
+                self.blend_active = False
 
     def selected_count_changed(self, attrname, old, new):
         if len(new['idx']) > 0:
@@ -567,6 +606,10 @@ class TweetDataController:
     def selected_area_changed(self, attrname, old, new):
         if len(new['idx']) > 0:
             print("Selected Histogram Area: idx: " + str(new['idx']))
+
+    def clear_selection_details(self):
+        details_str = "<b>Selected ID</b>:<br/>"
+        self.selection_details.text = details_str
 
     def update_selection_details(self):
         if self.circle_id > -1:
@@ -689,6 +732,7 @@ class TweetDataController:
         self.hr_area.data_source.data = self.histogram_controller_area.cds.from_df(self.active_dataset.histogram_area.df_histogram_cds)
         self.hr_distance.data_source.data = self.histogram_controller_distance.cds.from_df(self.active_dataset.histogram_distance.df_histogram_cds)
         self.hr_ratio.data_source.data = self.histogram_controller_ratio.cds.from_df(self.active_dataset.histogram_ratio.df_histogram_cds)
+        self.hr_dissolve.data_source.data = self.histogram_controller_ratio.cds.from_df(self.active_dataset.histogram_dissolve.df_histogram_cds)
 
     def switch_tweet_dataset(self, value):
         if value == 0:
@@ -709,32 +753,39 @@ class TweetDataController:
         self.update_selection_details()
         self.update_histograms()
 
-    def num_of_points_active(self):
-        active = len(self.circles.data['id'])
-        total = len(self.active_dataset.tweet_data_df['id'])
-        return active, total
+    def update_text_count(self):
+        count_active = len(self.circles.data['id'])
+        count_total = len(self.active_dataset.tweet_data_df['id'])
+        percentage = (count_active/count_total) * 100.0
+        text_count_str = "Count: Total: " + str(count_active) + " : " + str('{0:.3f}'.format(percentage)) + "%"
+        self.tc.text = text_count_str
 
     def filter_circles_by_count(self, count_start, count_end):
+        #print("Count: " + str(count_start) + " : " + str(count_end))
         self.filter_settings.count_start = count_start
         self.filter_settings.count_end = count_end
         self.apply_filters()
 
     def filter_circles_by_area(self, area_start, area_end):
+        #print("Area: " + str(area_start) + " : " + str(area_end))
         self.filter_settings.area_start = area_start
         self.filter_settings.area_end = area_end
         self.apply_filters()
 
     def filter_circles_by_distance(self, distance_start, distance_end):
+        #print("Distance: " + str(distance_start) + " : " + str(distance_end))
         self.filter_settings.distance_start = distance_start
         self.filter_settings.distance_end = distance_end
         self.apply_filters()
 
     def filter_circles_by_ratio(self, ratio_start, ratio_end):
+        #print("Ratio: " + str(ratio_start) + " : " + str(ratio_end))
         self.filter_settings.ratio_start = ratio_start
         self.filter_settings.ratio_end = ratio_end
         self.apply_filters()
 
     def filter_circles_by_dissolve(self, dissolve_start, dissolve_end):
+        #print("Dissolve: " + str(dissolve_start) + " : " + str(dissolve_end))
         self.filter_settings.dissolve_start = dissolve_start
         self.filter_settings.dissolve_end = dissolve_end
         self.apply_filters()
@@ -770,17 +821,17 @@ class TweetDataController:
             if self.filter_settings.count_active:
                 subset_df = subset_df.loc[
                             (subset_df['count'] >= self.filter_settings.count_start)
-                        &   (subset_df['count'] <= self.filter_settings.count_end)]
+                        &   (subset_df['count'] < self.filter_settings.count_end)]
 
             if self.filter_settings.area_active:
                 subset_df = subset_df.loc[
                             (subset_df['area'] >= self.filter_settings.area_start)
-                        &   (subset_df['area'] <= self.filter_settings.area_end)]
+                        &   (subset_df['area'] < self.filter_settings.area_end)]
 
             if self.filter_settings.distance_active:
                 subset_df = subset_df.loc[
                             (subset_df['distance'] >= self.filter_settings.distance_start)
-                        &   (subset_df['distance'] <= self.filter_settings.distance_end)]
+                        &   (subset_df['distance'] < self.filter_settings.distance_end)]
 
             if self.filter_settings.ratio_active:
                 if self.filter_settings.ratio_end > self.filter_settings.ratio_max_unbounded:
@@ -788,14 +839,15 @@ class TweetDataController:
                 else:
                     subset_df = subset_df.loc[
                                 (subset_df['ratio'] >= self.filter_settings.ratio_start)
-                            &   (subset_df['ratio'] <= self.filter_settings.ratio_end)]
+                            &   (subset_df['ratio'] < self.filter_settings.ratio_end)]
 
             if self.filter_settings.dissolve_active:
                 subset_df = subset_df.loc[
                             (subset_df['dissolve_area'] >= self.filter_settings.dissolve_start)
-                        &   (subset_df['dissolve_area'] <= self.filter_settings.dissolve_end)]
+                        &   (subset_df['dissolve_area'] < self.filter_settings.dissolve_end)]
 
             self.circles.data = self.circles.from_df(subset_df)
+            self.update_text_count()
 
     def turn_blend_on(self, ellipse_active, siblings_active, dissolve_active):
         print("Turn Blend On:")
@@ -851,6 +903,13 @@ class TweetDataController:
                 self.pdbr.glyph.line_alpha = 1.0 - blend_ratio
                 self.pdbr.glyph.fill_alpha = 1.0 - blend_ratio
 
+    def toggle_legend(self, arg):
+        if arg:
+            self.lr.visible = False
+        else:
+            self.lr.visible = True
+
+
 class SiblingDataManager:
 
     def __init__(self, sibling_data_folder, dataset_name):
@@ -859,13 +918,12 @@ class SiblingDataManager:
 
         self.sibling_data = dict()
 
-    def get_sibling_data(self, id):
-        filename = str(self.dataset_name) + "_" + str(id) + ".json"
+    def get_sibling_data(self, id_value):
+        filename = str(self.dataset_name) + "_" + str(id_value) + ".json"
         logger.info("Get Sibling Data: " + filename)
         if id not in self.sibling_data:
-            self.sibling_data[id] = self.load_sibling_data(filename)
-
-        return self.sibling_data[id]
+            self.sibling_data[id_value] = self.load_sibling_data(filename)
+        return self.sibling_data[id_value]
 
     def load_sibling_data(self, filename):
         logger.info("Load Sibling Data: " + filename)
@@ -879,12 +937,12 @@ class SiblingDataManager:
         logger.debug(data)
         return sibling_json
 
-    def get_sibling_idxs(self, id):
-        sibling_data = self.get_sibling_data(id)
+    def get_sibling_idxs(self, id_value):
+        sibling_data = self.get_sibling_data(id_value)
         return sibling_data['idxs']
 
-    def get_dissolve(self, id):
-        sibling_data = self.get_sibling_data(id)
+    def get_dissolve(self, id_value):
+        sibling_data = self.get_sibling_data(id_value)
         return sibling_data['dissolve']
 
     def __str__(self):

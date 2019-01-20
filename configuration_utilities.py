@@ -72,6 +72,7 @@ class TweetSpatialAnalysisConfig:
         config_str += "\nArea: " + str(self.area[0]) + " to " + str(self.area[1]) + " step: " + str(self.area[2])
         config_str += "\nDistance: " + str(self.distance[0]) + " to " + str(self.distance[1]) + " step: " + str(self.distance[2])
         config_str += "\nRatio: " + str(self.ratio[0]) + " to " + str(self.ratio[1]) + " step: " + str(self.ratio[2])
+        config_str += "\nDissolve: " + str(self.dissolve[0]) + " to " + str(self.dissolve[1]) + " step: " + str(self.dissolve[2])
         config_str += "\nHistograms:"
         config_str += "\nBins Count: " + str(self.bins_count)
         config_str += "\nBins Count Text: " + str(self.bins_count_text)
@@ -91,7 +92,7 @@ def main():
     logger.info("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
     logger.info("Tweet Spatial Analysis: Config:")
 
-    tweet_spatial_analysis_config = TweetSpatialAnalysisConfig("tweet_spatial_analysis.ini")
+    tweet_spatial_analysis_config = TweetSpatialAnalysisConfig("conf/tweet_spatial_analysis.ini")
 
     logger.info(tweet_spatial_analysis_config)
 

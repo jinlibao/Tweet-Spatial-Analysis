@@ -3,14 +3,20 @@ See: PEP 350 -- Codetags: https://www.python.org/dev/peps/pep-0350/
 Working on since last commit:
 Tasks:
 Completed:
-050: Add a colour palette to represent sibling count:
-090: Need to modify the colours when blending to distinguish datasets:
-092: Consider preprocessing defaults. Maybe set area/dissolve to 0 rather than -1:
+027: Create a better layout:
+032: Consider optimization as a whole over the entire 50K data set (x 3):
+058: If nothing selected then reset Selected ID text:
+064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins:
+093: Add a clear button to remove selected point and associated visuals:
+094: Consider toggling on/off the legend:
+098: If no bars are selected on the histogram, reset the filter to full range:
+Moved .ini into a conf folder.
 
 Working on:
-064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins:
+099: Look at the filtering as still loosing data points when filters applied from the histogram:
+100: Consider what to do about the filters / sliders when switching tabs:
 
-Next Id: 094
+Next Id: 103
 ToDo: 007: Consider some form of quad-tree pre optimization of data: Added 20181122
 ToDo: 009: Assess the use of CustomJSHover: https://bokeh.pydata.org/en/latest/docs/reference/models/tools.html#: Added 20181122:
 ToDo: 013: Can I add a main to the main.py file?
@@ -23,21 +29,22 @@ ToDo: 043: Consider using Bokeh's DataTable to provide a way to list the sibling
 ToDo: 059: Sibling data points are not selected-able nor have a hover tooltip: Added 20181208:
 ToDo: 069: Think about create some form of point density - can this relate to the spatial index? Added 20181211:
 ToDo: 081: When blend is on, the blends disappear when the filter is changed? When blend then toggled, only the active data set is then shown. Need to toggle ellipse for both to re-appear. Added 20181224:
-ToDo: 082: Take another look at Uncaught Error: reference {"id":"1004","type":"ColumnDataSource"} isn't known (not in Document?)
-ToDo: 087: 'Find ID' appears to not be properly working across the data sets? Look ar IDs where no area: Added 20190106
-ToDo: 093: Add a clear button to remove selected point and associated visuals: Added 20190108
+ToDo: 082: Take another look at Uncaught Error: reference {"id":"1004","type":"ColumnDataSource"} isn't known (not in Document?): Added 20181224:
+ToDo: 087: 'Find ID' appears to not be properly working across the data sets? Look ar IDs where no area: Added 20190106:
+ToDo: 095: Consider defining circle size by SDE area - this will likely be a non linear mapping: Added 20190110:
+ToDo: 096: Consider modifying the .ini to define number of histogram bins when not defining a non-linear interval list: Added 20190110:
+ToDo: 101: Be able to select multiple bars on the histograms: Added 20190119
+ToDo: 102: Issue of 'tapping' on a bar, moving mouse, and NOT detecting the select - even though bar selected visually. Added 20190110:
 
 InProgress: 010: Add Logging: https://bokeh.pydata.org/en/latest/docs/reference/util.html#bokeh-util-logconfig: Added 20181122: Started 20181122:
 InProgress: 018: Consider how to use visualization to represent area / number of tweets within ellipse etc - maybe add to the hover tool?: Added: 20181130: Started 20181202
-InProgress: 027: Create a better layout: Added 20181130: Started 20181130:
-InProgress: 032: Consider optimization as a whole over the entire 50K data set (x 3): Added 20181202: : Started 20181202:
 InProgress: 034: BBug: A user is able to select multiple data points when the scale is zoomed out enough - only want ability to select a single one: Added 20181202: Started 20181203:
 InProgress: 042: Can I format the text on the hover tooltip? Added 20181203: Started 20181203:
 InProgress: 054: Consider adding connecting lines between working and non working (with direction): Added 2081207: Started 20181207
-InProgress: 058: If nothing selected then reset Selected ID text: Added 20181208: Started 20181211:
 InProgress: 063: Consider some form of heat map for clustered tweet data points - representing density: Added 20181210: Started 20181210:
-InProgress: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: Started 20181218:
 InProgress: 068: Think about a map of overlapping SDEs - use grey scale + transparency - maybe convert patches to a raster: Added 20181211: Started 20181211:
+InProgress: 099: Look at the filtering as still loosing data points when filters applied from the histogram: Added 20190119: Started 20190119:
+InProgress: 100: Consider what to do about the filters / sliders when switching tabs: Added 20190119: Started 20190119:
 
 Done: 001: Draw ellipse on selecting a user: Added 20181122: Started 20181122: Completed 20181126
 Done: 002: Understand mapping of ellipse data to actual drawing: Added 20181122: Started 20181129: Completed 20181129
@@ -57,10 +64,12 @@ Done: 023: Check the drawing of the ellipse if the area is 0 or -1: Added 201811
 Done: 024: Allow the user to select a point by entering the ID in a text book. This will require some form of automatic zoom to 'fly' to the selected point: Added 20181130: Started 20181130: Completed 20181130
 Done: 025: Understand why data point ID 2760872119 is not within it's ellipse? Surely this can't happen as the data point is the location for ellipse? Added 20181130: Started 20181130: Completed 20181130
 Done: 026: On text, have single ID (idx) string - then parse this backend: Added 20181130: Started 20181130: Completed 20181130
+Done: 027: Create a better layout: Added 20181130: Started 20181130: Completed 20190119
 Done: 028: Consider using check boxes to define which ellipses to show for a selected data point: Added 20181130: Started 20181130: Completed 20181211
 Done: 029: Consider adding filters/sliders for some bins of 'num of local data points', 'ellipse area' and other measures: Added 20181201: Started 20181207: Completed 20181217
 Done: 030: Confirm spatial references / projections being used: Added 20181201: Started 20181201: Completed 20181201
 Done: 031: BBug: When changing the dataset, the selected data point is no longer displayed in red: Added 20181202: Started 20181202: Completed 20181202
+Done: 032: Consider optimization as a whole over the entire 50K data set (x 3): Added 20181202: Started 20181202: Completed 20190119
 Done: 033: Need to save the pre-processed data out to a file and then load into app: Added 20181202: Started 20181203: Completed 20181205
 Done: 035: Consider drawing all the ellipses of the datapoints within the selected datapoint - this is different to drawing the single dissolve: Added 20181202: Started 20181202: Completed 20181202
 Done: 036: Change buttons (where appropriate) to toggles to switch things on/off: Added 20181202: Completed 20181202
@@ -79,9 +88,11 @@ Done: 053: Add a slide for distance between working and non working: Added 20181
 Done: 055: When changing datasets, re-apply the count filter: Added 20181208: Started 20181208: Completed 20181208
 Done: 056: Consider potentially pre-processing dissolve area so the map can be filtered on that: Added 20181208: Started 20181218: Completed 20190107
 Done: 057: Add numerical count and %s respect to number of points for each slider: Added 20181208: Started 20181208: Completed 20181208
+Done: 058: If nothing selected then reset Selected ID text: Added 20181208: Started 20181211: Completed 20190119
 Done: 060: Consider adding text input for the sliders. For example unable to explicit slide to '1': Added 20181208: Started 20181211: Completed 20181211
 Done: 061: Add a legend for the 'sibling count' visualization: Added 20181209: Started 20190101: Completed 20190101
 Done: 062: Create a 'global configuration' that can be loaded at runtime - including details generated from the preprocessing stage: Added 20181209: Started 20181219: Completed 20181224:
+Done: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: Started 20181218: Completed 20190119
 Done: 065: BBug with circle_renderer.selection_glyph and point 2429397887 - cheated by setting alpha to 0.0 to work: Added 20181211: Started 20181211: Completed 20181211
 Done: 066: Choose different color for the find circle to contrast from other points better: Added 20181211: Stated 20181211: Completed 20181211
 Done: 067: Create a Git repo around the first version: Added 20181211: Started 20181211: Completed 20181211
@@ -105,6 +116,9 @@ Done: 089: Look at time to start up with 10K points: Added 20190106: Started 201
 Done: 090: Need to modify the colours when blending to distinguish datasets: Added 20190106: Started 20190108: Completed 20190108
 Done: 091: Make folder to sibling data absolute, rather than local: Added 20190107: Started 20190107: Completed 20190107
 Done: 092: Consider preprocessing defaults. Maybe set area/dissolve to 0 rather than -1: Added 20190106: Started 20190108: Completed 20190108
+Done: 093: Add a clear button to remove selected point and associated visuals: Added 20190108: Started 20190109: Completed 20190109
+Done: 094: Consider toggling on/off the legend: Added 20190110: Started 20190119: Completed 20190119
+Done: 098: If no bars are selected on the histogram, reset the filter to full range: Added 20190119: Started 20190119: Completed 20190119
 
 OnGoing:
 
@@ -245,9 +259,10 @@ Looks like this might have just been an error, as it looks fine now.
 Done: 026: On text, have single ID (idx) string - then parse this backend: Added 20181130: Started 20181130: Completed 20181130
 Only using the text_id widget, and then some basic string manipulation to extract the idx from between the brackets.
 
-InProgress: 027: Create a better layout: Added 20181130: Started 20181130:
+Done: 027: Create a better layout: Added 20181130: Started 20181130: Completed 20190119
 Started playing, look at TextInput not respecting width: https://github.com/bokeh/bokeh/issues/6427:
 20181211: Played with columns and rows. There is only so much that can be achieved, so keep expectations low.
+20190119: Consider finished and open again when feedback from users.
 
 Done: 028: Consider using check boxes to define which ellipses to show for a selected data point: Added 20181130: Started 20181130: Completed 20181211
 Consider various states such as the checkbox for the selected data set should always be selected.
@@ -280,7 +295,7 @@ This occurs when the user clicks on the map but no circle is selected i.e. unsel
 So, actually, I should be clearing the ellipse and circles inside ellipse instead.
 This doesn't appear to be a problem any more?
 
-InProgress: 032: Consider optimization as a whole over the entire 50K data set (x 3): Added 20181202: Started 20181202
+Done: 032: Consider optimization as a whole over the entire 50K data set (x 3): Added 20181202: Started 20181202: Completed 20190119
 Related to task 063
 On home desktop, 10K points is slow. It loads within less than 10s which is good, but zooming and panning is jerky.
 How many points have a count less than 0?
@@ -307,6 +322,7 @@ Consider providing buttons to explicitly turn points on/off.
 This doesn't actually seem to improve pan/zoom performace - I suspect the data is still being 'processed' even though invisible.
 Go back to making the circle data set empty.
 This works much better. There is a delay 'loading' the circles back up.
+20190119: Consider finished. And come back to the idea 'as a whole' in a later version.
 
 Done: 033: Need to save the pre-processed data out to a file and then load into app: Added 20181202: Started 20181203: Completed 20181205
 Look at Bokeh's Mapping Geo Data: https://bokeh.pydata.org/en/latest/docs/user_guide/geo.html for some direction.
@@ -512,9 +528,10 @@ Need to modify code so that all filters are actually applied together.
 Consider being able to select which filters to apply using a check box.
 Implemented so each filter has a checkbox to indicate if its on/off.
 
-InProgress: 058: If nothing selected then reset Selected ID text: Added 20181208: Started 20181211:
+Done: 058: If nothing selected then reset Selected ID text: Added 20181208: Started 20181211: Completed 20190119
 How do I detect if nothing is selected?
 Maybe have a 'clear selection' button?
+20190119: Started looking at again. Implemented.
 
 Done: 060: Consider adding text input for the sliders. For example unable to explicit slide to '1': Added 20181208: Started 20181211: Completed 20181211
 Add buttons either side of the slider with '-' and '+' to add 1 to the current slider value.
@@ -537,7 +554,7 @@ SciKit Learn: https://scikit-learn.org/stable/modules/generated/sklearn.cluster.
 Rtree 0.8.3: https://pypi.org/project/Rtree/ and http://toblerity.org/rtree/ : Rtree is a ctypes Python wrapper of libspatialindex that provides a number of advanced spatial indexing features for the spatially curious Python user. These features include: Nearest neighbor search, Intersection search, Multi-dimensional indexes, Clustered indexes (store Python pickles directly with index entries), Bulk loading, Deletion, Disk serialization, Custom storage implementation (to implement spatial indexing in ZODB, for example).
 * Learning Geospatial Analysis with Python: Spatial Indexing: p54: Quadtree vs R-Tree
 
-InProgress: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: Started 20181218:
+Done: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: Started 20181218: Completed 20190119
 How much can / should this be processed?
 Creating on the fly/as start up wrt 1,000 / 10,000 / 50,000 points.
 Also consider having non-regular bins - consider sibling counts: e.g. 1, 2, 3, 4, 5, 6-10, 11-20, 21-50, 50-100, >100
@@ -555,6 +572,14 @@ Was able to add third 'distance' histogram in under five minutes.
 Remember that this only represents the distance between working and non-working so does NOT change when the dataset is changed.
 Added fourth ratio histogram.
 20190101: Still need to add filter by functionality.
+20190109: Consider what to do when I change filter tabs. Do I reset the filter back to 100%?
+I can translate from Histogram to Sliders as I can use the bins to define the slider ranges.
+It doesn't translate the other way as the sliders to not match exactly the bins.
+For the first iteration, reset the filter when switching to histogram tab.
+Added callback to detect tab change and using a dummy CDS to communicate back to the TweetDataController
+20190119: How to connect the Histogram controller selected change callbacl to the filter.
+Think about hooking the appropriate filter method (e.g. filter_circles_by_count) in the tweet data controller to the associated histogram.
+Wired methods from tweet data controller into the histogram controller.
 
 Done: 065: BBug with circle_renderer.selection_glyph and point 2429397887 - cheated by setting alpha to 0.0 to work: Added 20181211: Started 20181211: Completed 20181211
 Replicate:
@@ -674,3 +699,25 @@ all three need to be negative to filter back to 10,000
 consider making the defaults for all three to 0
 In the pre-processing stage have set the defaults for area, ratio, a, b, distance to 0.0
 
+Done: 098: If no bars are selected on the histogram, reset the filter to full range: Added 20190119: Started 20190119: Completed 20190119
+How to detect if nothing is selected?
+Able to add self.p.js_on_event(events.Tap, CustomJS.from_py_func(callback_tap)) to the histogram controller.
+Need to update count total - move from MapWidgets into TweetDataController? Implemented.
+
+InProgress: 099: Look at the filtering as still loosing data points when filters applied from the histogram: Added 20190119: Started 20190119:
+W.r.t. the histograms, the intervals can be decimal numbers (since equal intervals) - but filters are whole numbers
+For example Distance:
+Histogram: 0 - 5.656 (865); 11.314 (60); 16.97 (30)
+Slider: 0 - 5 (851); 0 - 6 (866)
+Add bin values to histogram hover when equal intervals.
+Bin values added - consider formatting to single decimal point?
+Formatted to 2 decimal places.
+
+InProgress: 100: Consider what to do about the filters / sliders when switching tabs: Added 20190119: Started 20190119:
+Histogram bars have decimals - sliders ate integers
+I can't map from sliders to histograms.
+I can only approximate mapping from histograms to sliders.
+Potentially have two sets of filter values?
+Add a reset filters button. Implemented
+Issue of 'tapping' on a bar, moving mouse, and NOT detecting the select - even though bar selected visually. Mark as a bbug.
+On changing tab (to sliders), the sliders will be updated, which triggers their on_change callback, which in turns calls the tweet data controller method (again).

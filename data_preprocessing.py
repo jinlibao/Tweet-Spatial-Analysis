@@ -15,7 +15,7 @@ pd.set_option('expand_frame_repr', False)
 pd.options.display.max_rows = 999
 # Options and Settings: https://pandas.pydata.org/pandas-docs/stable/options.html
 
-num_of_rows_to_process = 1000
+num_of_rows_to_process = None
 # Define as None to process all rows.
 
 
