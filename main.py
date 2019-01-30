@@ -14,7 +14,7 @@ from tweet_data import *
 from user_profile_data import UserProfileDetails
 from widget_utilities import *
 
-tweet_spatial_analysis_config = TweetSpatialAnalysisConfig("Tweet-Spatial-Analysis/conf/tweet_spatial_analysis.ini")
+tweet_spatial_analysis_config = TweetSpatialAnalysisConfig("Tweet-Spatial-Analysis/conf/tweet_spatial_analysis - all.ini")
 logger.info(tweet_spatial_analysis_config)
 
 pre_processor = TweetDataPreProcessing(None)

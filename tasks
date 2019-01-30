@@ -3,18 +3,11 @@ See: PEP 350 -- Codetags: https://www.python.org/dev/peps/pep-0350/
 Working on since last commit:
 Tasks:
 Completed:
-027: Create a better layout:
-032: Consider optimization as a whole over the entire 50K data set (x 3):
-058: If nothing selected then reset Selected ID text:
-064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins:
-093: Add a clear button to remove selected point and associated visuals:
-094: Consider toggling on/off the legend:
-098: If no bars are selected on the histogram, reset the filter to full range:
-Moved .ini into a conf folder.
 
 Working on:
 099: Look at the filtering as still loosing data points when filters applied from the histogram:
 100: Consider what to do about the filters / sliders when switching tabs:
+101: Be able to select multiple bars on the histograms:
 
 Next Id: 103
 ToDo: 007: Consider some form of quad-tree pre optimization of data: Added 20181122
@@ -33,7 +26,6 @@ ToDo: 082: Take another look at Uncaught Error: reference {"id":"1004","type":"C
 ToDo: 087: 'Find ID' appears to not be properly working across the data sets? Look ar IDs where no area: Added 20190106:
 ToDo: 095: Consider defining circle size by SDE area - this will likely be a non linear mapping: Added 20190110:
 ToDo: 096: Consider modifying the .ini to define number of histogram bins when not defining a non-linear interval list: Added 20190110:
-ToDo: 101: Be able to select multiple bars on the histograms: Added 20190119
 ToDo: 102: Issue of 'tapping' on a bar, moving mouse, and NOT detecting the select - even though bar selected visually. Added 20190110:
 
 InProgress: 010: Add Logging: https://bokeh.pydata.org/en/latest/docs/reference/util.html#bokeh-util-logconfig: Added 20181122: Started 20181122:
@@ -45,6 +37,7 @@ InProgress: 063: Consider some form of heat map for clustered tweet data points 
 InProgress: 068: Think about a map of overlapping SDEs - use grey scale + transparency - maybe convert patches to a raster: Added 20181211: Started 20181211:
 InProgress: 099: Look at the filtering as still loosing data points when filters applied from the histogram: Added 20190119: Started 20190119:
 InProgress: 100: Consider what to do about the filters / sliders when switching tabs: Added 20190119: Started 20190119:
+InProgress: 101: Be able to select multiple bars on the histograms: Added 20190119: Started 20190130:
 
 Done: 001: Draw ellipse on selecting a user: Added 20181122: Started 20181122: Completed 20181126
 Done: 002: Understand mapping of ellipse data to actual drawing: Added 20181122: Started 20181129: Completed 20181129
@@ -721,3 +714,7 @@ Potentially have two sets of filter values?
 Add a reset filters button. Implemented
 Issue of 'tapping' on a bar, moving mouse, and NOT detecting the select - even though bar selected visually. Mark as a bbug.
 On changing tab (to sliders), the sliders will be updated, which triggers their on_change callback, which in turns calls the tweet data controller method (again).
+
+InProgress: 101: Be able to select multiple bars on the histograms: Added 20190119: Started 20190130:
+Look at the selection box tool that allows multiple 'points' to be selected.
+
