@@ -1,4 +1,3 @@
-
 from shapely.geometry import Point, Polygon
 from shapely.ops import cascaded_union
 import shapely.affinity

@@ -22,7 +22,7 @@ from utils import widget_utilities as wu
 
 logger = logging.getLogger()
 
-tweet_spatial_analysis_config = cu.TweetSpatialAnalysisConfig("Tweet-Spatial-Analysis/conf/tweet_spatial_analysis - all.ini")
+tweet_spatial_analysis_config = cu.TweetSpatialAnalysisConfig("Tweet-Spatial-Analysis/conf/tweet_spatial_analysis.ini")
 logger.info(tweet_spatial_analysis_config)
 
 pre_processor = TweetDataPreProcessing(None)

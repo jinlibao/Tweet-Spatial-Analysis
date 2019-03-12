@@ -1,4 +1,3 @@
-
 from bokeh.models import RangeSlider
 from bokeh.models.widgets import Button, CheckboxGroup, Div, Paragraph, RadioButtonGroup, Slider, TextInput, Toggle
 
