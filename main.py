@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+
+import logging
 
 from bokeh import events
 from bokeh.io import curdoc
@@ -7,14 +10,19 @@ from bokeh.palettes import PiYG, RdYlGn
 from bokeh.plotting import figure
 from bokeh.tile_providers import CARTODBPOSITRON
 
-from configuration_utilities import *
 from data_preprocessing import TweetDataPreProcessing
-from file_utilities import *
-from tweet_data import *
-from user_profile_data import UserProfileDetails
-from widget_utilities import *
+from utils import analysis_utilities as au
+from utils import configuration_utilities as cu
+from utils import file_utilities as fu
+from utils import histogram_utilities as hu
+from utils import tweet_data_utilities as tdu
+from utils import user_profile_utilities as upu
+from utils import widget_utilities as wu
 
-tweet_spatial_analysis_config = TweetSpatialAnalysisConfig("Tweet-Spatial-Analysis/conf/tweet_spatial_analysis - all.ini")
+
+logger = logging.getLogger()
+
+tweet_spatial_analysis_config = cu.TweetSpatialAnalysisConfig("Tweet-Spatial-Analysis/conf/tweet_spatial_analysis - all.ini")
 logger.info(tweet_spatial_analysis_config)
 
 pre_processor = TweetDataPreProcessing(None)
@@ -22,16 +30,16 @@ pre_processor.read_from_json(   "Tweet-Spatial-Analysis/data/tweet_mean_all.json
                                 "Tweet-Spatial-Analysis/data/tweets_median_working.json",
                                 "Tweet-Spatial-Analysis/data/tweets_median_non_working.json")
 
-file_open = FileOpen("Tweet-Spatial-Analysis/data", "user-info.csv")
-user_info = UserProfileDetails(file_open)
+file_open = fu.FileOpen("Tweet-Spatial-Analysis/data", "user-info.csv")
+user_info = upu.UserProfileDetails(file_open)
 user_info.process()
 
-tweet_data_controller = TweetDataController(pre_processor, tweet_spatial_analysis_config, user_info)
-map_widgets = MapWidgets(tweet_data_controller, tweet_spatial_analysis_config)
+tweet_data_controller = tdu.TweetDataController(pre_processor, tweet_spatial_analysis_config, user_info)
+map_widgets = wu.MapWidgets(tweet_data_controller, tweet_spatial_analysis_config)
 tweet_data_controller.selection_details = map_widgets.text_selection_details
 
-east_min, north_min = lon_lat_to_east_north(tweet_spatial_analysis_config.longitude[0], tweet_spatial_analysis_config.latitude[0])
-east_max, north_max = lon_lat_to_east_north(tweet_spatial_analysis_config.longitude[1], tweet_spatial_analysis_config.latitude[1])
+east_min, north_min = au.lon_lat_to_east_north(tweet_spatial_analysis_config.longitude[0], tweet_spatial_analysis_config.latitude[0])
+east_max, north_max = au.lon_lat_to_east_north(tweet_spatial_analysis_config.longitude[1], tweet_spatial_analysis_config.latitude[1])
 
 # Configuring Plot Tools: https://bokeh.pydata.org/en/latest/docs/user_guide/tools.html
 p = figure(plot_width=800, plot_height=800,
@@ -158,7 +166,7 @@ def callback_tap_count(
     new_data['idx'] = [idx[0]]
     sc.data = new_data
 
-histogram_plot_count = HistogramPlot(tweet_data_controller.histogram_controller_count, callback_hover_count, callback_tap_count,
+histogram_plot_count = hu.HistogramPlot(tweet_data_controller.histogram_controller_count, callback_hover_count, callback_tap_count,
                                      "Number of Siblings within a Tweet Data Point", "Number of Siblings", "Tweets with Count")
 tweet_data_controller.hr_count = histogram_plot_count.r
 
@@ -185,7 +193,7 @@ def callback_tap_area(
     new_data['idx'] = [idx[0]]
     sc.data = new_data
 
-histogram_plot_area = HistogramPlot(tweet_data_controller.histogram_controller_area, callback_hover_area, callback_tap_area, "Area of SDE", "Area", "Count")
+histogram_plot_area = hu.HistogramPlot(tweet_data_controller.histogram_controller_area, callback_hover_area, callback_tap_area, "Area of SDE", "Area", "Count")
 tweet_data_controller.hr_area = histogram_plot_area.r
 
 
@@ -210,7 +218,7 @@ def callback_tap_distance(
     new_data['idx'] = [idx[0]]
     sc.data = new_data
 
-histogram_plot_distance = HistogramPlot(tweet_data_controller.histogram_controller_distance, callback_hover_distance, callback_tap_distance, "Distance between W and Non-W", "Distance", "Count")
+histogram_plot_distance = hu.HistogramPlot(tweet_data_controller.histogram_controller_distance, callback_hover_distance, callback_tap_distance, "Distance between W and Non-W", "Distance", "Count")
 tweet_data_controller.hr_distance = histogram_plot_distance.r
 
 
@@ -227,7 +235,6 @@ def callback_tap_ratio(
         hhci = tweet_data_controller.histogram_controller_ratio.hover_idx,
         sc = tweet_data_controller.histogram_controller_ratio.selected
     ):
-
     idx = hhci.data['idx']
     new_data = dict()
     new_data['x'] = [0]
@@ -235,7 +242,7 @@ def callback_tap_ratio(
     new_data['idx'] = [idx[0]]
     sc.data = new_data
 
-histogram_plot_ratio = HistogramPlot(tweet_data_controller.histogram_controller_ratio, callback_hover_ratio, callback_tap_ratio, "X/Y Ratio", "Ratio", "Count")
+histogram_plot_ratio = hu.HistogramPlot(tweet_data_controller.histogram_controller_ratio, callback_hover_ratio, callback_tap_ratio, "X/Y Ratio", "Ratio", "Count")
 tweet_data_controller.hr_ratio = histogram_plot_ratio.r
 
 
@@ -260,7 +267,7 @@ def callback_tap_dissolve(
     new_data['idx'] = [idx[0]]
     sc.data = new_data
 
-histogram_plot_dissolve = HistogramPlot(tweet_data_controller.histogram_controller_dissolve, callback_hover_dissolve, callback_tap_dissolve, "Dissolve Area", "Area", "Count")
+histogram_plot_dissolve = hu.HistogramPlot(tweet_data_controller.histogram_controller_dissolve, callback_hover_dissolve, callback_tap_dissolve, "Dissolve Area", "Area", "Count")
 tweet_data_controller.hr_dissolve = histogram_plot_dissolve.r
 
 

@@ -1,13 +1,58 @@
 
+Python Version: 3.7
+--------------
+
+Environment Variables:
+PYTHON37_PATH: D:\Development\Python\Python37
+PYTHON37_SCRIPTS: D:\Development\Python\Python37\Scripts
 
 set PATH=%PYTHON37_PATH%;%PYTHON37_SCRIPTS%;%PATH%
 python --version
 3.7.1
 
-cd C:\Users\simon\Google Drive\UW Classes\11 GEOG5880 Intro Python Spatial Analysis\UW\Final Project\Chen Xu
 
-bokeh serve --show Tweet-Spatial-Analysis --log-level info --log-file output.txt --log-format "%(asctime)s %(levelname)s: %(message)s"
+Required Libraries:
+-------------------
+Pip Install
+bokeh
+pandas
+numpy
+
+From .whl
+pyproj
+shapely
+
+Copy files to: <parent_install>/Tweet-Spatial-Analysis/
+
+Configuration:
+--------------
+<parent_install>/Tweet-Spatial-Analysis/
+    conf/
+        tweet_spatial_analysis - all.ini
+    data/
+        tweet_mean_all.json
+        tweets_median_working.json
+        tweets_median_non_working.json
+        user-info.csv
+
+
+tweet_spatial_analysis - all.ini
+Set: folder to pre-processed 'cache-able' data
+[SIBLING_DATA]
+folder = D:/Development/Tweet-Spatial-Analysis/Sibling Data All/
+
+
+Running Application:
+--------------------
+Open Command-Line:
+Navigate to <parent_install>	
+e.g. cd <parent_install>
+From Command-Line run: 
+set PATH=%PYTHON37_PATH%;%PYTHON37_SCRIPTS%;%PATH%
+python --version
+3.7.1
+
 bokeh serve Tweet-Spatial-Analysis --log-level info --log-file output.txt --log-format "%(asctime)s %(levelname)s: %(message)s"
 
-http://localhost:5006/Tweet-Spatial-Analysis
+In Chrome: http://localhost:5006/Tweet-Spatial-Analysis
 

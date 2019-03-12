@@ -8,8 +8,9 @@ Working on:
 099: Look at the filtering as still loosing data points when filters applied from the histogram:
 100: Consider what to do about the filters / sliders when switching tabs:
 101: Be able to select multiple bars on the histograms:
+103: Pre-process if working and non-working SDEs are intersecting, within,overlap, disjoint:
 
-Next Id: 103
+Next Id: 104
 ToDo: 007: Consider some form of quad-tree pre optimization of data: Added 20181122
 ToDo: 009: Assess the use of CustomJSHover: https://bokeh.pydata.org/en/latest/docs/reference/models/tools.html#: Added 20181122:
 ToDo: 013: Can I add a main to the main.py file?
@@ -38,6 +39,7 @@ InProgress: 068: Think about a map of overlapping SDEs - use grey scale + transp
 InProgress: 099: Look at the filtering as still loosing data points when filters applied from the histogram: Added 20190119: Started 20190119:
 InProgress: 100: Consider what to do about the filters / sliders when switching tabs: Added 20190119: Started 20190119:
 InProgress: 101: Be able to select multiple bars on the histograms: Added 20190119: Started 20190130:
+InProgress: 103: Pre-process if working and non-working SDEs are intersecting, within,overlap, disjoint: Added 20190207: Started 20190207
 
 Done: 001: Draw ellipse on selecting a user: Added 20181122: Started 20181122: Completed 20181126
 Done: 002: Understand mapping of ellipse data to actual drawing: Added 20181122: Started 20181129: Completed 20181129
@@ -717,4 +719,14 @@ On changing tab (to sliders), the sliders will be updated, which triggers their 
 
 InProgress: 101: Be able to select multiple bars on the histograms: Added 20190119: Started 20190130:
 Look at the selection box tool that allows multiple 'points' to be selected.
+20190207: Initial tests not very successful.
+Alternative: Use Shift Key + Tap and select multiple bars that way.
+One issue is that after selecting multiple bars, you can tell if then only a single bar is selected, as can not identify if shift key is being pressed.
+Need to unselect all.
+Could potentially have single/mutliple select 'mode'.
 
+InProgress: 103: Pre-process if working and non-working SDEs are intersecting, within,overlap, disjoint: Added 20190207: Started 20190207
+Use the shapely functionality.
+Do I re run the data processing script again? Or write another tool to extend and use cached info?
+I'm only using the data points SDEs - not performing any sibling calculations.
+So I can read in the working/non-working json only - I shouldn't need the cached info.

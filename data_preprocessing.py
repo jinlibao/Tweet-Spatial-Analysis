@@ -1,13 +1,13 @@
-
+#!/usr/bin/env python3
 import logging
 import logging.config
 import numpy as np
+import pandas as pd
 
-#from bokeh.palettes import plasma
-
-from configuration_utilities import *
-from file_utilities import *
-from tweet_data import *
+from utils import analysis_utilities as au
+from utils import configuration_utilities as cu
+from utils import file_utilities as fu
+from utils import tweet_data_utilities as tdu
 
 logger = logging.getLogger()
 
@@ -101,7 +101,7 @@ class TweetDataPreProcessing:
 
         logger.info("Processing: Working")
         print("Processing: Working")
-        self.tweet_data_working = TweetData("working", self.config)
+        self.tweet_data_working = tdu.TweetData("working", self.config)
         self.tweet_data_working.create_dataframe(self.df, 'User-ID', 'latitude-median-working-tweets',
                                             'longitude-median-working-tweets', 'area-working-tweets',
                                             'x/y-working-tweets', 'theta-working-tweets', 'medians-distance')
@@ -112,7 +112,7 @@ class TweetDataPreProcessing:
 
         logger.info("Processing: All")
         print("Processing: All")
-        self.tweet_data_all = TweetData("all", self.config)
+        self.tweet_data_all = tdu.TweetData("all", self.config)
         self.tweet_data_all.create_dataframe(self.df, 'User-ID', 'latitude-mean-all-tweets',
                                                 'longitude-mean-all-tweets', 'area-all-tweets', 'x/y-all-tweets',
                                                 'theta-all-tweets', 'medians-distance')
@@ -123,7 +123,7 @@ class TweetDataPreProcessing:
 
         logger.info("Processing: Non-Working")
         print("Processing: Non-Working")
-        self.tweet_data_non_working = TweetData("non_working", self.config)
+        self.tweet_data_non_working = tdu.TweetData("non_working", self.config)
         self.tweet_data_non_working.create_dataframe(self.df, 'User-ID', 'latitude-median-nonworking-tweets',
                                                 'longitude-median-nonworking-tweets', 'area-nonworking-tweets',
                                                 'x/y-nonworking-tweets', 'theta-nonworking-tweets', 'medians-distance')
@@ -148,15 +148,15 @@ class TweetDataPreProcessing:
     '''
 
     def read_from_json(self, mean_all, working, non_working):
-        self.tweet_data_all = TweetData("all")
+        self.tweet_data_all = tdu.TweetData("all")
         self.tweet_data_all.read_from_json(mean_all)
         #self.process_color(self.tweet_data_all.df, config)
 
-        self.tweet_data_working = TweetData("working")
+        self.tweet_data_working = tdu.TweetData("working")
         self.tweet_data_working.read_from_json(working)
         #self.process_color(self.tweet_data_working.df, config)
 
-        self.tweet_data_non_working = TweetData("non_working")
+        self.tweet_data_non_working = tdu.TweetData("non_working")
         self.tweet_data_non_working.read_from_json(non_working)
         #self.process_color(self.tweet_data_non_working.df, config)
 
@@ -217,7 +217,7 @@ class TweetDataPreProcessing:
 # and follows the Earth's (curved) surface.
 def calculate_distance_non_projected_havershine_test(df, num_of_rows):
     for row_idx in range(0, num_of_rows):
-        dist = calculate_distance_non_projected_havershine(
+        dist = au.calculate_distance_non_projected_havershine(
             df['latitude-median-working-tweets'][row_idx],
             df['longitude-median-working-tweets'][row_idx],
             df['latitude-median-nonworking-tweets'][row_idx],
@@ -234,10 +234,10 @@ def main():
     logger.info("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
     logger.info("Tweet Data: Pre-Processing:")
 
-    tweet_spatial_analysis_config = TweetSpatialAnalysisConfig("tweet_spatial_analysis.ini")
+    tweet_spatial_analysis_config = cu.TweetSpatialAnalysisConfig("tweet_spatial_analysis.ini")
     logger.info(tweet_spatial_analysis_config)
 
-    file_open = FileOpen("data", "tweet-data.csv")
+    file_open = fu.FileOpen("data", "tweet-data.csv")
     logger.info(file_open)
 
     pre_processor = TweetDataPreProcessing(file_open, tweet_spatial_analysis_config)
@@ -247,4 +247,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
