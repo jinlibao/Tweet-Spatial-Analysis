@@ -3,11 +3,14 @@ See: PEP 350 -- Codetags: https://www.python.org/dev/peps/pep-0350/
 Working on since last commit:
 Tasks:
 Completed:
-006: Potentially compare working against non-working on same graph: Added 20181122: Completed 20181218 - implemented as part of 038
-075: BBug: IndexError: Added 20181217: Started Added 20181217: Completed 20181217: Reopened 20181217: Completed 20181218
-077: Ratio min value can so -1.1 - add hack fix as with max value: Added 20181218: Started 20181218: Completed 20181218
 
-Next Id: 078
+Working on:
+099: Look at the filtering as still loosing data points when filters applied from the histogram:
+100: Consider what to do about the filters / sliders when switching tabs:
+101: Be able to select multiple bars on the histograms:
+103: Pre-process if working and non-working SDEs are intersecting, within,overlap, disjoint:
+
+Next Id: 104
 ToDo: 007: Consider some form of quad-tree pre optimization of data: Added 20181122
 ToDo: 009: Assess the use of CustomJSHover: https://bokeh.pydata.org/en/latest/docs/reference/models/tools.html#: Added 20181122:
 ToDo: 013: Can I add a main to the main.py file?
@@ -18,27 +21,25 @@ ToDo: 037: If a data point has no siblings de-active the siblings and dissolve t
 ToDo: 041: After implementing the dissolve functionality, consider adding 'intersection': Added 20181203: 
 ToDo: 043: Consider using Bokeh's DataTable to provide a way to list the siblings within a selected datapoint's ellipse.  Added 20181203
 ToDo: 059: Sibling data points are not selected-able nor have a hover tooltip: Added 20181208:
-ToDo: 061: Add a legend for the 'sibling count' visualization: Added 20181209:
-ToDo: 062: Create a 'global configuration' that can be loaded at runtime - including details generated from the preprocessing stage: Added 20181209:
 ToDo: 069: Think about create some form of point density - can this relate to the spatial index? Added 20181211:
-ToDo: 072: Add scale to map and units to details for area Added 20181215:
-
+ToDo: 081: When blend is on, the blends disappear when the filter is changed? When blend then toggled, only the active data set is then shown. Need to toggle ellipse for both to re-appear. Added 20181224:
+ToDo: 082: Take another look at Uncaught Error: reference {"id":"1004","type":"ColumnDataSource"} isn't known (not in Document?): Added 20181224:
+ToDo: 087: 'Find ID' appears to not be properly working across the data sets? Look ar IDs where no area: Added 20190106:
+ToDo: 095: Consider defining circle size by SDE area - this will likely be a non linear mapping: Added 20190110:
+ToDo: 096: Consider modifying the .ini to define number of histogram bins when not defining a non-linear interval list: Added 20190110:
+ToDo: 102: Issue of 'tapping' on a bar, moving mouse, and NOT detecting the select - even though bar selected visually. Added 20190110:
 
 InProgress: 010: Add Logging: https://bokeh.pydata.org/en/latest/docs/reference/util.html#bokeh-util-logconfig: Added 20181122: Started 20181122:
 InProgress: 018: Consider how to use visualization to represent area / number of tweets within ellipse etc - maybe add to the hover tool?: Added: 20181130: Started 20181202
-InProgress: 027: Create a better layout: Added 20181130: Started 20181130:
-InProgress: 032: Consider optimization as a whole over the entire 50K data set (x 3): Added 20181202:
-InProgress: 034: BBug: A user is able to select multiple data points when the scale is zoomed out enough - only won't ability to select a single one: Added 20181202: Started 20181203:
+InProgress: 034: BBug: A user is able to select multiple data points when the scale is zoomed out enough - only want ability to select a single one: Added 20181202: Started 20181203:
 InProgress: 042: Can I format the text on the hover tooltip? Added 20181203: Started 20181203:
-InProgress: 049: Consider adding statistical descriptive details to the page: Added 20181205: Started 20181212:
-InProgress: 050: Add a colour palette to represent sibling count: Added 20181206: Started 20181207:
 InProgress: 054: Consider adding connecting lines between working and non working (with direction): Added 2081207: Started 20181207
-InProgress: 056: Consider potentially pre-processing dissolve area so the map can be filtered on that: Added 20181208: Started 20181218:
-InProgress: 058: If nothing selected then reset Selected ID text: Added 20181208: Started 20181211:
 InProgress: 063: Consider some form of heat map for clustered tweet data points - representing density: Added 20181210: Started 20181210:
-InProgress: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: Started 20181218:
 InProgress: 068: Think about a map of overlapping SDEs - use grey scale + transparency - maybe convert patches to a raster: Added 20181211: Started 20181211:
-
+InProgress: 099: Look at the filtering as still loosing data points when filters applied from the histogram: Added 20190119: Started 20190119:
+InProgress: 100: Consider what to do about the filters / sliders when switching tabs: Added 20190119: Started 20190119:
+InProgress: 101: Be able to select multiple bars on the histograms: Added 20190119: Started 20190130:
+InProgress: 103: Pre-process if working and non-working SDEs are intersecting, within,overlap, disjoint: Added 20190207: Started 20190207
 
 Done: 001: Draw ellipse on selecting a user: Added 20181122: Started 20181122: Completed 20181126
 Done: 002: Understand mapping of ellipse data to actual drawing: Added 20181122: Started 20181129: Completed 20181129
@@ -58,10 +59,12 @@ Done: 023: Check the drawing of the ellipse if the area is 0 or -1: Added 201811
 Done: 024: Allow the user to select a point by entering the ID in a text book. This will require some form of automatic zoom to 'fly' to the selected point: Added 20181130: Started 20181130: Completed 20181130
 Done: 025: Understand why data point ID 2760872119 is not within it's ellipse? Surely this can't happen as the data point is the location for ellipse? Added 20181130: Started 20181130: Completed 20181130
 Done: 026: On text, have single ID (idx) string - then parse this backend: Added 20181130: Started 20181130: Completed 20181130
+Done: 027: Create a better layout: Added 20181130: Started 20181130: Completed 20190119
 Done: 028: Consider using check boxes to define which ellipses to show for a selected data point: Added 20181130: Started 20181130: Completed 20181211
 Done: 029: Consider adding filters/sliders for some bins of 'num of local data points', 'ellipse area' and other measures: Added 20181201: Started 20181207: Completed 20181217
 Done: 030: Confirm spatial references / projections being used: Added 20181201: Started 20181201: Completed 20181201
 Done: 031: BBug: When changing the dataset, the selected data point is no longer displayed in red: Added 20181202: Started 20181202: Completed 20181202
+Done: 032: Consider optimization as a whole over the entire 50K data set (x 3): Added 20181202: Started 20181202: Completed 20190119
 Done: 033: Need to save the pre-processed data out to a file and then load into app: Added 20181202: Started 20181203: Completed 20181205
 Done: 035: Consider drawing all the ellipses of the datapoints within the selected datapoint - this is different to drawing the single dissolve: Added 20181202: Started 20181202: Completed 20181202
 Done: 036: Change buttons (where appropriate) to toggles to switch things on/off: Added 20181202: Completed 20181202
@@ -72,28 +75,47 @@ Done: 044: Present user profiles: Added 20181203: Started 20181204: Completed 20
 Done: 045: Consider the width and height for the ellipse. The measures I have are in non-projected space - but when I draw the ellipse they are in project space - surely I need to project the width and height lengths: Added 20181203: Started 20181203: Completed 20181204
 Done: 046: BBug: The reset tool appears to distort glyphs after being used? Added 20181204: Started 20181204: Completed 20181204
 Done: 048: Consider storing 'a' and 'b' instead of 'width' and 'height' to reduce the amount of divisions: Added 20181204: Started 20181204: Completed 20181205
+Done: 049: Consider adding statistical descriptive details to the page: Added 20181205: Started 20181212: Completed 20181226:
+Done: 050: Add a colour palette to represent sibling count: Added 20181206: Started 20181207: Completed 20190108
 Done: 051: On changing the sibling count slider, clear all selections: Added 2081207: Started 20181207: Completed 20181208
 Done: 052: Add a glyph that represents the selected point, as issue when changing slider and showing selected point using internal mechanism: Added 2081207: Started 20181207: Completed 20181208
 Done: 053: Add a slide for distance between working and non working: Added 20181208: Completed 20181217
 Done: 055: When changing datasets, re-apply the count filter: Added 20181208: Started 20181208: Completed 20181208
+Done: 056: Consider potentially pre-processing dissolve area so the map can be filtered on that: Added 20181208: Started 20181218: Completed 20190107
 Done: 057: Add numerical count and %s respect to number of points for each slider: Added 20181208: Started 20181208: Completed 20181208
+Done: 058: If nothing selected then reset Selected ID text: Added 20181208: Started 20181211: Completed 20190119
 Done: 060: Consider adding text input for the sliders. For example unable to explicit slide to '1': Added 20181208: Started 20181211: Completed 20181211
+Done: 061: Add a legend for the 'sibling count' visualization: Added 20181209: Started 20190101: Completed 20190101
+Done: 062: Create a 'global configuration' that can be loaded at runtime - including details generated from the preprocessing stage: Added 20181209: Started 20181219: Completed 20181224:
+Done: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: Started 20181218: Completed 20190119
 Done: 065: BBug with circle_renderer.selection_glyph and point 2429397887 - cheated by setting alpha to 0.0 to work: Added 20181211: Started 20181211: Completed 20181211
 Done: 066: Choose different color for the find circle to contrast from other points better: Added 20181211: Stated 20181211: Completed 20181211
 Done: 067: Create a Git repo around the first version: Added 20181211: Started 20181211: Completed 20181211
 Done: 070: Restructure code to use a controller to interface from the widgets to the data: Added 20181212: Started 20181212: Completed 20181212
 Done: 071: Can I dynamically update user info: Added 20181215: Started 20181215: Completed 20181215:
+Done: 072: Add scale to map and units to details for area Added 20181215: Started 20190101: Completed 20190101
 Done: 073: Consider showing area/count for both working and non-working together: Added 20181217: Started 20181217: Completed 20181217
 Done: 074: BBug: Sibling ellipses not being cleared when toggle blend turned off: Added 20181217: Started 20181217: Completed 20181217
 Done: 075: BBug: IndexError: Added 20181217: Started Added 20181217: Completed 20181217: Reopened 20181217: Completed 20181218
 Done: 076: Add medians distance to user info: Added 20181217: Started 20191217: Completed 20181217:
 Done: 077: Ratio min value can so -1.1 - add hack fix as with max value: Added 20181218: Started 20181218: Completed 20181218
-
+Done: 078: Understand the datasets better wrt filters. Using 10,000 datapoints when I reset the filters to their minimum? Added 21081219: Started 20181219: Completed 20181219
+Done: 079: Adding progress printing to the console when pre-processing the datasets: Added 21081219: Started 20181219: Completed 20181219
+Done: 080: BBug: ValueError('Out of range float values are not JSON compliant') when pressing Toggle Siblings: ID: 1416678168: Added 20181219: Started 20181219: Completed 20181224
+Done: 083: Look at pre-processing the dissolve area to be able to filter on this: Added 20181231: Started 20190105: Completed 20190107
+Done: 084: Take another looking at adding tabs now that we have a figure for the count histogram: Added 20181231: Started 20181231: Completed 20181231
+Done: 085: Can I get the hover data to follow the mouse? On histograms the info can always be seen: Added 20190102: Started 20190102: Completed 20190102
+Done: 086: Explore putting the ids/idxs data pointing to siblings in a separate database: Added 20190105: Started 20190105: Completed 20190107
+Done: 088: Change the 'Find ID' circle colour. Difficult to view against plasma palette. Maybe change order of draw. Added 20190106: Started 20190107: Completed 20190107
+Done: 089: Look at time to start up with 10K points: Added 20190106: Started 20190107: Completed 20190107
+Done: 090: Need to modify the colours when blending to distinguish datasets: Added 20190106: Started 20190108: Completed 20190108
+Done: 091: Make folder to sibling data absolute, rather than local: Added 20190107: Started 20190107: Completed 20190107
+Done: 092: Consider preprocessing defaults. Maybe set area/dissolve to 0 rather than -1: Added 20190106: Started 20190108: Completed 20190108
+Done: 093: Add a clear button to remove selected point and associated visuals: Added 20190108: Started 20190109: Completed 20190109
+Done: 094: Consider toggling on/off the legend: Added 20190110: Started 20190119: Completed 20190119
+Done: 098: If no bars are selected on the histogram, reset the filter to full range: Added 20190119: Started 20190119: Completed 20190119
 
 OnGoing:
-OnGoing: 002: Understand mapping of ellipse data to actual drawing: Added 20181122: Started 20181129: Completed 20181129
-OnGoing: 012: Look at pre-processing the (latitude, longitude) coordinate projections: Added 20181122: Started 20181126: Completed 20181129
-OnGoing: 055: When changing datasets, re-apply the count filter: Added 20181208: Started 20181208: Completed 20181208
 
 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 Interesting IDs:
@@ -232,9 +254,10 @@ Looks like this might have just been an error, as it looks fine now.
 Done: 026: On text, have single ID (idx) string - then parse this backend: Added 20181130: Started 20181130: Completed 20181130
 Only using the text_id widget, and then some basic string manipulation to extract the idx from between the brackets.
 
-InProgress: 027: Create a better layout: Added 20181130: Started 20181130:
+Done: 027: Create a better layout: Added 20181130: Started 20181130: Completed 20190119
 Started playing, look at TextInput not respecting width: https://github.com/bokeh/bokeh/issues/6427:
 20181211: Played with columns and rows. There is only so much that can be achieved, so keep expectations low.
+20190119: Consider finished and open again when feedback from users.
 
 Done: 028: Consider using check boxes to define which ellipses to show for a selected data point: Added 20181130: Started 20181130: Completed 20181211
 Consider various states such as the checkbox for the selected data set should always be selected.
@@ -267,7 +290,7 @@ This occurs when the user clicks on the map but no circle is selected i.e. unsel
 So, actually, I should be clearing the ellipse and circles inside ellipse instead.
 This doesn't appear to be a problem any more?
 
-InProgress: 032: Consider optimization as a whole over the entire 50K data set (x 3): Added 20181202:
+Done: 032: Consider optimization as a whole over the entire 50K data set (x 3): Added 20181202: Started 20181202: Completed 20190119
 Related to task 063
 On home desktop, 10K points is slow. It loads within less than 10s which is good, but zooming and panning is jerky.
 How many points have a count less than 0?
@@ -280,13 +303,28 @@ Can I maybe turn rendering off / down-sample while moving/zooming?
 Once a point is selected - remove points outside a certain range?
 Only show datapoint and siblings? i.e. only points in it's ellipse?
 20181215: Started looking at the LOD/Pan events.
+20181218: Created a lod dummy renderer that is need to detect the change in the related CDS, which then calls the on_change function.
+Can set the visible attribute of the circle renderer to tre/false to turn drawing on/off.
+LOD events are also called when the map is panned - so no need to also implement specific pan events.
+Need to test with 10,000 points to understand performance.
+20181219: Tested with 10,000 points. There is a few seconds delay from starting to zoom/pan before the points are cleared.
+Considering adding pan events back in.
+20181222: Explore the use of the MouseMove / MouseWheel events. There is a definite delay in detecting the LOD/Pan events and reacting.
+Concerns that the basic UI Event implementation might not be up to the job:
+Generalizing Events: https://github.com/bokeh/bokeh/wiki/Generalizing-Events
+Consider providing buttons to explicitly turn points on/off.
+20181224: Added toggle button to turn data points on/off - or more explicitly make the circle renderer invisible/visible.
+This doesn't actually seem to improve pan/zoom performace - I suspect the data is still being 'processed' even though invisible.
+Go back to making the circle data set empty.
+This works much better. There is a delay 'loading' the circles back up.
+20190119: Consider finished. And come back to the idea 'as a whole' in a later version.
 
 Done: 033: Need to save the pre-processed data out to a file and then load into app: Added 20181202: Started 20181203: Completed 20181205
 Look at Bokeh's Mapping Geo Data: https://bokeh.pydata.org/en/latest/docs/user_guide/geo.html for some direction.
 GeoJSON: http://geojson.org/
 Simply used Pandas Dataframe to_json / read_json - appears super quick (for 1000 x 3 points).
 
-InProgress: 034: BBug: A user is able to select multiple data points when the scale is zoomed out enough - only won't ability to select a single one: Added 20181202: Started 20181203:
+InProgress: 034: BBug: A user is able to select multiple data points when the scale is zoomed out enough - only want ability to select a single one: Added 20181202: Started 20181203:
 Look at Folium/Leaflet that uses a 'group pin' that indicates X individual points are grouped together, which gradually zooms down into single pins.
 
 Done: 035: Consider drawing all the ellipses of the datapoints within the selected datapoint - this is different to drawing the single dissolve: Added 20181202: Started 20181202: Completed 20181202
@@ -420,14 +458,31 @@ Done: 048: Consider storing 'a' and 'b' instead of 'width' and 'height' to reduc
 How many calculations are there? This only involves pre processing (finding siblings) and when finding the dissolve - so minimal really.
 Made the change. I think it confirms better the expected standard data defined for an ellipses.
 
-InProgress: 049: Consider adding statistical descriptive details to the page: Added 20181205: Started 20181212:
+Done: 049: Consider adding statistical descriptive details to the page: Added 20181205: Started 20181212: Completed 20181226:
 Add interactivity for clicking on histogram bars to act as 'filters' on the map.
 When doing this, adjust the filter sliders appropriately.
 Would these graphs potentially live in a separate tab? The existing page is starting to get 'busy'.
+20181226: Looks like Tabs require Panels:
+ValueError: expected an element of List(Instance(Panel)), got seq with invalid items [Column(id='1202', ...), Column(id='1237', ...)]
+Issues:
+Improve the layout subsystem #8085: https://github.com/bokeh/bokeh/pull/8085
+Tabs Only Renders Right When At Least One Tab Contains A Figure #5169: https://github.com/bokeh/bokeh/issues/5169
+Initial tests adding tabs or trying to interatively add/remove widgets have not be successful. Leave tabs for the time being.
+Finish this task and focus on 064.
 
-InProgress: 050: Add a colour palette to represent sibling count: Added 20181206: Started 20181207:
+Done: 050: Add a colour palette to represent sibling count: Added 20181206: Started 20181207: Completed 20190108
 Tried a linear colour scheme and a 1.0 - 1.0/(1.0 + count) version.
-There is prodominently a high grouping between 0 and the low 10s - maybe create a more tailed palette that specifically bins the palette?
+There is predominently a high grouping between 0 and the low 10s - maybe create a more tailed palette that specifically bins the palette?
+20181231: Using the palettes and functionality defined in: https://bokeh.pydata.org/en/latest/docs/reference/palettes.html#bokeh-palettes
+Start with the histograms.
+20190101: Is it worth considering having a separate colour for when count is 0?
+Added 'Perceptualy Uniform Sequential colormaps' plasma palette.
+Need to move the color definition for each point to the pre-processing stage.
+20190105 Also consider making the choice of the palatte configureable: cividis, gray/grey, inferno, magma, plasma, viridis
+Does moving the defining of the colour to the pre-processing stage require to load the config file?
+In some sense yes, as the defining of the bins for the count is required.
+Could even consider as a stage after pre-processing, but before visualization - allowing different bins to be considered.
+20190108: Am using the count bins within the .ini file to define colour.
 
 Done: 051: On changing the sibling count slider, clear all selections: Added 2081207: Started 20181207: Completed 20181208
 Appears to be working.
@@ -450,7 +505,7 @@ Done: 055: When changing datasets, re-apply the count filter: Added 20181208: St
 Filter re-applied. But there is a noticeable flicker as all circles are drawn and then the filter is applied.
 Is there a better way? Potentially - but explore at a later date.
 
-InProgress: 056: Consider potentially pre-processing dissolve area so the map can be filtered on that: Added 20181208: Started 20181218:
+Done: 056: Consider potentially pre-processing dissolve area so the map can be filtered on that: Added 20181208: Started 20181218: Completed 20190107
 This actually has some weight to it.
 Preprocessing 10000 data points, the max count is 8160
 This will take some seconds (need to test/confirm) to do in really time - and potentially performed multiple times if a point is selected/de-selcted multiple times.
@@ -458,8 +513,9 @@ Results could be 'cached' - but this would need implementing.
 How large would files become? 1,000 400K : 10,000 17 to 20MB : 50,000?
 This also has an impact on load time.
 This does imply that a review on the general pre-processing architecture needs to be considered.
+Same as 083: Contiinuing in this task.
 
-Done: 057: Add numerical count and %s respect to number of points for each slider: Added 20181208: Started 20181208:
+Done: 057: Add numerical count and %s respect to number of points for each slider: Added 20181208: Started 20181208: Completed 20181208
 This is the number w.r.t. to all the filters, not individual filters.
 Example: Although starting with 1000 points, as soon as the sibling count is applied, this drops to 996?
 This is because some rows have an area of -1, so the area filter removes these.
@@ -467,14 +523,19 @@ Need to modify code so that all filters are actually applied together.
 Consider being able to select which filters to apply using a check box.
 Implemented so each filter has a checkbox to indicate if its on/off.
 
-InProgress: 058: If nothing selected then reset Selected ID text: Added 20181208: Started 20181211:
+Done: 058: If nothing selected then reset Selected ID text: Added 20181208: Started 20181211: Completed 20190119
 How do I detect if nothing is selected?
 Maybe have a 'clear selection' button?
+20190119: Started looking at again. Implemented.
 
 Done: 060: Consider adding text input for the sliders. For example unable to explicit slide to '1': Added 20181208: Started 20181211: Completed 20181211
 Add buttons either side of the slider with '-' and '+' to add 1 to the current slider value.
 Added buttons to the count slider as we need the +-1 precision when selecting. Do we need the same level of precision for the area slider?
 Lets say yes, as we do have tweets with an area of -1, so it might be useful to view areas from say -100 to 0 - again difficult to get this level of precision just with a slide.
+
+Done: 061: Add a legend for the 'sibling count' visualization: Added 20181209: Started 20190101: Completed 20190101
+Created a 'fake' legend using the histogram count data.
+Currently a title can not be added to the legend.
 
 InProgress: 063: Consider some form of heat map for clustered tweet data points - representing density: Added 20181210: Started 20181210: 
 Related to task 032
@@ -488,11 +549,32 @@ SciKit Learn: https://scikit-learn.org/stable/modules/generated/sklearn.cluster.
 Rtree 0.8.3: https://pypi.org/project/Rtree/ and http://toblerity.org/rtree/ : Rtree is a ctypes Python wrapper of libspatialindex that provides a number of advanced spatial indexing features for the spatially curious Python user. These features include: Nearest neighbor search, Intersection search, Multi-dimensional indexes, Clustered indexes (store Python pickles directly with index entries), Bulk loading, Deletion, Disk serialization, Custom storage implementation (to implement spatial indexing in ZODB, for example).
 * Learning Geospatial Analysis with Python: Spatial Indexing: p54: Quadtree vs R-Tree
 
-InProgress: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: Started 20181218:
+Done: 064: Evolving from 049, consider adding various appropriate histograms to the page, and creating click-able from the various bins: Added 20181210: Started 20181218: Completed 20190119
 How much can / should this be processed?
 Creating on the fly/as start up wrt 1,000 / 10,000 / 50,000 points.
 Also consider having non-regular bins - consider sibling counts: e.g. 1, 2, 3, 4, 5, 6-10, 11-20, 21-50, 50-100, >100
 How does this affect the x-axis scale/representation?
+20181222: Started looking to research if bin sizes could be defined.
+20181226: Added basic histogram to the plot in main.py.
+Integrate the count histogram into the TweetDataController and MapWidgets classes.
+20181230: Histogram working correctly and changes when active dataset is changed.
+Add hover over the quads
+20181231: Consider putting the count histogram into a separate class?
+And a second histogram - SDE area.
+Second chart added. Need to look at creating 'histogram class'.
+Created Histogram Plot, Controller and Data classes. The JavaScript related callbacks for Hover and Tap have to be functions so are ecxplicitly defined rather than being in a class.
+Was able to add third 'distance' histogram in under five minutes.
+Remember that this only represents the distance between working and non-working so does NOT change when the dataset is changed.
+Added fourth ratio histogram.
+20190101: Still need to add filter by functionality.
+20190109: Consider what to do when I change filter tabs. Do I reset the filter back to 100%?
+I can translate from Histogram to Sliders as I can use the bins to define the slider ranges.
+It doesn't translate the other way as the sliders to not match exactly the bins.
+For the first iteration, reset the filter when switching to histogram tab.
+Added callback to detect tab change and using a dummy CDS to communicate back to the TweetDataController
+20190119: How to connect the Histogram controller selected change callbacl to the filter.
+Think about hooking the appropriate filter method (e.g. filter_circles_by_count) in the tweet data controller to the associated histogram.
+Wired methods from tweet data controller into the histogram controller.
 
 Done: 065: BBug with circle_renderer.selection_glyph and point 2429397887 - cheated by setting alpha to 0.0 to work: Added 20181211: Started 20181211: Completed 20181211
 Replicate:
@@ -503,6 +585,8 @@ Appears to be connected to circle_renderer.selection_glyph
 Cheated by making alpha 0.0.
 BUT why for this point and hardly any others?
 20181211: Replicated problem in earlier version.
+Issue: ValueError("expected an element of either String, Dict(Enum('expr', 'field', 'value', 'transform'), Either(String, Instance(Transform), Instance(Expression), Float)) or Float, got array([527, 120,  77,  29,  24,  29,  18,  10,   8,   7,  38,  14,  17,\n        36,  18,  10,  11,   5,   0,   1], dtype=int64)")
+
 
 Done: 067: Create a Git repo around the first version: Added 20181211: Started 20181211: Completed 20181211
 Created repository with dev branch.
@@ -511,18 +595,22 @@ InProgress: 068: Think about a map of overlapping SDEs - use grey scale + transp
 Can I convert the shape patch into a raster?
 Rather than using transparency do I need to look at aggregation / sum of counts?
 
-Done: 070: Restructure code to use a controller to interface from the widgets to the data: Added 20181212: Started 20181212:
+Done: 070: Restructure code to use a controller to interface from the widgets to the data: Added 20181212: Started 20181212
 Basic idea is to allow the controller to manage which of the three data sets is being displayed and the blending between the working and non working.
 Implementation appears to be working.
 Merged work from branch dev_tweet_class into dev
 
-Done: 071: Can I dynamically update user info: Added 20181215: Started 20181215: Completed 20181215:
+Done: 071: Can I dynamically update user info: Added 20181215: Started 20181215: Completed 20181215
 Can I use the TweetDataCOntroller: selected_circle_changed to update the user info?
 Wired in widgets for info to the controller and this worked.
 Consider displaying the area and number of siblings as well - although these will need updating when the dataset is changed.
 Also, why do I need separate widgets for these? Can I just not now use a single one?
 Modified to use a single Div that also allows text formatting such as new line <br> and bold <b>.
 Added area and count. Updated when changing datasets.
+
+Done: 072: Add scale to map and units to details for area Added 20181215: Started 20190101: Completed 20190101
+Add axis labels and projection: epsg:3857: WSG 84 Web Mercator
+Added axis labels
 
 Done: 075: BBug: IndexError: Added 20181217: Started Added 20181217: Completed 20181217: Reopened 20181217: Completed 20181218
 Browser Console: [bokeh] Unhandled ERROR reply to AC220859020043EE93948406B9B81461: IndexError('index 0 is out of bounds for axis 0 with size 0')
@@ -532,3 +620,113 @@ Start looking from the radio_button_data_type_change callback in the MapWidgets 
 Starting with working as active and toggle blend active, the error appeared when toggle blend was pressed i.e. made active.
 Solved. Was calling turn_blend_on and subsequent update calls that used circle_idx before it had been set.
 20181218: Similar problem in the update_selection_details function. Resolved
+
+Done: 078: Understand the datasets better wrt filters. Using 10,000 datapoints when I reset the filters to their minimum? Added 21081219: Started 20181219: Completed 20181219
+Issue was infact caused by increase in max count, area and probably distance.
+This can be solved by implementing task 062
+20181223: Approach: Expand the FilterSettings class to be the beginning of the global configuration.
+Created and parsed tweet_spatail_analysis.ini
+
+Done: 080: BBug: ValueError('Out of range float values are not JSON compliant') when pressing Toggle Siblings: ID: 1416678168: Added 20181219: Started 20181219: Completed 20181224
+ERROR: error handling message Message 'PATCH-DOC' (revision 1) content: {'events': [{'kind': 'ModelChanged', 'model': {'type': 'Toggle', 'id': '1019'}, 'attr': 'active', 'new': True}], 'references': []}: ValueError('Out of range float values are not JSON compliant')
+https://github.com/bokeh/bokeh/issues/5439
+https://github.com/bokeh/bokeh/issues/7523
+https://stackoverflow.com/questions/38821132/bokeh-valueerror-out-of-range-float-values-are-not-json-compliant
+Check data for NaN values.
+20181224: Issue appears when toggling siblings
+The following occurs when toggling dissolve:
+ValueError('No Shapely geometry can be created from null value') which I assume is related.
+Use: 1416678168
+Caused by points having 'a' and 'b' values set to -1.0
+
+Done: 083: Look at pre-processing the dissolve area to be able to filter on this: Added 20181231: Started 20190105: Completed 20190107
+Add 'dissolve' column to TweetData df.
+Move the update_dissolve method in MapTweetData, into TweetData
+Same as 056:
+20190107: Range Slider added.
+
+Done: 084: Take another looking at adding tabs now that we have a figure for the count histogram: Added 20181231: Started 20181231: Completed 20181231
+Followed https://bokeh.pydata.org/en/latest/docs/reference/models/widgets.panels.html and it worked.
+Successfully added a second histogram to the tab.
+
+Done: 085: Can I get the hover data to follow the mouse? On histograms the info can always be seen: Added 20190102: Started 20190102: Completed 20190102
+Try using the point_policy for the HoverTool.
+This worked.
+
+Done: 086: Explore putting the ids/idxs data pointing to siblings in a separate database: Added 20190105: Started 20190105: Completed 20190107
+The size of te dataset files are for 1K points:370-413K to 10K points 17-20M - what size will they be for 50K
+Load time is already noticeable for 10K points.
+Consider separating out the sibling data ids/idxs from the main individual points.
+Either into a separate file or potential an individual file for each data point.
+The latter method also allows the dissolve to be pre-processed and stored - which itself will start to become significant as the count of the siblings increase.
+Could have a very basic cache where sibling info is stored in memory once loaded - so loaded only once.
+Development Steps:
+1) Pre-process data - create siblings ids/idxs
+2) Calculate dissolve area and polygon - if count == 0 then there is no dissolve.
+3) Save ids/idxs and polygon into separate file (if count > 0) -
+Are there cases when working has no dissolve and non-working does?
+i.e. working has no siblings but non-working does?
+If no siblings, then the dissolve is simply the data point SDE ellipse.
+So, does this imply EVERY data point will have a file even if sibling count is 0 as they ALL have a dissolve?
+20190106: Created a SiblingDataManager class to 'cache' the sibling data.
+Do I put this in TweetDataController, or deeper into the MapTweetData?
+The current architecture leaves the update of the siblings at the TweetData level - follow a similar implementation - so the latter.
+Initial tests using 10K points appear promising regards panning/zooming and filter.
+20190107 Further tests appear good. Consider complete and open up another tasks if errors/problems appear.
+
+Done: 088: Change the 'Find ID' circle colour. Difficult to view against plasma palette. Maybe change order of draw. Added 20190106: Started 20190107: Completed 20190107
+CHnaged colour to darkgreen and line width of 2
+It's already drawn last, so should be on top of all other rendering.
+
+Done: 089: Look at time to start up with 10K points: Added 20190106: Started 20190107: Completed 20190107
+Slow startup time caused by re-calculating the colour on start up. Removed this, as it will be put in the pipeline before start up.
+Took seconds to load.
+
+Done: 090: Need to modify the colours when blending to distinguish datasets: Added 20190106: Started 20190108: Completed 20190108
+Using the RdYlGn divergent color palette
+
+Done: 092: Consider preprocessing defaults. Maybe set area/dissolve to 0 rather than -1: Added 20190106: Started 20190108: Completed 20190108
+There is an issue with filtering:
+Defaults area 0 : ratio 0 : dissolve 0
+If you turn the filters off/on then 10,000 drops down to 9948
+ratio -1 : 9981
+all three need to be negative to filter back to 10,000
+consider making the defaults for all three to 0
+In the pre-processing stage have set the defaults for area, ratio, a, b, distance to 0.0
+
+Done: 098: If no bars are selected on the histogram, reset the filter to full range: Added 20190119: Started 20190119: Completed 20190119
+How to detect if nothing is selected?
+Able to add self.p.js_on_event(events.Tap, CustomJS.from_py_func(callback_tap)) to the histogram controller.
+Need to update count total - move from MapWidgets into TweetDataController? Implemented.
+
+InProgress: 099: Look at the filtering as still loosing data points when filters applied from the histogram: Added 20190119: Started 20190119:
+W.r.t. the histograms, the intervals can be decimal numbers (since equal intervals) - but filters are whole numbers
+For example Distance:
+Histogram: 0 - 5.656 (865); 11.314 (60); 16.97 (30)
+Slider: 0 - 5 (851); 0 - 6 (866)
+Add bin values to histogram hover when equal intervals.
+Bin values added - consider formatting to single decimal point?
+Formatted to 2 decimal places.
+
+InProgress: 100: Consider what to do about the filters / sliders when switching tabs: Added 20190119: Started 20190119:
+Histogram bars have decimals - sliders ate integers
+I can't map from sliders to histograms.
+I can only approximate mapping from histograms to sliders.
+Potentially have two sets of filter values?
+Add a reset filters button. Implemented
+Issue of 'tapping' on a bar, moving mouse, and NOT detecting the select - even though bar selected visually. Mark as a bbug.
+On changing tab (to sliders), the sliders will be updated, which triggers their on_change callback, which in turns calls the tweet data controller method (again).
+
+InProgress: 101: Be able to select multiple bars on the histograms: Added 20190119: Started 20190130:
+Look at the selection box tool that allows multiple 'points' to be selected.
+20190207: Initial tests not very successful.
+Alternative: Use Shift Key + Tap and select multiple bars that way.
+One issue is that after selecting multiple bars, you can tell if then only a single bar is selected, as can not identify if shift key is being pressed.
+Need to unselect all.
+Could potentially have single/mutliple select 'mode'.
+
+InProgress: 103: Pre-process if working and non-working SDEs are intersecting, within,overlap, disjoint: Added 20190207: Started 20190207
+Use the shapely functionality.
+Do I re run the data processing script again? Or write another tool to extend and use cached info?
+I'm only using the data points SDEs - not performing any sibling calculations.
+So I can read in the working/non-working json only - I shouldn't need the cached info.

@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 def on_server_loaded(server_context):
     ''' If present, this function is called when the server first starts. '''
     print("on_server_loaded")

@@ -1,10 +1,13 @@
-
+#!/usr/bin/env python3
 import logging
 import logging.config
 import numpy as np
+import pandas as pd
 
-from file_utilities import *
-from tweet_data import *
+from utils import analysis_utilities as au
+from utils import configuration_utilities as cu
+from utils import file_utilities as fu
+from utils import tweet_data_utilities as tdu
 
 logger = logging.getLogger()
 
@@ -12,14 +15,15 @@ pd.set_option('expand_frame_repr', False)
 pd.options.display.max_rows = 999
 # Options and Settings: https://pandas.pydata.org/pandas-docs/stable/options.html
 
-num_of_rows_to_process = 10000
-# Defines as None to process all rows.
+num_of_rows_to_process = None
+# Define as None to process all rows.
 
 
 class TweetDataPreProcessing:
 
-    def __init__(self, file_details, encoding="utf-8", separator=","):
+    def __init__(self, file_details, config=None, encoding="utf-8", separator=","):
         self.file_details = file_details
+        self.config = config
         self.encoding = encoding
         self.separator = separator
         self.df = None
@@ -95,46 +99,66 @@ class TweetDataPreProcessing:
         #self.identify_rows_with_nan()
         #self.df_details()
 
-        logger.info("Processing: All")
-        print("Processing: All")
-        self.tweet_data_all = TweetData("all")
-        self.tweet_data_all.create_dataframe(self.df, 'User-ID', 'latitude-mean-all-tweets',
-                                                'longitude-mean-all-tweets', 'area-all-tweets', 'x/y-all-tweets',
-                                                'theta-all-tweets', 'medians-distance')
-        logger.info(self.tweet_data_all)
-        logger.info("Processed.")
-        print("Processed.")
-
         logger.info("Processing: Working")
         print("Processing: Working")
-        self.tweet_data_working = TweetData("working")
+        self.tweet_data_working = tdu.TweetData("working", self.config)
         self.tweet_data_working.create_dataframe(self.df, 'User-ID', 'latitude-median-working-tweets',
                                             'longitude-median-working-tweets', 'area-working-tweets',
                                             'x/y-working-tweets', 'theta-working-tweets', 'medians-distance')
         logger.info(self.tweet_data_working)
+        self.write_to_json(self.tweet_data_working.df, "tweets_median_working.json")
+        logger.info("Processed.")
+        print("Processed.")
+
+        logger.info("Processing: All")
+        print("Processing: All")
+        self.tweet_data_all = tdu.TweetData("all", self.config)
+        self.tweet_data_all.create_dataframe(self.df, 'User-ID', 'latitude-mean-all-tweets',
+                                                'longitude-mean-all-tweets', 'area-all-tweets', 'x/y-all-tweets',
+                                                'theta-all-tweets', 'medians-distance')
+        logger.info(self.tweet_data_all)
+        self.write_to_json(self.tweet_data_all.df, "tweet_mean_all.json")
         logger.info("Processed.")
         print("Processed.")
 
         logger.info("Processing: Non-Working")
         print("Processing: Non-Working")
-        self.tweet_data_non_working = TweetData("non-working")
+        self.tweet_data_non_working = tdu.TweetData("non_working", self.config)
         self.tweet_data_non_working.create_dataframe(self.df, 'User-ID', 'latitude-median-nonworking-tweets',
                                                 'longitude-median-nonworking-tweets', 'area-nonworking-tweets',
                                                 'x/y-nonworking-tweets', 'theta-nonworking-tweets', 'medians-distance')
-
         logger.info(self.tweet_data_non_working)
+        self.write_to_json(self.tweet_data_non_working.df, "tweets_median_non_working.json")
         logger.info("Processed.")
         print("Processed.")
 
+    '''
+    def process_color(self, tweet_data_df, config):
+        fill_color_list = plasma(len(config.bins_count))
+        fill_color_list.reverse()
+
+        for idx in range(0, tweet_data_df.shape[0]):
+            count = tweet_data_df['count'][idx]
+            for idx2 in range(0, len(config.bins_count)-1):
+                if count < config.bins_count[idx2]:
+                    tweet_data_df.loc[idx, 'color'] = fill_color_list[idx2 - 1]
+                    break
+                else:
+                    tweet_data_df.loc[idx, 'color'] = fill_color_list[idx2]
+    '''
+
     def read_from_json(self, mean_all, working, non_working):
-        self.tweet_data_all = TweetData("all")
+        self.tweet_data_all = tdu.TweetData("all")
         self.tweet_data_all.read_from_json(mean_all)
+        #self.process_color(self.tweet_data_all.df, config)
 
-        self.tweet_data_working = TweetData("working")
+        self.tweet_data_working = tdu.TweetData("working")
         self.tweet_data_working.read_from_json(working)
+        #self.process_color(self.tweet_data_working.df, config)
 
-        self.tweet_data_non_working = TweetData("non-working")
+        self.tweet_data_non_working = tdu.TweetData("non_working")
         self.tweet_data_non_working.read_from_json(non_working)
+        #self.process_color(self.tweet_data_non_working.df, config)
 
     def identify_rows_with_nan(self):
         logger.info("Identify rows with NaN values:")
@@ -193,7 +217,7 @@ class TweetDataPreProcessing:
 # and follows the Earth's (curved) surface.
 def calculate_distance_non_projected_havershine_test(df, num_of_rows):
     for row_idx in range(0, num_of_rows):
-        dist = calculate_distance_non_projected_havershine(
+        dist = au.calculate_distance_non_projected_havershine(
             df['latitude-median-working-tweets'][row_idx],
             df['longitude-median-working-tweets'][row_idx],
             df['latitude-median-nonworking-tweets'][row_idx],
@@ -210,21 +234,18 @@ def main():
     logger.info("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
     logger.info("Tweet Data: Pre-Processing:")
 
-    file_open = FileOpen("data", "tweet-data.csv")
+    tweet_spatial_analysis_config = cu.TweetSpatialAnalysisConfig("tweet_spatial_analysis.ini")
+    logger.info(tweet_spatial_analysis_config)
+
+    file_open = fu.FileOpen("data", "tweet-data.csv")
     logger.info(file_open)
 
-    pre_processor = TweetDataPreProcessing(file_open)
+    pre_processor = TweetDataPreProcessing(file_open, tweet_spatial_analysis_config)
     logger.info(pre_processor)
     pre_processor.process()
 
-    logger.info("Writing files to JSON file:")
-    print("Writing files to JSON file:")
-    pre_processor.write_to_json(pre_processor.tweet_data_non_working.df, "tweets_median_non_working.json")
-    pre_processor.write_to_json(pre_processor.tweet_data_working.df, "tweets_median_working.json")
-    pre_processor.write_to_json(pre_processor.tweet_data_all.df, "tweet_mean_all.json")
-    logger.info("Files Written.")
-    print("Files Written.")
 
 if __name__ == '__main__':
     main()
+
 
