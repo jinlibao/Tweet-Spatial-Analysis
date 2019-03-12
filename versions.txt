@@ -5,3 +5,18 @@ Created 20181211
 Done: 028: Consider using check boxes to define which ellipses to show for a selected data point: Added 20181130: Started 20181130: Completed 20181211
 Done: 060: Consider adding text input for the sliders. For example unable to explicit slide to '1': Added 20181208: Started 20181211: Completed 20181211
 InProgress: 027: Create a better layout: Added 20181130: Started 20181130:
+
+1.1.0:
+Date: 20181218:
+006: Potentially compare working against non-working on same graph: Implemented as part of 038
+027: Worked on improved layout.
+029: Consider adding filters/sliders for some bins of 'num of local data points', 'ellipse area' and other measures: This was finished off by adding distance and ratio
+038: Display both 'working'/'non-working' ellipses together:
+053: Add a slide for distance between working and non working:
+070: Re-structuring code to add a controller interfacing between the widgets and the tweet data.
+071: Dynamically updated the user info for the selected point - removing the need for a button press. Also added area and count details. Updated when changing datasets.
+073: Consider showing area/count for both working and non-working together:
+074: BBug: Sibling ellipses not being cleared when toggle blend turned off:
+075: BBug: IndexError:
+076: Add medians distance to user info:
+077: Ratio min value can so -1.1 - add hack fix as with max value:
