@@ -1,7 +1,8 @@
 from pyproj import Proj, transform, Geod
 from math import *
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
 
 def lon_lat_to_east_north(lon, lat):
     try:
@@ -27,7 +28,8 @@ def are_two_ellipses_overlapping(x1, y1, a1, b1, phi1, x2, y2, a2, b2, phi2):
     else:
         return False
 
-def plot_ellipses(x1, y1, a1, b1, phi1, x2, y2, a2, b2, phi2):
+def plot_ellipses(x1, y1, a1, b1, phi1, x2, y2, a2, b2, phi2, filename="plot.pdf"):
+
     c1 =  (a1 / a2) * cos(phi1 - phi2)
     c2 = -(b1 / a2) * sin(phi1 - phi2)
     c3 =  ((x1 - x2) * cos(phi2) + (y1 - y2) * sin(phi2)) / a2
@@ -45,10 +47,39 @@ def plot_ellipses(x1, y1, a1, b1, phi1, x2, y2, a2, b2, phi2):
     ey3 = d1 * np.cos(t) + d2 * np.sin(t) + d3
     ex4 = np.cos(t)
     ey4 = np.sin(t)
-    plt.figure()
-    plt.plot(ex1, ey1, 'r-', ex2, ey2, 'b-', ex3, ey3, 'r--', ex4, ey4, 'b--')
-    plt.axis('equal')
-    plt.show()
+    ex = [[ex1, ex2], [ex3, ex4]]
+    ey = [[ey1, ey2], [ey3, ey4]]
+    style = [['r-', 'b-'], ['r:', 'b:']]
+
+    plt.style.use('ggplot')
+    plt.rc('text', usetex=True)
+    plt.rc('font', family='serif')
+    with PdfPages(filename) as pdf:
+        for i in range(len(ex)):
+            fig = plt.figure()
+            plt.plot(ex[i][0], ey[i][0], 'r', ex[i][1], ey[i][1], 'b')
+            plt.axis('equal')
+            plt.xlabel('$x$')
+            plt.ylabel('$y$')
+            plt.title('Ellipse Overlapping')
+            plt.show(block=False)
+            pdf.savefig(fig)
+            plt.close()
+
+        fig = plt.figure()
+        for i in range(len(ex)):
+            # fig = plt.figure()
+            plt.plot(ex[i][0], ey[i][0], style[i][0], ex[i][1], ey[i][1], style[i][1])
+            plt.axis('equal')
+            plt.xlabel('$x$')
+            plt.ylabel('$y$')
+            plt.title('Ellipse Overlapping')
+        plt.show(block=False)
+        pdf.savefig(fig)
+        plt.close()
+
+
+
 
 def dist(c1, c2, c3, d1, d2, d3, t):
     return (c1 * cos(t) + c2 * sin(t) + c3) ** 2 + \
