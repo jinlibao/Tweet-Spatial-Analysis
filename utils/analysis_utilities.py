@@ -1,6 +1,7 @@
 from pyproj import Proj, transform, Geod
-
 from math import *
+import matplotlib.pyplot as plt
+import numpy as np
 
 def lon_lat_to_east_north(lon, lat):
     try:
@@ -8,6 +9,75 @@ def lon_lat_to_east_north(lon, lat):
         return east, north
     except:
         return None, None
+
+def are_two_ellipses_overlapping(x1, y1, a1, b1, phi1, x2, y2, a2, b2, phi2):
+    c1 =  (a1 / a2) * cos(phi1 - phi2)
+    c2 = -(b1 / a2) * sin(phi1 - phi2)
+    c3 =  ((x1 - x2) * cos(phi2) + (y1 - y2) * sin(phi2)) / a2
+    d1 =  (a1 / b2) * sin(phi1 - phi2)
+    d2 = -(b1 / b2) * cos(phi1 - phi2)
+    d3 = (-(x1 - x2) * sin(phi2) + (y1 - y2) * cos(phi2)) / b2
+    t1, t2 = newton(f, g, c1, c2, c3, d1, d2, d3, 0)
+    dist1 = f(c1, c2, c3, d1, d2, d3, t1)
+    dist2 = f(c1, c2, c3, d1, d2, d3, t2)
+    if min(dist1, dist2) <= 1:
+        return True
+    else:
+        return False
+
+def plot_ellipses(x1, y1, a1, b1, phi1, x2, y2, a2, b2, phi2):
+    c1 =  (a1 / a2) * cos(phi1 - phi2)
+    c2 = -(b1 / a2) * sin(phi1 - phi2)
+    c3 =  ((x1 - x2) * cos(phi2) + (y1 - y2) * sin(phi2)) / a2
+    d1 =  (a1 / b2) * sin(phi1 - phi2)
+    d2 = -(b1 / b2) * cos(phi1 - phi2)
+    d3 = (-(x1 - x2) * sin(phi2) + (y1 - y2) * cos(phi2)) / b2
+
+    pi = atan(1) * 4
+    t = np.linspace(0, 2 * pi, 100)
+    ex1 = a1 * np.cos(t) * cos(phi1) - b1 * np.sin(t) * sin(phi1) + x1
+    ey1 = a1 * np.cos(t) * sin(phi1) + b1 * np.sin(t) * cos(phi1) + y1
+    ex2 = a2 * np.cos(t) * cos(phi2) - b2 * np.sin(t) * sin(phi2) + x2
+    ey2 = a2 * np.cos(t) * sin(phi2) + b2 * np.sin(t) * cos(phi2) + y2
+    ex3 = c1 * np.cos(t) + c2 * np.sin(t) + c3
+    ey3 = d1 * np.cos(t) + d2 * np.sin(t) + d3
+    ex4 = np.cos(t)
+    ey4 = np.sin(t)
+    plt.figure()
+    plt.plot(ex1, ey1, ex2, ey2, ex3, ey3, ex4, ey4)
+    plt.axis('equal')
+    plt.show()
+
+def f(c1, c2, c3, d1, d2, d3, t):
+    return (c1 * cos(t) + c2 * sin(t) + c3) ** 2 + \
+           (d1 * cos(t) + d2 * sin(t) + d3) ** 2
+
+def g(c1, c2, c3, d1, d2, d3, t):
+    return 2 * ((c1 * cos(t) + c2 * sin(t) + c3) * (-c1 * sin(t) + c2 * cos(t)) + \
+                (d1 * cos(t) + d2 * sin(t) + d3) * (-d1 * sin(t) + d2 * cos(t)))
+
+def h(c1, c2, c3, d1, d2, d3, t):
+    return 2 * ((c1 * cos(t) + c2 * sin(t) + c3) * (-c1 * cos(t) - c2 * sin(t)) + \
+                (-c1 * sin(t) + c2 * cos(t)) ** 2 + \
+                (d1 * cos(t) + d2 * sin(t) + d3) * (-d1 * cos(t) - d2 * sin(t)) + \
+                (-d1 * sin(t) + d2 * cos(t)) ** 2)
+
+def newton(f, g, c1, c2, c3, d1, d2, d3, t0, tol=1e-6, maxIter=100):
+    pi = atan(1) * 4
+    iter = 0
+    t = t0
+    while iter < maxIter and fabs(f(c1, c2, c3, d1, d2, d3, t)) >= tol:
+        if g(c1, c2, c3, d1, d2, d3, t) == 0:
+            t = t - f(c1, c2, c3, d1, d2, d3, t) / 1
+        else:
+            t = t - f(c1, c2, c3, d1, d2, d3, t) / g(c1, c2, c3, d1, d2, d3, t)
+        iter += 1
+    t1 = (t / (2 * pi) - floor(t / (2 * pi))) * 2 * pi
+    if t1 > pi:
+        t2 = t1 - pi
+    else:
+        t2 = t1 + pi
+    return (t1, t2)
 
 # Point and ellipse (rotated) position test: algorithm
 # https://stackoverflow.com/questions/7946187/point-and-ellipse-rotated-position-test-algorithm
