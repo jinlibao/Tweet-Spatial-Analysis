@@ -15,11 +15,13 @@ def are_two_ellipses_overlapping(x1, y1, a1, b1, phi1, x2, y2, a2, b2, phi2):
     c2 = -(b1 / a2) * sin(phi1 - phi2)
     c3 =  ((x1 - x2) * cos(phi2) + (y1 - y2) * sin(phi2)) / a2
     d1 =  (a1 / b2) * sin(phi1 - phi2)
-    d2 = -(b1 / b2) * cos(phi1 - phi2)
+    d2 =  (b1 / b2) * cos(phi1 - phi2)
     d3 = (-(x1 - x2) * sin(phi2) + (y1 - y2) * cos(phi2)) / b2
+    pi = atan(1) * 4
     t1, t2 = newton(f, g, c1, c2, c3, d1, d2, d3, 0)
-    dist1 = f(c1, c2, c3, d1, d2, d3, t1)
-    dist2 = f(c1, c2, c3, d1, d2, d3, t2)
+    # t1, t2 = bisection(f, c1, c2, c3, d1, d2, d3, 0, pi)
+    dist1 = dist(c1, c2, c3, d1, d2, d3, t1)
+    dist2 = dist(c1, c2, c3, d1, d2, d3, t2)
     if min(dist1, dist2) <= 1:
         return True
     else:
@@ -30,7 +32,7 @@ def plot_ellipses(x1, y1, a1, b1, phi1, x2, y2, a2, b2, phi2):
     c2 = -(b1 / a2) * sin(phi1 - phi2)
     c3 =  ((x1 - x2) * cos(phi2) + (y1 - y2) * sin(phi2)) / a2
     d1 =  (a1 / b2) * sin(phi1 - phi2)
-    d2 = -(b1 / b2) * cos(phi1 - phi2)
+    d2 =  (b1 / b2) * cos(phi1 - phi2)
     d3 = (-(x1 - x2) * sin(phi2) + (y1 - y2) * cos(phi2)) / b2
 
     pi = atan(1) * 4
@@ -44,31 +46,55 @@ def plot_ellipses(x1, y1, a1, b1, phi1, x2, y2, a2, b2, phi2):
     ex4 = np.cos(t)
     ey4 = np.sin(t)
     plt.figure()
-    plt.plot(ex1, ey1, ex2, ey2, ex3, ey3, ex4, ey4)
+    plt.plot(ex1, ey1, 'r-', ex2, ey2, 'b-', ex3, ey3, 'r--', ex4, ey4, 'b--')
     plt.axis('equal')
     plt.show()
 
-def f(c1, c2, c3, d1, d2, d3, t):
+def dist(c1, c2, c3, d1, d2, d3, t):
     return (c1 * cos(t) + c2 * sin(t) + c3) ** 2 + \
            (d1 * cos(t) + d2 * sin(t) + d3) ** 2
 
-def g(c1, c2, c3, d1, d2, d3, t):
+def f(c1, c2, c3, d1, d2, d3, t):
     return 2 * ((c1 * cos(t) + c2 * sin(t) + c3) * (-c1 * sin(t) + c2 * cos(t)) + \
                 (d1 * cos(t) + d2 * sin(t) + d3) * (-d1 * sin(t) + d2 * cos(t)))
 
-def h(c1, c2, c3, d1, d2, d3, t):
+def g(c1, c2, c3, d1, d2, d3, t):
     return 2 * ((c1 * cos(t) + c2 * sin(t) + c3) * (-c1 * cos(t) - c2 * sin(t)) + \
                 (-c1 * sin(t) + c2 * cos(t)) ** 2 + \
                 (d1 * cos(t) + d2 * sin(t) + d3) * (-d1 * cos(t) - d2 * sin(t)) + \
                 (-d1 * sin(t) + d2 * cos(t)) ** 2)
 
-def newton(f, g, c1, c2, c3, d1, d2, d3, t0, tol=1e-6, maxIter=100):
+def bisection(f, c1, c2, c3, d1, d2, d3, lo, hi, tol=1e-5, maxIter=100):
+    pi = atan(1) * 4
+    iter = 0
+    if fabs(f(c1, c2, c3, d1, d2, d3, lo)) < tol:
+        return (lo, lo + pi)
+    elif fabs(f(c1, c2, c3, d1, d2, d3, hi)) < tol:
+        return (hi, hi + pi)
+    mid = (lo + hi) / 2
+
+    while fabs(f(c1, c2, c3, d1, d2, d3, mid)) >= tol and iter < maxIter:
+        if f(c1, c2, c3, d1, d2, d3, lo) * f(c1, c2, c3, d1, d2, d3, mid) < 0:
+            hi = mid
+        else:
+            lo = mid
+        mid = (lo + hi) / 2
+        iter += 1
+
+    t1 = (mid / (2 * pi) - floor(mid / (2 * pi))) * 2 * pi
+    if t1 > pi:
+        t2 = t1 - pi
+    else:
+        t2 = t1 + pi
+    return (t1, t2)
+
+def newton(f, g, c1, c2, c3, d1, d2, d3, t0, tol=1e-5, maxIter=100000):
     pi = atan(1) * 4
     iter = 0
     t = t0
-    while iter < maxIter and fabs(f(c1, c2, c3, d1, d2, d3, t)) >= tol:
+    while fabs(f(c1, c2, c3, d1, d2, d3, t)) >= tol and iter < maxIter:
         if g(c1, c2, c3, d1, d2, d3, t) == 0:
-            t = t - f(c1, c2, c3, d1, d2, d3, t) / 1
+            t = t - f(c1, c2, c3, d1, d2, d3, t) * 0.01
         else:
             t = t - f(c1, c2, c3, d1, d2, d3, t) / g(c1, c2, c3, d1, d2, d3, t)
         iter += 1
