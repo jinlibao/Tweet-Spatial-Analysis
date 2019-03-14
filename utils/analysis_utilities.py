@@ -12,6 +12,9 @@ def lon_lat_to_east_north(lon, lat):
         return None, None
 
 def are_two_ellipses_overlapping(x1, y1, a1, b1, phi1, x2, y2, a2, b2, phi2):
+    # Make sure the second ellipse has large scaling constant
+    if max(a1, b1) > max(a2, b2):
+        x1, y1, a1, b1, phi1, x2, y2, a2, b2, phi2 = x2, y2, a2, b2, phi2, x1, y1, a1, b1, phi1
     c1 =  (a1 / a2) * cos(phi1 - phi2)
     c2 = -(b1 / a2) * sin(phi1 - phi2)
     c3 =  ((x1 - x2) * cos(phi2) + (y1 - y2) * sin(phi2)) / a2
