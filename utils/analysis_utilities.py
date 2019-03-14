@@ -49,7 +49,7 @@ def plot_ellipses(x1, y1, a1, b1, phi1, x2, y2, a2, b2, phi2, filename="plot.pdf
     ey4 = np.sin(t)
     ex = [[ex1, ex2], [ex3, ex4]]
     ey = [[ey1, ey2], [ey3, ey4]]
-    style = [['r-', 'b-'], ['r:', 'b:']]
+    style = [['r:', 'b:'], ['r-', 'b-']]
 
     plt.style.use('ggplot')
     plt.rc('text', usetex=True)
