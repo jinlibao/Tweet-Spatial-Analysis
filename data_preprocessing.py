@@ -64,7 +64,6 @@ class TweetDataPreProcessing:
             tweet_data_working_overlap.to_csv(filename, sep=',', header=True, index=True)
             self.tweet_data_working_overlap = tweet_data_working_overlap
 
-
     def build_overlap_matrix_parallel(self, df, filename='overlap_matrix.csv'):
         start_time = timeit.default_timer()
         comm = MPI.COMM_WORLD
@@ -72,64 +71,57 @@ class TweetDataPreProcessing:
         rank = comm.Get_rank()
         # rows, cols = df.shape
         rows, cols = 20, 10
-        rows_per_cpu = math.ceil(rows / size)
+        rows_per_cpu = rows / size
+        rows_per_cpu_ceil = math.ceil(rows_per_cpu)
+        rows_per_cpu_floor = math.floor(rows_per_cpu)
+        threshold = math.ceil((rows_per_cpu - rows_per_cpu_floor) * size)
         k = rank
 
+        if threshold == 0:
+            start = k * rows_per_cpu_floor
+            rows_local = rows_per_cpu_floor
+        elif k < threshold:
+            start = k * rows_per_cpu_ceil
+            rows_local = rows_per_cpu_ceil
+        else:
+            start = threshold * rows_per_cpu_ceil + (k - threshold) * rows_per_cpu_floor
+            rows_local = rows_per_cpu_floor
+        # print('Total CPUs: {:2d}, Rank {:2d}, rows: {:3d}, rows_per_cpu: {:d}, start: {:d}'.format(rank, size, rows, rows_local, start))
+
+        tweet_data_working_overlap = np.zeros((rows_local, rows))
+        for i in range(start, start + rows_local):
+            # print(k, start, i)
+            for j in range(rows):
+                if df['a'][i] == 0 or df['b'][i] == 0 or df['a'][j] == 0 or df['b'][j] == 0:
+                    tweet_data_working_overlap[i - start][j] = -1
+                    continue
+                tweet_data_working_overlap[i - start][j] = au.are_two_ellipses_overlapping(
+                    df['x'][i], df['y'][i], df['a'][i], df['b'][i], df['angle'][i],
+                    df['x'][j], df['y'][j], df['a'][j], df['b'][j], df['angle'][j]
+                )
+            print('Node {:d}: Progress {:.2f}%'.format(k,  (i - start + 1) / rows_local * 100))
+        # print(tweet_data_working_overlap, rank)
+
         if k != 0:
-            start = k * rows_per_cpu
-            if k == size - 1:
-                # rows_local = (rows - 1) % rows_per_cpu + 1
-                rows_local = rows - k * rows_per_cpu
-                if rows_local < 0:
-                    rows_local = 0
-            else:
-                rows_local = rows_per_cpu
-            tweet_data_working_overlap = np.zeros((rows_local, rows))
-            for i in range(0, rows_local):
-                for j in range(rows):
-                    if df['a'][start + i] == 0 or df['b'][start + i] == 0 or df['a'][j] == 0 or df['b'][j] == 0:
-                        tweet_data_working_overlap[i][j] = -1
-                        continue
-                    tweet_data_working_overlap[i][j] = au.are_two_ellipses_overlapping(
-                        df['x'][start + i], df['y'][start + i], df['a'][start + i], df['b'][start + i], df['angle'][start + i],
-                        df['x'][j], df['y'][j], df['a'][j], df['b'][j], df['angle'][j],
-                    )
-            # print(tweet_data_working_overlap, rank)
-            # print('My rank is {:d} of {:d} processors, number of rows: {:d}, and rows_per_cpu: {:d}'.format(rank, size, rows, rows_local))
             comm.send(tweet_data_working_overlap, dest=0)
 
         if k == 0:
             data_dict = {}
-            start = k * rows_per_cpu
-            if k == size - 1:
-                rows_local = (rows - 1) % rows_per_cpu + 1
-            else:
-                rows_local = rows_per_cpu
-            tweet_data_working_overlap = np.zeros((rows_local, rows))
-            for i in range(0, rows_local):
-                for j in range(rows):
-                    if df['a'][start + i] == 0 or df['b'][start + i] == 0 or df['a'][j] == 0 or df['b'][j] == 0:
-                        tweet_data_working_overlap[i][j] = -1
-                        continue
-                    tweet_data_working_overlap[i][j] = au.are_two_ellipses_overlapping(
-                        df['x'][start + i], df['y'][start + i], df['a'][start + i], df['b'][start + i], df['angle'][start + i],
-                        df['x'][j], df['y'][j], df['a'][j], df['b'][j], df['angle'][j],
-                    )
-            # print(tweet_data_working_overlap, rank)
-            # print('My rank is {:d} of {:d} processors, number of rows: {:d}, and rows_per_cpu: {:d}'.format(rank, size, rows, rows_local))
-
             for i in range(1, size):
                 data_dict[str(i)] = comm.recv(source=i)
+                print('Node {:d}: Received data from Node {:d}'.format(k,  i))
+
             for i in range(1, len(data_dict) + 1):
-                # print(data_dict[str(i)], i)
-                # tweet_data_working_overlap.extend(data_dict[str(i)])
                 tweet_data_working_overlap = np.append(tweet_data_working_overlap , data_dict[str(i)], axis = 0)
+                print('Node {:d}: Appended data from Node {:d}'.format(k,  i))
+
             tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap.astype(int), columns=df['id'][0:rows], index=df['id'][0:rows])
             # print(tweet_data_working_overlap)
             tweet_data_working_overlap.to_csv(filename, sep=',', header=True, index=True)
+            self.tweet_data_working_overlap = tweet_data_working_overlap
+            print('Node {:d}: Finishing saving data to .csv'.format(k))
             end_time = timeit.default_timer()
             print(end_time - start_time)
-            self.tweet_data_working_overlap = tweet_data_working_overlap
 
     def test_overlap(self):
         # self.build_overlap_matrix(self.tweet_data_working.df)
