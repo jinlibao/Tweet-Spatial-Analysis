@@ -70,7 +70,7 @@ def build_overlap_matrix_parallel(df, filename='overlap_matrix.csv'):
     else:
         start = threshold * rows_per_cpu_ceil + (k - threshold) * rows_per_cpu_floor
         rows_local = rows_per_cpu_floor
-    # print('Total CPUs: {:2d}, Rank {:2d}, rows: {:3d}, rows_per_cpu: {:d}, start: {:d}'.format(rank, size, rows, rows_local, start))
+    # print('Total CPUs: {:4d}, Rank {:4d}, rows: {:5d}, rows_per_cpu: {:5d}, start: {:5d}'.format(rank, size, rows, rows_local, start))
 
     tweet_data_working_overlap = np.zeros((rows_local, rows))
     for i in range(start, start + rows_local):
@@ -83,7 +83,7 @@ def build_overlap_matrix_parallel(df, filename='overlap_matrix.csv'):
                 df['x'][i], df['y'][i], df['a'][i], df['b'][i], df['angle'][i],
                 df['x'][j], df['y'][j], df['a'][j], df['b'][j], df['angle'][j]
             )
-        print('Node {:d}: Progress {:.2f}%'.format(k,  (i - start + 1) / rows_local * 100))
+        print('CPU {:04d}: Progress {:6.2f}%'.format(k,  (i - start + 1) / rows_local * 100))
     # print(tweet_data_working_overlap, rank)
 
     if k != 0:
@@ -93,15 +93,15 @@ def build_overlap_matrix_parallel(df, filename='overlap_matrix.csv'):
         data_dict = {}
         for i in range(1, size):
             data_dict[str(i)] = comm.recv(source=i)
-            print('Node {:d}: Received data from Node {:d}'.format(k,  i))
+            print('CPU {:04d}: Received data from CPU {:04d}'.format(k,  i))
 
         for i in range(1, len(data_dict) + 1):
             tweet_data_working_overlap = np.append(tweet_data_working_overlap , data_dict[str(i)], axis = 0)
-            print('Node {:d}: Appended data from Node {:d}'.format(k,  i))
+            print('CPU {:04d}: Appended data from CPU {:04d}'.format(k,  i))
 
         tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap.astype(int), columns=df['id'][0:rows], index=df['id'][0:rows])
         # print(tweet_data_working_overlap)
         tweet_data_working_overlap.to_csv(filename, sep=',', header=True, index=True)
-        print('Node {:d}: Finishing saving data to .csv'.format(k))
+        print('CPU {:04d}: Finishing saving data to .csv'.format(k))
         end_time = timeit.default_timer()
         print(end_time - start_time)
