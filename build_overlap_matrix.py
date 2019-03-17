@@ -21,7 +21,7 @@ from utils import tweet_data_utilities as tdu
 from data_preprocessing import TweetDataPreProcessing
 from mpi4py import MPI
 
-def build_overlap_matrix(df, filename='overlap_matrix.csv'):
+def build_overlap_matrix(df, loc='.', name='overlap_matrix.csv'):
     start_time = timeit.default_timer()
     comm = MPI.COMM_WORLD
     size = comm.Get_size()
@@ -52,6 +52,7 @@ def build_overlap_matrix(df, filename='overlap_matrix.csv'):
 
         tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap.astype(int), columns=df['id'][0:rows], index=df['id'][0:rows])
         # print(tweet_data_working_overlap)
+        filename = '{:s}/{:s}'.format(loc, name)
         print('CPU {:04d}: Saving data to {:s}'.format(rank, filename))
         tweet_data_working_overlap.to_csv(filename, sep=',', header=True, index=True)
 
@@ -61,7 +62,7 @@ def build_overlap_matrix(df, filename='overlap_matrix.csv'):
         second = elapsed_time - 3600 * hour - 60 * minute
         print('Time elapsed: {:d} hours {:d} minutes {:.2f} seconds'.format(hour, minute, second))
 
-def build_overlap_matrix_parallel(df, filename='overlap_matrix_parallel.csv'):
+def build_overlap_matrix_parallel(df, loc='.', name='overlap_matrix_parallel.csv'):
     start_time = timeit.default_timer()
     comm = MPI.COMM_WORLD
     size = comm.Get_size()
@@ -113,6 +114,7 @@ def build_overlap_matrix_parallel(df, filename='overlap_matrix_parallel.csv'):
 
         tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap.astype(int), columns=df['id'][0:rows], index=df['id'][0:rows])
         # print(tweet_data_working_overlap)
+        filename = '{:s}/{:s}'.format(loc, name)
         print('CPU {:04d}: Saving data to {:s}'.format(rank, filename))
         tweet_data_working_overlap.to_csv(filename, sep=',', header=True, index=True)
         # print('CPU {:04d}: Finishing saving data to .csv'.format(rank))
@@ -123,7 +125,7 @@ def build_overlap_matrix_parallel(df, filename='overlap_matrix_parallel.csv'):
         second = elapsed_time - 3600 * hour - 60 * minute
         print('Time elapsed: {:d} hours {:d} minutes {:.2f} seconds'.format(hour, minute, second))
 
-def build_overlap_matrix_parallel_block(df, filename='overlap_matrix_parallel_block.csv'):
+def build_overlap_matrix_parallel_block(df, loc='.', name='overlap_matrix_parallel_block.csv'):
     start_time = timeit.default_timer()
     comm = MPI.COMM_WORLD
     size = comm.Get_size()
@@ -177,6 +179,7 @@ def build_overlap_matrix_parallel_block(df, filename='overlap_matrix_parallel_bl
 
             tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap.astype(int), columns=df['id'][0:rows], index=df['id'][0:rows])
             # print(tweet_data_working_overlap)
+            filename = '{:s}/{:s}'.format(loc, name)
             print('CPU {:04d}: Saving data to {:s}'.format(rank, filename))
             tweet_data_working_overlap.to_csv(filename, sep=',', header=True, index=True)
 
