@@ -49,13 +49,14 @@ def build_overlap_matrix(df, loc='.', name='overlap_matrix.csv'):
                 print('CPU {:04d}: {:6.2f}% accomplished'.format(rank,  (i + 1) / rows * 100))
 
         for i in range(rows):
-            for j in range(i + 1, rows):
-                tweet_data_working_overlap[i, j] = tweet_data_working_overlap[j, i]
+            tweet_data_working_overlap[0:i, i] = tweet_data_working_overlap[i, 0:i]
+        print('CPU {:04d}: Assigned transposed tril to triu (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
 
         tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap.astype(int), columns=df['id'][0:rows], index=df['id'][0:rows])
+        print('CPU {:04d}: Converted numpy array to pandas DataFrame (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
         # print(tweet_data_working_overlap)
         filename = '{:s}/{:s}'.format(loc, name)
-        print('CPU {:04d}: Saving data to {:s}'.format(rank, filename))
+        print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(rank, filename, timeit.default_timer() - start_time))
         tweet_data_working_overlap.to_csv(filename, sep=',', header=True, index=True)
 
         elapsed_time = timeit.default_timer() - start_time
@@ -78,7 +79,6 @@ def build_overlap_matrix_parallel(df, loc='.', name='overlap_matrix_parallel.csv
 
     tweet_data_working_overlap_local = np.zeros((rows_local, rows))
     for i in range(row_start, row_start + rows_local):
-        # print(rank, row_start, i)
         for j in range(rows):
             if i == j:
                 tweet_data_working_overlap_local[i - row_start, j] = 1
@@ -101,25 +101,26 @@ def build_overlap_matrix_parallel(df, loc='.', name='overlap_matrix_parallel.csv
     if rank == 0:
         tweet_data_working_overlap = np.zeros((rows, rows))
         tweet_data_working_overlap[0:rows_local] = tweet_data_working_overlap_local
+        for i in range(row_start, row_start + rows_local):
+            tweet_data_working_overlap[0:i, i] = tweet_data_working_overlap[i, 0:i]
         number_of_sources = 1
         while number_of_sources < size:
             data = comm.recv(source=MPI.ANY_SOURCE, status=status)
             k = status.Get_source()
+            print('CPU {:04d}: Received data from CPU {:04d} (Time: {:.2f} seconds)'.format(rank,  k, timeit.default_timer() - start_time))
             row_start, rows_local = find_range_1D(rows, size, k)
-            tweet_data_working_overlap[row_start:row_start + rows_local] = data
+            tweet_data_working_overlap[row_start:row_start + rows_local] = data + tweet_data_working_overlap[row_start:row_start + rows_local]
+            for i in range(row_start, row_start + rows_local):
+                tweet_data_working_overlap[0:i, i] = tweet_data_working_overlap[i, 0:i]
             number_of_sources += 1
-            print('CPU {:04d}: Received data from CPU {:04d}'.format(rank,  k))
-
-        for i in range(rows):
-            for j in range(i + 1, rows):
-                tweet_data_working_overlap[i, j] = tweet_data_working_overlap[j, i]
+        print('CPU {:04d}: Merged received data to global numpy array (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
 
         tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap.astype(int), columns=df['id'][0:rows], index=df['id'][0:rows])
+        print('CPU {:04d}: Converted numpy array to pandas DataFrame (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
         # print(tweet_data_working_overlap)
         filename = '{:s}/{:s}'.format(loc, name)
-        print('CPU {:04d}: Saving data to {:s}'.format(rank, filename))
+        print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(rank, filename, timeit.default_timer() - start_time))
         tweet_data_working_overlap.to_csv(filename, sep=',', header=True, index=True)
-        # print('CPU {:04d}: Finishing saving data to .csv'.format(rank))
 
         elapsed_time = timeit.default_timer() - start_time
         hour = math.floor(elapsed_time / 3600)
@@ -143,15 +144,17 @@ def build_overlap_matrix_parallel_block(df, loc='.', name='overlap_matrix_parall
         for i in range(row_start, row_start + rows_local):
             for j in range(col_start, col_start + cols_local):
                 if i == j:
-                    tweet_data_working_overlap_local[i - row_start][j - col_start] = 1
+                    tweet_data_working_overlap_local[i - row_start, j - col_start] = 1
                 elif j < i:
                     if df['a'][i] == 0 or df['b'][i] == 0 or df['a'][j] == 0 or df['b'][j] == 0:
-                        tweet_data_working_overlap_local[i - row_start][j - col_start] = -1
+                        tweet_data_working_overlap_local[i - row_start, j - col_start] = -1
                     else:
-                        tweet_data_working_overlap_local[i - row_start][j - col_start] = au.are_two_ellipses_overlapping(
+                        tweet_data_working_overlap_local[i - row_start, j - col_start] = au.are_two_ellipses_overlapping(
                             df['x'][i], df['y'][i], df['a'][i], df['b'][i], df['angle'][i],
                             df['x'][j], df['y'][j], df['a'][j], df['b'][j], df['angle'][j]
                         )
+            if row_start == col_start:
+                tweet_data_working_overlap_local[0:i - row_start + 1, i - row_start] = tweet_data_working_overlap_local[i - row_start, 0:i - row_start + 1]
 
             if (i - row_start + 1) % 10 == 0:
                 print('CPU {:04d}: {:6.2f}% accomplished'.format(rank,  (i - row_start + 1) / rows_local * 100))
@@ -170,19 +173,20 @@ def build_overlap_matrix_parallel_block(df, loc='.', name='overlap_matrix_parall
             while number_of_sources < cpu_required:
                 data = comm.recv(source=MPI.ANY_SOURCE, status=status)
                 k = status.Get_source()
+                print('CPU {:04d}: Received data from CPU {:04d} (Time: {:.2f} seconds)'.format(rank,  k, timeit.default_timer() - start_time))
                 cpu_required, row_start, col_start, rows_local, cols_local = find_range_2D(rows, size, k)
                 tweet_data_working_overlap[row_start:row_start + rows_local, col_start:col_start + cols_local] = data
+                if row_start != col_start:
+                    tweet_data_working_overlap[col_start:col_start + cols_local, row_start:row_start + rows_local] = data.T
                 number_of_sources += 1
-                print('CPU {:04d}: Received data from CPU {:04d}'.format(rank,  k))
+            print('CPU {:04d}: Merged received data to global numpy array (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
 
-            for i in range(rows):
-                for j in range(i + 1, rows):
-                    tweet_data_working_overlap[i, j] = tweet_data_working_overlap[j, i]
 
             tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap.astype(int), columns=df['id'][0:rows], index=df['id'][0:rows])
+            print('CPU {:04d}: Converted numpy array to pandas DataFrame (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
             # print(tweet_data_working_overlap)
             filename = '{:s}/{:s}'.format(loc, name)
-            print('CPU {:04d}: Saving data to {:s}'.format(rank, filename))
+            print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(rank, filename, timeit.default_timer() - start_time))
             tweet_data_working_overlap.to_csv(filename, sep=',', header=True, index=True)
 
             elapsed_time = timeit.default_timer() - start_time
@@ -238,7 +242,8 @@ if __name__ == '__main__':
     if platform.system() == 'Linux':
         node = 'teton'
         # node = 'moran'
-        partition = 'hugemem'
+        # partition = 'hugemem'
+        partition = 'regular'
         # partition = 'knl'
         # partition = 'gpu'
         loc = '/gscratch/ljin1/data/twitter/csv'
@@ -249,13 +254,15 @@ if __name__ == '__main__':
     else:
         node = 'intel'
         partition = 'partition'
+        loc = '.'
 
     # mode = 'serial'
     # mode = 'parallel'
     mode = 'parallel_block'
 
-    name = 'overlap_matrix_{:s}_{:s}_{:s}_{:d}_{:02d}_{:02d}_{:02d}_{:02d}_{:02d}.csv'.format(node, partition,  mode, year, month, day, hour, minute, second)
+    name = 'overlap_matrix_{:s}_{:s}_{:s}_{:d}_{:02d}_{:02d}_{:02d}_{:02d}_{:02d}.csv'.format(node, partition, mode, year, month, day, hour, minute, second)
 
+    loc = '.'
     if mode == 'serial':
         build_overlap_matrix(tdp.tweet_data_working.df, loc, name)
     elif mode == 'parallel':
