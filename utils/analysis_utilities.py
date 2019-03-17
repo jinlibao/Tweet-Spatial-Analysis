@@ -52,6 +52,7 @@ def plot_ellipses(x1, y1, a1, b1, phi1, x2, y2, a2, b2, phi2, filename="plot.pdf
     ey4 = np.sin(t)
     ex = [[ex1, ex2], [ex3, ex4]]
     ey = [[ey1, ey2], [ey3, ey4]]
+    label = ['Before Inverse Transformation', 'After Inverse Transformation']
     style = [['r:', 'b:'], ['r-', 'b-']]
 
     plt.style.use('ggplot')
@@ -64,19 +65,24 @@ def plot_ellipses(x1, y1, a1, b1, phi1, x2, y2, a2, b2, phi2, filename="plot.pdf
             plt.axis('equal')
             plt.xlabel('$x$')
             plt.ylabel('$y$')
-            plt.title('Ellipse Overlapping')
+            plt.title(label[i])
             plt.show(block=False)
             pdf.savefig(fig)
             plt.close()
 
         fig = plt.figure()
+        handles = []
         for i in range(len(ex)):
             # fig = plt.figure()
-            plt.plot(ex[i][0], ey[i][0], style[i][0], ex[i][1], ey[i][1], style[i][1])
+            cur_h_0, = plt.plot(ex[i][0], ey[i][0], style[i][0], label=label[i])
+            handles.append(cur_h_0)
+            cur_h_1, = plt.plot(ex[i][1], ey[i][1], style[i][1], label=label[i])
+            handles.append(cur_h_1)
             plt.axis('equal')
             plt.xlabel('$x$')
             plt.ylabel('$y$')
-            plt.title('Ellipse Overlapping')
+            plt.title('Before vs. After Inverse Transformation')
+        plt.legend(handles=handles, loc='best')
         plt.show(block=False)
         pdf.savefig(fig)
         plt.close()
