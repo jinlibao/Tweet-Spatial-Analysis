@@ -12,6 +12,8 @@ Build overlap matrix
 
 import math
 import timeit
+import datetime
+import platform
 import numpy as np
 import pandas as pd
 from utils import analysis_utilities as au
@@ -90,7 +92,7 @@ def build_overlap_matrix_parallel(df, loc='.', name='overlap_matrix_parallel.csv
                     )
 
         if (i - row_start + 1) % 10 == 0:
-            print('CPU {:04d}: {:6.2f}% accomplised'.format(rank,  (i - row_start + 1) / rows_local * 100))
+            print('CPU {:04d}: {:6.2f}% accomplished'.format(rank,  (i - row_start + 1) / rows_local * 100))
     # print(tweet_data_working_overlap, rank)
 
     if rank != 0:
@@ -152,7 +154,7 @@ def build_overlap_matrix_parallel_block(df, loc='.', name='overlap_matrix_parall
                         )
 
             if (i - row_start + 1) % 10 == 0:
-                print('CPU {:04d}: {:6.2f}% accomplised'.format(rank,  (i - row_start + 1) / rows_local * 100))
+                print('CPU {:04d}: {:6.2f}% accomplished'.format(rank,  (i - row_start + 1) / rows_local * 100))
 
         # print(tweet_data_working_overlap, rank)
 
@@ -225,6 +227,38 @@ if __name__ == '__main__':
                        "data/tweets_median_working.json",
                        "data/tweets_median_non_working.json")
 
-    # build_overlap_matrix(tdp.tweet_data_working.df)
-    # build_overlap_matrix_parallel(tdp.tweet_data_working.df)
-    build_overlap_matrix_parallel_block(tdp.tweet_data_working.df)
+    dt = datetime.datetime.now()
+    year = dt.year
+    month = dt.month
+    day= dt.day
+    hour = dt.hour
+    minute = dt.minute
+    second = dt.second
+
+    if platform.system() == 'Linux':
+        node = 'teton'
+        # node = 'moran'
+        partition = 'hugemem'
+        # partition = 'knl'
+        # partition = 'gpu'
+        loc = '/gscratch/ljin1/data/twitter/csv'
+    elif platform.system() == 'Darwin':
+        node = 'libaoutrage'
+        partition = 'macOS'
+        loc = '/Users/libao/Documents/data/twitter/csv'
+    else:
+        node = 'intel'
+        partition = 'partition'
+
+    # mode = 'serial'
+    # mode = 'parallel'
+    mode = 'parallel_block'
+
+    name = 'overlap_matrix_{:s}_{:s}_{:s}_{:d}_{:02d}_{:02d}_{:02d}_{:02d}_{:02d}.csv'.format(node, partition,  mode, year, month, day, hour, minute, second)
+
+    if mode == 'serial':
+        build_overlap_matrix(tdp.tweet_data_working.df, loc, name)
+    elif mode == 'parallel':
+        build_overlap_matrix_parallel(tdp.tweet_data_working.df, loc, name)
+    else:
+        build_overlap_matrix_parallel_block(tdp.tweet_data_working.df, loc, name)
