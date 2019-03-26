@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import datetime
 
+from argparse import ArgumentParser
 from utils import analysis_utilities as au
 from utils import configuration_utilities as cu
 from utils import file_utilities as fu
@@ -36,7 +37,7 @@ class TweetDataPreProcessing:
         self.tweet_data_non_working = None
         self.tweet_data_working_overlap = None
 
-    def build_overlap_matrix(self, df, loc='.', name='overlap_matrix.csv'):
+    def build_overlap_matrix(self, df, rows, filename='./overlap_matrix.csv'):
         start_time = timeit.default_timer()
         comm = MPI.COMM_WORLD
         size = comm.Get_size()
@@ -68,7 +69,6 @@ class TweetDataPreProcessing:
             tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap.astype(int), columns=df['id'][0:rows], index=df['id'][0:rows])
             print('CPU {:04d}: Converted numpy array to pandas DataFrame (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
             # print(tweet_data_working_overlap)
-            filename = '{:s}/{:s}'.format(loc, name)
             print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(rank, filename, timeit.default_timer() - start_time))
             tweet_data_working_overlap.to_csv(filename, sep=',', header=True, index=True)
             self.tweet_data_working_overlap = tweet_data_working_overlap
@@ -79,7 +79,7 @@ class TweetDataPreProcessing:
             second = elapsed_time - 3600 * hour - 60 * minute
             print('Time elapsed: {:d} hours {:d} minutes {:.2f} seconds'.format(hour, minute, second))
 
-    def build_overlap_matrix_parallel(self, df, loc='.', name='overlap_matrix_parallel.csv'):
+    def build_overlap_matrix_parallel(self, df, rows, filename='./overlap_matrix_parallel.csv'):
         start_time = timeit.default_timer()
         comm = MPI.COMM_WORLD
         size = comm.Get_size()
@@ -132,7 +132,6 @@ class TweetDataPreProcessing:
             tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap.astype(int), columns=df['id'][0:rows], index=df['id'][0:rows])
             print('CPU {:04d}: Converted numpy array to pandas DataFrame (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
             # print(tweet_data_working_overlap)
-            filename = '{:s}/{:s}'.format(loc, name)
             print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(rank, filename, timeit.default_timer() - start_time))
             tweet_data_working_overlap.to_csv(filename, sep=',', header=True, index=True)
             self.tweet_data_working_overlap = tweet_data_working_overlap
@@ -143,7 +142,7 @@ class TweetDataPreProcessing:
             second = elapsed_time - 3600 * hour - 60 * minute
             print('Time elapsed: {:d} hours {:d} minutes {:.2f} seconds'.format(hour, minute, second))
 
-    def build_overlap_matrix_parallel_block(self, df, loc='.', name='overlap_matrix_parallel_block.csv'):
+    def build_overlap_matrix_parallel_block(self, df, rows, filename='overlap_matrix_parallel_block.csv'):
         start_time = timeit.default_timer()
         comm = MPI.COMM_WORLD
         size = comm.Get_size()
@@ -200,7 +199,6 @@ class TweetDataPreProcessing:
                 tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap.astype(int), columns=df['id'][0:rows], index=df['id'][0:rows])
                 print('CPU {:04d}: Converted numpy array to pandas DataFrame (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
                 # print(tweet_data_working_overlap)
-                filename = '{:s}/{:s}'.format(loc, name)
                 print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(rank, filename, timeit.default_timer() - start_time))
                 tweet_data_working_overlap.to_csv(filename, sep=',', header=True, index=True)
                 self.tweet_data_working_overlap = tweet_data_working_overlap
@@ -250,36 +248,58 @@ class TweetDataPreProcessing:
         minute = dt.minute
         second = dt.second
 
-        if platform.system() == 'Linux':
-            node = 'teton'
-            # node = 'moran'
-            # partition = 'hugemem'
-            partition = 'regular'
-            # partition = 'knl'
-            # partition = 'gpu'
-            loc = '/gscratch/ljin1/data/twitter/csv'
-        elif platform.system() == 'Darwin':
-            node = 'libaoutrage'
-            partition = 'macOS'
-            loc = '/Users/libao/Documents/data/twitter/csv'
+        # algorithm = 'serial'
+        # algorithm = 'parallel'
+        algorithm = 'parallel_block'
+
+        parser = ArgumentParser()
+        parser.add_argument('-l', '--loc', dest='loc', help='Location to save the output file')
+        parser.add_argument('-n', '--name', dest='name', help='Name for the output file')
+        parser.add_argument('-o', '--outfile', dest='filename', help="Path for saving the output file")
+        parser.add_argument('-r', '--rows', dest='rows', help="Path for saving the output file")
+        args = parser.parse_args()
+
+        if args.loc:
+            loc = args.loc
         else:
-            node = 'intel'
-            partition = 'partition'
             loc = '.'
 
-        # mode = 'serial'
-        mode = 'parallel'
-        # mode = 'parallel_block'
-
-        name = 'overlap_matrix_{:s}_{:s}_{:s}_{:d}_{:02d}_{:02d}_{:02d}_{:02d}_{:02d}.csv'.format(node, partition, mode, year, month, day, hour, minute, second)
-
-        loc = '.'
-        if mode == 'serial':
-            self.build_overlap_matrix(self.tweet_data_working.df, loc, name)
-        elif mode == 'parallel':
-            self.build_overlap_matrix_parallel(self.tweet_data_working.df, loc, name)
+        if args.name:
+            name = args.name
         else:
-            self.build_overlap_matrix_parallel_block(self.tweet_data_working.df, loc, name)
+            if platform.system() == 'Linux':
+                node = 'teton'
+                # node = 'moran'
+                # partition = 'hugemem'
+                partition = 'regular'
+                # partition = 'knl'
+                # partition = 'gpu'
+            elif platform.system() == 'Darwin':
+                node = 'libaoutrage'
+                partition = 'macOS'
+            else:
+                node = 'intel'
+                partition = 'partition'
+
+            name = 'overlap_matrix_{:s}_{:s}_{:s}_{:d}_{:02d}_{:02d}_{:02d}_{:02d}_{:02d}.csv'.format(node, partition, algorithm, year, month, day, hour, minute, second)
+
+        if args.filename:
+            filename = args.filename
+        else:
+            filename = '{:s}/{:s}'.format(loc, name)
+
+        # rows, _ = tdp.tweet_data_working.df.shape
+        if args.rows:
+            rows = int(args.rows)
+        else:
+            rows, _ = tdp.tweet_data_working.df.shape
+
+        if algorithm == 'serial':
+            build_overlap_matrix(tdp.tweet_data_working.df, rows, filename)
+        elif algorithm == 'parallel':
+            build_overlap_matrix_parallel(tdp.tweet_data_working.df, rows, filename)
+        else:
+            build_overlap_matrix_parallel_block(tdp.tweet_data_working.df, rows, filename)
 
     def trim_columns(self, df):
         # Trimming / stripping the white space can create an empty cell. This is then NOT picked up by isspace()
