@@ -23,6 +23,7 @@ from utils import file_utilities as fu
 from utils import tweet_data_utilities as tdu
 from data_preprocessing import TweetDataPreProcessing
 from mpi4py import MPI
+import build_distance_matrix as bdm
 
 def build_overlap_matrix(df, rows, filename='./overlap_matrix.csv'):
     start_time = timeit.default_timer()
@@ -54,14 +55,16 @@ def build_overlap_matrix(df, rows, filename='./overlap_matrix.csv'):
         tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap.astype(int), columns=df['id'][0:rows], index=df['id'][0:rows])
         print('CPU {:04d}: Converted numpy array to pandas DataFrame (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
         # print(tweet_data_working_overlap)
-        print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(rank, filename, timeit.default_timer() - start_time))
-        tweet_data_working_overlap.to_csv(filename, sep=',', header=True, index=True)
+        # print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(rank, filename, timeit.default_timer() - start_time))
+        # tweet_data_working_overlap.to_csv(filename, sep=',', header=True, index=True)
+        bdm.build_distance_matrix(tweet_data_working_overlap, filename, start_time)
 
         elapsed_time = timeit.default_timer() - start_time
         hour = math.floor(elapsed_time / 3600)
         minute = math.floor((elapsed_time - hour * 3600) / 60)
         second = elapsed_time - 3600 * hour - 60 * minute
         print('Time elapsed: {:d} hours {:d} minutes {:.2f} seconds'.format(hour, minute, second))
+        return tweet_data_working_overlap
 
 def build_overlap_matrix_parallel(df, rows, filename='./overlap_matrix_parallel.csv'):
     start_time = timeit.default_timer()
@@ -113,14 +116,16 @@ def build_overlap_matrix_parallel(df, rows, filename='./overlap_matrix_parallel.
         tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap.astype(int), columns=df['id'][0:rows], index=df['id'][0:rows])
         print('CPU {:04d}: Converted numpy array to pandas DataFrame (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
         # print(tweet_data_working_overlap)
-        print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(rank, filename, timeit.default_timer() - start_time))
-        tweet_data_working_overlap.to_csv(filename, sep=',', header=True, index=True)
+        # print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(rank, filename, timeit.default_timer() - start_time))
+        # tweet_data_working_overlap.to_csv(filename, sep=',', header=True, index=True)
+        bdm.build_distance_matrix(tweet_data_working_overlap, filename, start_time)
 
         elapsed_time = timeit.default_timer() - start_time
         hour = math.floor(elapsed_time / 3600)
         minute = math.floor((elapsed_time - hour * 3600) / 60)
         second = elapsed_time - 3600 * hour - 60 * minute
         print('Time elapsed: {:d} hours {:d} minutes {:.2f} seconds'.format(hour, minute, second))
+        return tweet_data_working_overlap
 
 def build_overlap_matrix_parallel_block(df, rows, filename='./overlap_matrix_parallel_block.csv'):
     start_time = timeit.default_timer()
@@ -136,7 +141,7 @@ def build_overlap_matrix_parallel_block(df, rows, filename='./overlap_matrix_par
         for i in range(row_start, row_start + rows_local):
             for j in range(col_start, col_start + cols_local):
                 if i == j:
-                    tweet_data_working_overlap_local[i - row_start, j - col_start] = 1
+                    tweet_data_working_overlap_local[i - row_start, j - col_start] = 0
                 elif j < i:
                     if df['a'][i] == 0 or df['b'][i] == 0 or df['a'][j] == 0 or df['b'][j] == 0:
                         tweet_data_working_overlap_local[i - row_start, j - col_start] = -1
@@ -177,9 +182,9 @@ def build_overlap_matrix_parallel_block(df, rows, filename='./overlap_matrix_par
             tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap.astype(int), columns=df['id'][0:rows], index=df['id'][0:rows])
             print('CPU {:04d}: Converted numpy array to pandas DataFrame (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
             # print(tweet_data_working_overlap)
-            print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(rank, filename, timeit.default_timer() - start_time))
-            tweet_data_working_overlap.to_csv(filename, sep=',', header=True, index=True)
-
+            # print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(rank, filename, timeit.default_timer() - start_time))
+            # tweet_data_working_overlap.to_csv(filename.replace('.csv', '_adjacency.csv'), sep=',', header=True, index=True)
+            bdm.build_distance_matrix(tweet_data_working_overlap, filename, start_time)
             elapsed_time = timeit.default_timer() - start_time
             hour = math.floor(elapsed_time / 3600)
             minute = math.floor((elapsed_time - hour * 3600) / 60)

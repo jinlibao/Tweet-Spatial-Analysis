@@ -12,10 +12,10 @@
 # Start the job
 if [[ $OSTYPE == darwin* ]] # MacBook Pro @ libaooutrage (macOS)
 then
-    DATA_DIR=/Users/libao/Documents/data/twitter/result
+    DATA_DIR=/Users/libao/Documents/data/twitter/csv
 elif [[ $OSTYPE == linux-gnu ]] # Teton @ UWyo ARCC (Linux)
 then
-    DATA_DIR=/gscratch/ljin1/data/twitter/result
+    DATA_DIR=/gscratch/ljin1/data/twitter/csv
 fi
 
 # Set up output directory
@@ -24,4 +24,4 @@ if [ ! -d $DATA_DIR ]; then
 fi
 
 echo $NCPU
-mpirun -n $NCPU python3 ./build_overlap_matrix.py -l $DATA_DIR
+mpirun -n $NCPU python3 ./build_overlap_matrix.py -l $DATA_DIR -r 50
