@@ -23,7 +23,6 @@ from utils import file_utilities as fu
 from utils import tweet_data_utilities as tdu
 from data_preprocessing import TweetDataPreProcessing
 from mpi4py import MPI
-import build_distance_matrix as bdm
 
 def build_overlap_matrix(df, rows, filename='./overlap_matrix.csv'):
     start_time = timeit.default_timer()
@@ -32,7 +31,6 @@ def build_overlap_matrix(df, rows, filename='./overlap_matrix.csv'):
     rank = comm.Get_rank()
     if rank == 0:
         tweet_data_working_overlap = np.zeros((rows, rows))
-
         for i in range(rows):
             for j in range(rows):
                 if i == j:
@@ -127,6 +125,153 @@ def build_overlap_matrix_parallel(df, rows, filename='./overlap_matrix_parallel.
         print('Time elapsed: {:d} hours {:d} minutes {:.2f} seconds'.format(hour, minute, second))
         return tweet_data_working_overlap
 
+def bfs_array(raw_graph):
+    '''
+    Breadth First Search on array
+    Find components of a graph
+    '''
+    visited = [False for i in range(len(raw_graph))]
+    components = []
+    for i in range(len(raw_graph)):
+        if not visited[i]:
+            visited[i] = True
+            component = [i]
+            queue = []
+            for j in range(len(raw_graph[i])):
+                if not visited[j] and raw_graph[i, j] > 0:
+                    visited[j] = True
+                    queue.append(j)
+                    component.append(j)
+            while len(queue) > 0:
+                j = queue.pop(0)
+                for k in range(len(raw_graph[j])):
+                    if not visited[k] and raw_graph[j, k] > 0:
+                        visited[k] = True
+                        component.append(k)
+                        queue.append(k)
+            components.append(component)
+    return components
+
+def bfs_df(raw_graph):
+    '''
+    Breadth First Search on pandas.DataFrame
+    Find components of a graph
+    '''
+    n, _ = raw_graph.shape
+    visited = [False for i in range(n)]
+    components = []
+    for i in range(n):
+        if not visited[i]:
+            visited[i] = True
+            component = [i]
+            queue = []
+            for j in range(n):
+                if not visited[j] and raw_graph.iloc[i, j] > 0:
+                    visited[j] = True
+                    queue.append(j)
+                    component.append(j)
+            while len(queue) > 0:
+                j = queue.pop(0)
+                for k in range(n):
+                    if not visited[k] and raw_graph.iloc[j, k] > 0:
+                        visited[k] = True
+                        component.append(k)
+                        queue.append(k)
+            components.append(component)
+    return components
+
+def APD(A):
+    '''
+    Seidel's algorithm
+    Find distance matrix of a connected graph
+    '''
+    n, _ = A.shape
+    B = A
+    while not all(B[i,j] for i in range(n) for j in range(n) if i != j):
+        Z = B.dot(B)
+        B = np.array([[1 if i != j and ( B[i,j] == 1 or Z[i,j] > 0 ) else 0 for j in range(n)] for i in range(n)])
+    T = B
+    X = T.dot(A)
+    degree = [sum( A[i,j] for j in range(n) ) for i in range(n)]
+    D = np.array([[2 * T[i,j] if X[i,j] >= T[i,j] * degree[j] else 2 * T[i,j] - 1 for j in range(n)] for i in range(n) ] )
+    return D
+
+def find_components(df, filename, start_time):
+    print('CPU {:04d}: Now cleaning data remove -1 entries (Time: {:.2f} seconds)'.format(0, timeit.default_timer() - start_time))
+    # Data cleaning
+    col = [idx for idx in df.iloc[0].index if df.iloc[0][idx] == -1]
+    idx = [int(idx) for idx in col]
+    df = df.drop(index=idx, columns=col)
+
+    print('CPU {:04d}: Starting BFS... (Time: {:.2f} seconds)'.format(0, timeit.default_timer() - start_time))
+    components = bfs_df(df)
+    components.sort(key=len, reverse=True)
+
+    idx = df.index[components[0]]
+    col = df.columns[components[0]]
+    idx_list = [idx]
+    col_list = [col]
+    for i in range(1, len(components)):
+        idx = idx.append(df.index[components[i]])
+        idx_list.append(df.index[components[i]])
+        col = col.append(df.columns[components[i]])
+        col_list.append(df.columns[components[i]])
+        print(components[i], idx.shape, col.shape, type(idx), type(col))
+
+    print('CPU {:04d}: Reconstructing adjacency pandas DataFrame (Time: {:.2f} seconds)'.format(0, timeit.default_timer() - start_time))
+    df_orig = np.zeros(df.shape)
+    df_orig = pd.DataFrame(data=df_orig.astype(int), columns=col, index=idx)
+    for i in range(len(idx_list)):
+        df_orig.loc[idx_list[i], col_list[i]] = df.loc[idx_list[i], col_list[i]]
+    filename_adj = filename.replace('.csv', '_adjacency.csv')
+    print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(0, filename_adj, timeit.default_timer() - start_time))
+    df_orig.to_csv(filename_adj, sep=',', header=True, index=True)
+    return (df, components, idx, col, idx_list, col_list)
+
+def build_distance_matrix(df, components, idx, col, idx_list, col_list, filename, start_time):
+    comm = MPI.COMM_WORLD
+    size = comm.Get_size()
+    rank = comm.Get_rank()
+    status = MPI.Status()
+
+    df_dist_list = []
+    for i in range(1, len(components)):
+        if rank == i % size:
+            print('CPU {:04d}: Starting APD... (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
+            D = APD(np.array(df.loc[idx_list[i],col_list[i]]))
+            comm.send((D, i), dest=0)
+
+    if rank == 0:
+        print('CPU {:04d}: Starting APD... (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
+        D = APD(np.array(df.loc[idx_list[rank],col_list[rank]]))
+        df_dist_list.append(pd.DataFrame(data=D.astype(int), columns=col_list[rank], index=idx_list[rank]))
+        number_of_sources = 1
+
+        while number_of_sources < len(components):
+            D, i = comm.recv(source=MPI.ANY_SOURCE, status=status)
+            k = status.Get_source()
+            print('CPU {:04d}: Received data from CPU {:04d} (Time: {:.2f} seconds)'.format(rank,  k, timeit.default_timer() - start_time))
+            df_dist_list.append(pd.DataFrame(data=D.astype(int), columns=col_list[i], index=idx_list[i]))
+            number_of_sources += 1
+
+        print('CPU {:04d}: Constructing distance pandas DataFrame (Time: {:.2f} seconds)'.format(0, timeit.default_timer() - start_time))
+        df_dist = np.ones(df.shape) * -1
+        df_dist = pd.DataFrame(data=df_dist.astype(int), columns=col, index=idx)
+
+        for i in range(len(idx_list)):
+            df_dist.loc[idx_list[i], col_list[i]] = df_dist_list[i]
+
+        filename_dis = filename.replace('.csv', '_distance.csv')
+
+        print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(0, filename_dis, timeit.default_timer() - start_time))
+        df_dist.to_csv(filename_dis, sep=',', header=True, index=True)
+
+        elapsed_time = timeit.default_timer() - start_time
+        hour = math.floor(elapsed_time / 3600)
+        minute = math.floor((elapsed_time - hour * 3600) / 60)
+        second = elapsed_time - 3600 * hour - 60 * minute
+        print('Time elapsed: {:d} hours {:d} minutes {:.2f} seconds'.format(hour, minute, second))
+
 def build_overlap_matrix_parallel_block(df, rows, filename='./overlap_matrix_parallel_block.csv'):
     start_time = timeit.default_timer()
     comm = MPI.COMM_WORLD
@@ -178,18 +323,13 @@ def build_overlap_matrix_parallel_block(df, rows, filename='./overlap_matrix_par
                 number_of_sources += 1
             print('CPU {:04d}: Merged received data to global numpy array (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
 
-
             tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap.astype(int), columns=df['id'][0:rows], index=df['id'][0:rows])
             print('CPU {:04d}: Converted numpy array to pandas DataFrame (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
             # print(tweet_data_working_overlap)
             # print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(rank, filename, timeit.default_timer() - start_time))
             # tweet_data_working_overlap.to_csv(filename.replace('.csv', '_adjacency.csv'), sep=',', header=True, index=True)
-            bdm.build_distance_matrix(tweet_data_working_overlap, filename, start_time)
-            elapsed_time = timeit.default_timer() - start_time
-            hour = math.floor(elapsed_time / 3600)
-            minute = math.floor((elapsed_time - hour * 3600) / 60)
-            second = elapsed_time - 3600 * hour - 60 * minute
-            print('Time elapsed: {:d} hours {:d} minutes {:.2f} seconds'.format(hour, minute, second))
+            tweet_data_working_overlap, components, idx, col, idx_list, col_list = find_components(tweet_data_working_overlap, filename, start_time)
+            return (tweet_data_working_overlap, components, idx, col, idx_list, col_list, filename, start_time)
 
 def find_range_1D(number, number_of_cpu, rank):
     number_per_cpu = number / number_of_cpu
@@ -257,8 +397,8 @@ if __name__ == '__main__':
         if platform.system() == 'Linux':
             node = 'teton'
             # node = 'moran'
-            # partition = 'hugemem'
-            partition = 'regular'
+            partition = 'hugemem'
+            # partition = 'regular'
             # partition = 'knl'
             # partition = 'gpu'
         elif platform.system() == 'Darwin':
@@ -280,10 +420,14 @@ if __name__ == '__main__':
         rows = int(args.rows)
     else:
         rows, _ = tdp.tweet_data_working.df.shape
+        print(rows)
 
     if algorithm == 'serial':
         build_overlap_matrix(tdp.tweet_data_working.df, rows, filename)
     elif algorithm == 'parallel':
         build_overlap_matrix_parallel(tdp.tweet_data_working.df, rows, filename)
     else:
-        build_overlap_matrix_parallel_block(tdp.tweet_data_working.df, rows, filename)
+        rank = comm.Get_rank()
+        if rank == 0:
+            df, components, idx, col, idx_list, col_list, filename, start_time = build_overlap_matrix_parallel_block(tdp.tweet_data_working.df, rows, filename)
+            build_distance_matrix(df, components, idx, col, idx_list, col_list, filename, start_time)
