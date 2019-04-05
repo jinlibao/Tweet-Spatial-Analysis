@@ -328,8 +328,19 @@ def build_overlap_matrix_parallel_block(df, rows, filename='./overlap_matrix_par
             # print(tweet_data_working_overlap)
             # print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(rank, filename, timeit.default_timer() - start_time))
             # tweet_data_working_overlap.to_csv(filename.replace('.csv', '_adjacency.csv'), sep=',', header=True, index=True)
-            tweet_data_working_overlap, components, idx, col, idx_list, col_list = find_components(tweet_data_working_overlap, filename, start_time)
-            return (tweet_data_working_overlap, components, idx, col, idx_list, col_list, filename, start_time)
+            data = find_components(tweet_data_working_overlap, filename, start_time)
+
+            if len(components) < size:
+                for i in range(1, len(components)):
+                    comm.send(data, dest=i)
+
+            df, components, idx, col, idx_list, col_list = data
+            build_distance_matrix(df, components, idx, col, idx_list, col_list, filename, start_time)
+
+        if rank != 0:
+            data = comm.recv(source=0, status)
+            df, components, idx, col, idx_list, col_list = data
+            build_distance_matrix(df, components, idx, col, idx_list, col_list, filename, start_time)
 
 def find_range_1D(number, number_of_cpu, rank):
     number_per_cpu = number / number_of_cpu
@@ -427,7 +438,5 @@ if __name__ == '__main__':
     elif algorithm == 'parallel':
         build_overlap_matrix_parallel(tdp.tweet_data_working.df, rows, filename)
     else:
-        rank = comm.Get_rank()
-        if rank == 0:
-            df, components, idx, col, idx_list, col_list, filename, start_time = build_overlap_matrix_parallel_block(tdp.tweet_data_working.df, rows, filename)
-            build_distance_matrix(df, components, idx, col, idx_list, col_list, filename, start_time)
+        build_overlap_matrix_parallel_block(tdp.tweet_data_working.df, rows, filename)
+
