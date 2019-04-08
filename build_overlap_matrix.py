@@ -180,6 +180,21 @@ def bfs_df(raw_graph):
             components.append(component)
     return components
 
+def APD_recursive(A):
+    '''
+    Seidel's algorithm
+    Find distance matrix of a connected graph
+    '''
+    n, _ = A.shape
+    if all(A[i,j] for i in range(n) for j in range(n) if i != j): return A
+    Z = A.dot(A)
+    B = np.array([[1 if i != j and ( A[i,j] == 1 or Z[i,j] > 0 ) else 0 for j in range(n)] for i in range(n)])
+    T = APD_recursive(B)
+    X = T.dot(A)
+    degree = [sum( A[i,j] for j in range(n) ) for i in range(n)]
+    D = np.array([[2 * T[i,j] if X[i,j] >= T[i,j] * degree[j] else 2 * T[i,j] - 1 for j in range(n)] for i in range(n) ] )
+    return D
+
 def APD(A):
     '''
     Seidel's algorithm
@@ -238,12 +253,12 @@ def build_distance_matrix(df, components, idx, col, idx_list, col_list, filename
     for i in range(1, len(components)):
         if rank == i % size:
             print('CPU {:04d}: Starting APD... (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
-            D = APD(np.array(df.loc[idx_list[i],col_list[i]]))
+            D = APD_recursive(np.array(df.loc[idx_list[i],col_list[i]]))
             comm.send((D, i), dest=0)
 
     if rank == 0:
         print('CPU {:04d}: Starting APD... (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
-        D = APD(np.array(df.loc[idx_list[rank],col_list[rank]]))
+        D = APD_recursive(np.array(df.loc[idx_list[rank],col_list[rank]]))
         df_dist_list.append(pd.DataFrame(data=D.astype(int), columns=col_list[rank], index=idx_list[rank]))
         number_of_sources = 1
 
@@ -330,17 +345,17 @@ def build_overlap_matrix_parallel_block(df, rows, filename='./overlap_matrix_par
             # tweet_data_working_overlap.to_csv(filename.replace('.csv', '_adjacency.csv'), sep=',', header=True, index=True)
             data = find_components(tweet_data_working_overlap, filename, start_time)
 
-            if len(components) < size:
-                for i in range(1, len(components)):
-                    comm.send(data, dest=i)
+            # if len(components) < size:
+                # for i in range(1, len(components)):
+                    # comm.send(data, dest=i)
 
             df, components, idx, col, idx_list, col_list = data
             build_distance_matrix(df, components, idx, col, idx_list, col_list, filename, start_time)
 
-        if rank != 0:
-            data = comm.recv(source=0, status)
-            df, components, idx, col, idx_list, col_list = data
-            build_distance_matrix(df, components, idx, col, idx_list, col_list, filename, start_time)
+        # if rank != 0:
+            # data = comm.recv(source=0, status)
+            # df, components, idx, col, idx_list, col_list = data
+            # build_distance_matrix(df, components, idx, col, idx_list, col_list, filename, start_time)
 
 def find_range_1D(number, number_of_cpu, rank):
     number_per_cpu = number / number_of_cpu
