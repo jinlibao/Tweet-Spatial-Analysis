@@ -159,3 +159,9 @@ main_dos.py
 data/ui.csv
 utils/__init__.py
 *.pdf
+
+# C++
+*/bin/
+
+# csv file
+*.csv
