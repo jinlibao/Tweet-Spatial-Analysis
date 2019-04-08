@@ -4,7 +4,8 @@
 #
 
 CXX = g++
-CXXFLAGS = -std=c++17 -O3 -Wall -I/opt/intel/mkl/include -L/opt/intel/mkl/lib  -I/Users/libao/.armadillo/armadillo-9.300.2-mkl/include -L/Users/libao/.armadillo/armadillo-9.300.2-mkl/lib -larmadillo -lmkl_core
+CXXFLAGS = -std=c++17 -O3 -Wall -I$(MKL_INCLUDE) -L$(MKL_LIB) -I$(ARMADILLO_INCLUDE) -L$(ARMADILLO_LIB) -larmadillo -lmkl_core
+BIN=../bin
 
 RM = rm -rf
 
@@ -15,13 +16,13 @@ ALLPROGS = example build_distance_matrix
 all: $(ALLPROGS)
 
 build_distance_matrix: build_distance_matrix.cpp
-	$(CXX) $(CXXFLAGS) -o $@ $<
+	$(CXX) $(CXXFLAGS) -o $(BIN)/$@ $<
 
 example: example.cpp
-	$(CXX) $(CXXFLAGS) -o $@ $<
+	$(CXX) $(CXXFLAGS) -o $(BIN)/$@ $<
 
 clean:
 	$(RM) $(ALLPROGS:=.dSYM) $(ALLPROGS:=.o)
 
 distclean: clean
-	$(RM) $(ALLPROGS)
+	$(RM) $(addprefix $(BIN)/,$(ALLPROGS))
