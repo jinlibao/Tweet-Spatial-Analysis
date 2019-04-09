@@ -31,6 +31,7 @@ module list
 cd $PROJECT_DIR/cpp/src
 make distclean -s
 make all -s
+make clean -s
 echo "All compiled!"
 cd ..
 echo "executable file(s) under './bin/'"

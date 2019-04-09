@@ -1,37 +1,4 @@
-#include <armadillo>
-#include <cstdlib>
-#include <iostream>
-
-using namespace std;
-using namespace arma;
-
-imat APD(imat A);
-long long recursion_depth = 0;
-
-int main(int argc, char *argv[])
-{
-    string input_file("./data/adjacency_matrix.csv"), output_file("./data/distance_matrix.csv");
-
-    int c;
-    while ((c = getopt(argc, argv, "i::o::")) != -1) {
-        switch (c) {
-        case 'i':
-            if (optarg) input_file = optarg;
-            break;
-        case 'o':
-            if (optarg) output_file = optarg;
-            break;
-        }
-    }
-
-    imat E;
-    E.load(input_file, csv_ascii);
-    imat F = APD(E);
-    // cout << F << endl;
-    F.save(output_file, csv_ascii);
-
-    return 0;
-}
+#include "include/tweets_spatial_analysis.h"
 
 imat APD(imat A)
 {
@@ -51,9 +18,6 @@ imat APD(imat A)
         }
     }
 
-    ++recursion_depth;
-    cout << "Recursion depth: " << recursion_depth << endl;
-
     imat D(n, n, fill::ones);
     D = -1 * D;
     if (cnt == (n - 1) * n) {
@@ -62,7 +26,6 @@ imat APD(imat A)
     }
     imat T = APD(B);
 
-    cout << "Finished recursion " << --recursion_depth << endl;
     imat X = T * A;
     vec deg(n, fill::zeros);
     for (int i = 0; i < n; ++i) {
