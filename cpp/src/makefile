@@ -9,20 +9,17 @@ BIN=../bin
 
 RM = rm -rf
 
-ALLPROGS = example build_distance_matrix
+ALLPROGS = main
 
 .DEFAULT_GOAL := all
 
 all: $(ALLPROGS)
 
-build_distance_matrix: build_distance_matrix.cpp
-	$(CXX) $(CXXFLAGS) -o $(BIN)/$@ $<
-
-example: example.cpp
-	$(CXX) $(CXXFLAGS) -o $(BIN)/$@ $<
+main: main.cpp apd.o
+	$(CXX) $(CXXFLAGS) -o $(BIN)/$@ $?
 
 clean:
-	$(RM) $(ALLPROGS:=.dSYM) $(ALLPROGS:=.o)
+	$(RM) $(ALLPROGS:=.dSYM) $(ALLPROGS:=.o) *.o
 
 distclean: clean
 	$(RM) $(addprefix $(BIN)/,$(ALLPROGS))

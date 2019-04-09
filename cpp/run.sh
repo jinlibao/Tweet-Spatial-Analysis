@@ -34,4 +34,4 @@ module list
 
 # Run
 cd $PROJECT_DIR/cpp
-bin/build_distance_matrix -o $DATA_DIR/distance_matrix.csv -i $DATA_DIR/adjacency_matrix.csv
+bin/main -o $DATA_DIR/distance_matrix.csv -i $DATA_DIR/adjacency_matrix.csv
