@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
     string input_file("./data/adjacency_matrix.csv"), output_file("./data/distance_matrix.csv");
 
     int c;
-    while ((c = getopt(argc, argv, "i::o::")) != -1) {
+    while ((c = getopt(argc, argv, "i:o:")) != -1) {
         switch (c) {
         case 'i':
             if (optarg) input_file = optarg;

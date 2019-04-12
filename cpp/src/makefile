@@ -3,8 +3,20 @@
 # Libao Jin, 2019-04-08 01:50
 #
 
-CXX = g++
-CXXFLAGS = -std=c++17 -O3 -Wall -I$(MKL_INCLUDE) -L$(MKL_LIB) -I$(ARMADILLO_INCLUDE) -L$(ARMADILLO_LIB) -larmadillo -lmkl_core
+#CXX = g++ 
+CXX=/home/ljin1/.linuxbrew/bin/g++-8
+
+# Intel MKL 1
+CXXFLAGS=-std=c++11 -O2 -Wall -m64 -I$(MKL_INCLUDE) -I$(ARMADILLO_INCLUDE)
+LINK=-L$(MKL_LIB) -Wl,--no-as-needed -lmkl_rt -lpthread -lm -ldl -L$(ARMADILLO_LIB) -larmadillo
+
+# Intel MKL 2
+#CXXFLAGS=-std=c++11 -O2 -Wall -DMKL_ILP64 -m64 -I$(MKL_INCLUDE) -I$(ARMADILLO_INCLUDE)
+#LINK=-L$(MKL_LIB) -Wl,--no-as-needed -lmkl_intel_ilp64 -lmkl_sequential -lmkl_core -lpthread -lm -ldl -L$(ARMADILLO_LIB) -larmadillo
+
+# OpenBLAS
+#CXXFLAGS = -std=c++11 -O2 -Wall -m64 -I$(ARMADILLO_INCLUDE) -I/home/ljin1/.linuxbrew/include -L/home/ljin1/.linuxbrew/lib -L$(ARMADILLO_LIB) -larmadillo -lopenblas -lm
+
 BIN=../bin
 
 RM = rm -rf
@@ -16,7 +28,7 @@ ALLPROGS = main
 all: $(ALLPROGS)
 
 main: main.cpp apd.o
-	$(CXX) $(CXXFLAGS) -o $(BIN)/$@ $?
+	$(CXX) $? $(CXXFLAGS) -o $(BIN)/$@ $(LINK)
 
 clean:
 	$(RM) $(ALLPROGS:=.dSYM) $(ALLPROGS:=.o) *.o
