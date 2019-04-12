@@ -50,7 +50,7 @@ def build_overlap_matrix(df, rows, filename='./overlap_matrix.csv'):
             tweet_data_working_overlap[0:i, i] = tweet_data_working_overlap[i, 0:i]
         print('CPU {:04d}: Assigned transposed tril to triu (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
 
-        tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap.astype(int), columns=df['id'][0:rows], index=df['id'][0:rows])
+        tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap, columns=df['id'][0:rows], index=df['id'][0:rows])
         print('CPU {:04d}: Converted numpy array to pandas DataFrame (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
         bdm.build_distance_matrix(tweet_data_working_overlap, filename, start_time)
 
@@ -108,7 +108,7 @@ def build_overlap_matrix_parallel(df, rows, filename='./overlap_matrix_parallel.
             number_of_sources += 1
         print('CPU {:04d}: Merged received data to global numpy array (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
 
-        tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap.astype(int), columns=df['id'][0:rows], index=df['id'][0:rows])
+        tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap, columns=df['id'][0:rows], index=df['id'][0:rows])
         print('CPU {:04d}: Converted numpy array to pandas DataFrame (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
         # print(tweet_data_working_overlap)
         # print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(rank, filename, timeit.default_timer() - start_time))
@@ -184,10 +184,10 @@ def APD_recursive(A):
     '''
     n, _ = A.shape
     if all(A[i,j] for i in range(n) for j in range(n) if i != j): return A
-    Z = A.dot(A)
+    Z = A.astype(np.float32).dot(A.astype(np.float32))
     B = np.array([[1 if i != j and ( A[i,j] == 1 or Z[i,j] > 0 ) else 0 for j in range(n)] for i in range(n)])
     T = APD_recursive(B)
-    X = T.dot(A)
+    X = T.astype(np.float32).dot(A.astype(np.float32))
     degree = [sum( A[i,j] for j in range(n) ) for i in range(n)]
     D = np.array([[2 * T[i,j] if X[i,j] >= T[i,j] * degree[j] else 2 * T[i,j] - 1 for j in range(n)] for i in range(n) ] )
     return D
@@ -200,10 +200,10 @@ def APD(A):
     n, _ = A.shape
     B = A
     while not all(B[i,j] for i in range(n) for j in range(n) if i != j):
-        Z = B.dot(B)
+        Z = B.astype(np.float32).dot(B.astype(np.float32))
         B = np.array([[1 if i != j and ( B[i,j] == 1 or Z[i,j] > 0 ) else 0 for j in range(n)] for i in range(n)])
     T = B
-    X = T.dot(A)
+    X = T.astype(np.float32).dot(A.astype(np.float32))
     degree = [sum( A[i,j] for j in range(n) ) for i in range(n)]
     D = np.array([[2 * T[i,j] if X[i,j] >= T[i,j] * degree[j] else 2 * T[i,j] - 1 for j in range(n)] for i in range(n) ] )
     return D
@@ -232,11 +232,12 @@ def find_components(df, filename, start_time):
 
     print('CPU {:04d}: Reconstructing adjacency pandas DataFrame (Time: {:.2f} seconds)'.format(0, timeit.default_timer() - start_time))
     df_orig = np.zeros(df.shape)
-    df_orig = pd.DataFrame(data=df_orig.astype(int), columns=col, index=idx)
+    df_orig = pd.DataFrame(data=df_orig, columns=col, index=idx)
     for i in range(len(idx_list)):
         df_orig.loc[idx_list[i], col_list[i]] = df.loc[idx_list[i], col_list[i]]
     filename_adj = filename.replace('.csv', '_adjacency.csv')
     print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(0, filename_adj, timeit.default_timer() - start_time))
+    df_orig = df_orig.astype(np.int8)
     df_orig.to_csv(filename_adj, sep=',', header=True, index=True)
     return (df, components, idx, col, idx_list, col_list)
 
@@ -255,7 +256,7 @@ def build_distance_matrix(df, components, idx, col, idx_list, col_list, filename
             if i % size != 0:
                 comm.send((D, i), dest=0)
             else:
-                df_dist_list.append(pd.DataFrame(data=D.astype(int), columns=col_list[i], index=idx_list[i]))
+                df_dist_list.append(pd.DataFrame(data=D, columns=col_list[i], index=idx_list[i]))
                 components_rank_0 += 1
 
     if rank == 0:
@@ -264,12 +265,12 @@ def build_distance_matrix(df, components, idx, col, idx_list, col_list, filename
             D, i = comm.recv(source=MPI.ANY_SOURCE, status=status)
             k = status.Get_source()
             print('CPU {:04d}: Received data from CPU {:04d} (Time: {:.2f} seconds)'.format(rank,  k, timeit.default_timer() - start_time))
-            df_dist_list.append(pd.DataFrame(data=D.astype(int), columns=col_list[i], index=idx_list[i]))
+            df_dist_list.append(pd.DataFrame(data=D, columns=col_list[i], index=idx_list[i]))
             number_of_sources += 1
 
         print('CPU {:04d}: Constructing distance pandas DataFrame (Time: {:.2f} seconds)'.format(0, timeit.default_timer() - start_time))
         df_dist = np.ones(df.shape) * -1
-        df_dist = pd.DataFrame(data=df_dist.astype(int), columns=col, index=idx)
+        df_dist = pd.DataFrame(data=df_dist, columns=col, index=idx)
 
         for i in range(len(idx_list)):
             idx_local = df_dist_list[i].index
@@ -279,6 +280,7 @@ def build_distance_matrix(df, components, idx, col, idx_list, col_list, filename
         filename_dis = filename.replace('.csv', '_distance.csv')
 
         print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(0, filename_dis, timeit.default_timer() - start_time))
+        df_dist = df_dist.astype(np.int8)
         df_dist.to_csv(filename_dis, sep=',', header=True, index=True)
 
         elapsed_time = timeit.default_timer() - start_time
@@ -339,7 +341,7 @@ def build_overlap_matrix_parallel_block(df, rows, filename='./overlap_matrix_par
                 number_of_sources += 1
             print('CPU {:04d}: Merged received data to global numpy array (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
 
-            tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap.astype(int), columns=df['id'][0:rows], index=df['id'][0:rows])
+            tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap, columns=df['id'][0:rows], index=df['id'][0:rows])
             print('CPU {:04d}: Converted numpy array to pandas DataFrame (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
             data = find_components(tweet_data_working_overlap, filename, start_time)
     data = comm.bcast(data, root=0)
