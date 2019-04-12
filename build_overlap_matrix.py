@@ -295,85 +295,65 @@ def build_overlap_matrix_parallel_block(df, rows, filename='./overlap_matrix_par
     size = comm.Get_size()
     rank = comm.Get_rank()
     status = MPI.Status()
-    cpu_required, row_start, col_start, rows_local, cols_local = find_range_2D(rows, size, rank)
     data = []
+    n_indices = 0
+    n, _ = df.shape
     # print('Total CPUs: {:4d}, Rank {:4d}, rows: {:5d}, rows_per_cpu: {:5d}, row_start: {:5d}, cols_per_cpu: {:5d}, col_start: {:5d}'.format(size, rank, rows, rows_local, row_start, cols_local, col_start))
 
-    if rank < cpu_required:
-        tweet_data_working_overlap_local = np.zeros((rows_local, cols_local))
-        for i in range(row_start, row_start + rows_local):
-            for j in range(col_start, col_start + cols_local):
+    if rank > 0:
+        n_indices = comm.bcast(n_indices, root=0)
+        if rank < n_indices:
+            while True:
+                i, j = comm.recv(source=0, tag=MPI.ANY_TAG, status=status)
+                tag = status.Get_tag()
+                if tag == n ** 2:
+                    break
                 if i == j:
-                    tweet_data_working_overlap_local[i - row_start, j - col_start] = 0
+                    overlap = 0
                 elif j < i:
                     if df['a'][i] == 0 or df['b'][i] == 0 or df['a'][j] == 0 or df['b'][j] == 0:
-                        tweet_data_working_overlap_local[i - row_start, j - col_start] = -1
+                        overlap = -1
                     else:
-                        tweet_data_working_overlap_local[i - row_start, j - col_start] = au.are_two_ellipses_overlapping(
+                        overlap = au.are_two_ellipses_overlapping(
                             df['x'][i], df['y'][i], df['a'][i], df['b'][i], df['angle'][i],
-                            df['x'][j], df['y'][j], df['a'][j], df['b'][j], df['angle'][j]
-                        )
-            if row_start == col_start:
-                tweet_data_working_overlap_local[0:i - row_start + 1, i - row_start] = tweet_data_working_overlap_local[i - row_start, 0:i - row_start + 1]
+                            df['x'][j], df['y'][j], df['a'][j], df['b'][j], df['angle'][j])
+                comm.send(overlap, dest=0, tag=tag)
+                # print('CPU {:04d}: Sent data to CPU {:04d}'.format(rank,  0))
+    if rank == 0:
+        tweet_data_working_overlap = np.zeros((n, n))
+        indices = [(i, j) for i in range(n) for j in range(n) if j < i]
+        n_indices = len(indices)
+        n_indices, comm.bcast(n_indices, root=0)
+        n_sent = 0
+        for i in range(min(size - 1, n_indices)):
+            comm.send(indices[n_sent], dest=n_sent + 1, tag=n_sent)
+            n_sent += 1
 
-            if (i - row_start + 1) % 10 == 0:
-                print('CPU {:04d}: {:6.2f}% accomplished'.format(rank,  (i - row_start + 1) / rows_local * 100))
+        while True:
+            overlap = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG, status=status)
+            src = status.Get_source()
+            tag = status.Get_tag()
+            i, j = indices[tag]
+            tweet_data_working_overlap[i, j] = overlap
+            if n_sent <= n_indices:
+                comm.send(indices[n_sent], dest=src, tag=n_sent)
+                n_sent += 1
+            else:
+                comm.send(indices[0], dest=src, tag=n ** 2)
+                break
 
-        # print(tweet_data_working_overlap, rank)
+            print('CPU {:04d}: Received data from CPU {:04d} (Time: {:.2f} seconds)'.format(rank,  src, timeit.default_timer() - start_time))
+        tweet_data_working_overlap = tweet_data_working_overlap + tweet_data_working_overlap.T
+        print('CPU {:04d}: Merged received data to global numpy array (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
 
-        if rank != 0:
-            comm.send(tweet_data_working_overlap_local, dest=0)
-            # print('CPU {:04d}: Sent data to CPU {:04d}'.format(rank,  0))
+        tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap, columns=df['id'][0:rows], index=df['id'][0:rows])
+        print('CPU {:04d}: Converted numpy array to pandas DataFrame (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
+        data = find_components(tweet_data_working_overlap, filename, start_time)
 
-        if rank == 0:
-            tweet_data_working_overlap = np.zeros((rows, rows))
-            tweet_data_working_overlap[0:rows_local, 0:cols_local] = tweet_data_working_overlap_local
 
-            number_of_sources = 1
-            while number_of_sources < cpu_required:
-                data = comm.recv(source=MPI.ANY_SOURCE, status=status)
-                k = status.Get_source()
-                print('CPU {:04d}: Received data from CPU {:04d} (Time: {:.2f} seconds)'.format(rank,  k, timeit.default_timer() - start_time))
-                cpu_required, row_start, col_start, rows_local, cols_local = find_range_2D(rows, size, k)
-                tweet_data_working_overlap[row_start:row_start + rows_local, col_start:col_start + cols_local] = data
-                if row_start != col_start:
-                    tweet_data_working_overlap[col_start:col_start + cols_local, row_start:row_start + rows_local] = data.T
-                number_of_sources += 1
-            print('CPU {:04d}: Merged received data to global numpy array (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
-
-            tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap, columns=df['id'][0:rows], index=df['id'][0:rows])
-            print('CPU {:04d}: Converted numpy array to pandas DataFrame (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
-            data = find_components(tweet_data_working_overlap, filename, start_time)
     data = comm.bcast(data, root=0)
     df, components, idx, col, idx_list, col_list = data
     build_distance_matrix(df, components, idx, col, idx_list, col_list, filename, start_time)
-
-def find_range_1D(number, number_of_cpu, rank):
-    number_per_cpu = number / number_of_cpu
-    number_per_cpu_ceil = math.ceil(number_per_cpu)
-    number_per_cpu_floor = math.floor(number_per_cpu)
-    threshold = number - number_per_cpu_floor * number_of_cpu
-
-    if rank < threshold:
-        start = rank * number_per_cpu_ceil
-        number_local = number_per_cpu_ceil
-    else:
-        start = threshold * number_per_cpu_ceil + (rank - threshold) * number_per_cpu_floor
-        number_local = number_per_cpu_floor
-
-    return (start, number_local)
-
-def find_range_2D(rows, cpu_available, rank):
-    cols = rows
-    m = math.floor(math.sqrt(2 * cpu_available + 1 / 4) - 1 / 2)
-    cpu_required = int(m * (m + 1) / 2)
-    i = math.floor(math.sqrt(2 * rank + 1 / 4) - 1 / 2)
-    j = int(rank - i * (i + 1) / 2)
-
-    row_start, rows_local = find_range_1D(rows, m, i)
-    col_start, cols_local = find_range_1D(cols, m, j)
-
-    return (cpu_required, row_start, col_start, rows_local, cols_local)
 
 
 if __name__ == '__main__':
