@@ -34,7 +34,7 @@ def build_overlap_matrix(df, rows, filename='./overlap_matrix.csv'):
         for i in range(rows):
             for j in range(rows):
                 if i == j:
-                    tweet_data_working_overlap[i, j] = 1
+                    tweet_data_working_overlap[i, j] = 0
                 elif j < i:
                     if df['a'][i] == 0 or df['b'][i] == 0 or df['a'][j] == 0 or df['b'][j] == 0:
                         tweet_data_working_overlap[i, j] = -1
@@ -52,75 +52,38 @@ def build_overlap_matrix(df, rows, filename='./overlap_matrix.csv'):
 
         tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap, columns=df['id'][0:rows], index=df['id'][0:rows])
         print('CPU {:04d}: Converted numpy array to pandas DataFrame (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
-        bdm.build_distance_matrix(tweet_data_working_overlap, filename, start_time)
+
+        data = find_components(tweet_data_working_overlap, filename, start_time)
+        df, components, idx, col, idx_list, col_list = data
+        number_of_components = len(components)
+
+        df_dist_list = []
+        for i in range(number_of_components):
+            D = APD_recursive(np.array(df.loc[idx_list[i],col_list[i]]))
+            df_dist_list.append(pd.DataFrame(data=D, columns=col_list[i], index=idx_list[i]))
+
+
+        print('CPU {:04d}: Constructing distance pandas DataFrame (Time: {:.2f} seconds)'.format(0, timeit.default_timer() - start_time))
+        df_dist = np.ones(df.shape) * -1
+        df_dist = pd.DataFrame(data=df_dist, columns=col, index=idx)
+        # print(len(idx_list), len(df_dist_list))
+
+        for i in range(len(idx_list)):
+            idx_local = df_dist_list[i].index
+            col_local = df_dist_list[i].columns
+            df_dist.loc[idx_local, col_local] = df_dist_list[i]
+
+        filename_dis = filename.replace('.csv', '_distance.csv')
+
+        print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(0, filename_dis, timeit.default_timer() - start_time))
+        df_dist = df_dist.astype(np.int8)
+        df_dist.to_csv(filename_dis, sep=',', header=True, index=True)
 
         elapsed_time = timeit.default_timer() - start_time
         hour = math.floor(elapsed_time / 3600)
         minute = math.floor((elapsed_time - hour * 3600) / 60)
         second = elapsed_time - 3600 * hour - 60 * minute
         print('Time elapsed: {:d} hours {:d} minutes {:.2f} seconds'.format(hour, minute, second))
-        return tweet_data_working_overlap
-
-def build_overlap_matrix_parallel(df, rows, filename='./overlap_matrix_parallel.csv'):
-    start_time = timeit.default_timer()
-    comm = MPI.COMM_WORLD
-    size = comm.Get_size()
-    rank = comm.Get_rank()
-    status = MPI.Status()
-    row_start, rows_local = find_range_1D(rows, size, rank)
-    # print('Total CPUs: {:4d}, Rank {:4d}, rows: {:5d}, rows_per_cpu: {:5d}, row_start: {:5d}'.format(size, rank, rows, rows_local, row_start))
-
-    tweet_data_working_overlap_local = np.zeros((rows_local, rows))
-    for i in range(row_start, row_start + rows_local):
-        for j in range(rows):
-            if i == j:
-                tweet_data_working_overlap_local[i - row_start, j] = 1
-            elif j < i:
-                if df['a'][i] == 0 or df['b'][i] == 0 or df['a'][j] == 0 or df['b'][j] == 0:
-                    tweet_data_working_overlap_local[i - row_start, j] = -1
-                else:
-                    tweet_data_working_overlap_local[i - row_start, j] = au.are_two_ellipses_overlapping(
-                        df['x'][i], df['y'][i], df['a'][i], df['b'][i], df['angle'][i],
-                        df['x'][j], df['y'][j], df['a'][j], df['b'][j], df['angle'][j],
-                    )
-
-        if (i - row_start + 1) % 10 == 0:
-            print('CPU {:04d}: {:6.2f}% accomplished'.format(rank,  (i - row_start + 1) / rows_local * 100))
-    # print(tweet_data_working_overlap, rank)
-
-    if rank != 0:
-        comm.send(tweet_data_working_overlap_local, dest=0)
-
-    if rank == 0:
-        tweet_data_working_overlap = np.zeros((rows, rows))
-        tweet_data_working_overlap[0:rows_local] = tweet_data_working_overlap_local
-        for i in range(row_start, row_start + rows_local):
-            tweet_data_working_overlap[0:i, i] = tweet_data_working_overlap[i, 0:i]
-        number_of_sources = 1
-        while number_of_sources < size:
-            data = comm.recv(source=MPI.ANY_SOURCE, status=status)
-            k = status.Get_source()
-            print('CPU {:04d}: Received data from CPU {:04d} (Time: {:.2f} seconds)'.format(rank,  k, timeit.default_timer() - start_time))
-            row_start, rows_local = find_range_1D(rows, size, k)
-            tweet_data_working_overlap[row_start:row_start + rows_local] = data + tweet_data_working_overlap[row_start:row_start + rows_local]
-            for i in range(row_start, row_start + rows_local):
-                tweet_data_working_overlap[0:i, i] = tweet_data_working_overlap[i, 0:i]
-            number_of_sources += 1
-        print('CPU {:04d}: Merged received data to global numpy array (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
-
-        tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap, columns=df['id'][0:rows], index=df['id'][0:rows])
-        print('CPU {:04d}: Converted numpy array to pandas DataFrame (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
-        # print(tweet_data_working_overlap)
-        # print('CPU {:04d}: Now saving pandas DataFrame to {:s} (Time: {:.2f} seconds)'.format(rank, filename, timeit.default_timer() - start_time))
-        # tweet_data_working_overlap.to_csv(filename, sep=',', header=True, index=True)
-        bdm.build_distance_matrix(tweet_data_working_overlap, filename, start_time)
-
-        elapsed_time = timeit.default_timer() - start_time
-        hour = math.floor(elapsed_time / 3600)
-        minute = math.floor((elapsed_time - hour * 3600) / 60)
-        second = elapsed_time - 3600 * hour - 60 * minute
-        print('Time elapsed: {:d} hours {:d} minutes {:.2f} seconds'.format(hour, minute, second))
-        return tweet_data_working_overlap
 
 def bfs_array(raw_graph):
     '''
@@ -241,36 +204,79 @@ def find_components(df, filename, start_time):
     df_orig.to_csv(filename_adj, sep=',', header=True, index=True)
     return (df, components, idx, col, idx_list, col_list)
 
-def build_distance_matrix(df, components, idx, col, idx_list, col_list, filename, start_time):
+def build_overlap_matrix_parallel(df, n, filename='./overlap_matrix_parallel_block.csv'):
+    start_time = timeit.default_timer()
     comm = MPI.COMM_WORLD
     size = comm.Get_size()
     rank = comm.Get_rank()
     status = MPI.Status()
-
-    df_dist_list = []
-    components_rank_0 = 0
-    for i in range(len(components)):
-        if rank == i % size:
-            print('CPU {:04d}: Starting APD... (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
-            D = APD_recursive(np.array(df.loc[idx_list[i],col_list[i]]))
-            if i % size != 0:
-                comm.send((D, i), dest=0)
-            else:
-                df_dist_list.append(pd.DataFrame(data=D, columns=col_list[i], index=idx_list[i]))
-                components_rank_0 += 1
+    data = []
+    n_indices = 0
+    # print('Total CPUs: {:4d}, Rank {:4d}, rows: {:5d}, rows_per_cpu: {:5d}, row_start: {:5d}, cols_per_cpu: {:5d}, col_start: {:5d}'.format(size, rank, rows, rows_local, row_start, cols_local, col_start))
 
     if rank == 0:
-        number_of_sources = components_rank_0
-        while number_of_sources < len(components):
-            D, i = comm.recv(source=MPI.ANY_SOURCE, status=status)
-            k = status.Get_source()
-            print('CPU {:04d}: Received data from CPU {:04d} (Time: {:.2f} seconds)'.format(rank,  k, timeit.default_timer() - start_time))
-            df_dist_list.append(pd.DataFrame(data=D, columns=col_list[i], index=idx_list[i]))
-            number_of_sources += 1
+        tweet_data_working_overlap = np.zeros((n, n))
+        indices = [(i, j) for i in range(n) for j in range(n) if j < i]
+        n_indices = len(indices)
+        n_indices = comm.bcast(n_indices, root=0)
+        n_sent = 0
+        for i in range(min(size - 1, n_indices)):
+            comm.send(indices[n_sent], dest=n_sent + 1, tag=n_sent)
+            n_sent += 1
+
+        for k in range(n_indices):
+            overlap = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG, status=status)
+            src = status.Get_source()
+            tag = status.Get_tag()
+            i, j = indices[tag]
+            tweet_data_working_overlap[i, j] = overlap
+            if n_sent < n_indices:
+                comm.send(indices[n_sent], dest=src, tag=n_sent)
+                n_sent += 1
+            else:
+                comm.send(indices[0], dest=src, tag=n ** 2)
+            # print('CPU {:04d}: Received data from CPU {:04d} (Time: {:.2f} seconds)'.format(rank,  src, timeit.default_timer() - start_time))
+
+            # if ((k + 1) / n_indices * 100) % 10 < 0.01:
+            if ((k + 1) / n_indices * 1000) % 50 < 0.01:
+                print('CPU {:04d}: {:6.2f}% accomplished (Time: {:.2f} seconds)'.format(rank,  (k + 1) / n_indices * 100, timeit.default_timer() - start_time))
+
+        tweet_data_working_overlap = tweet_data_working_overlap + tweet_data_working_overlap.T
+        print('CPU {:04d}: Merged received data to global numpy array (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
+        tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap, columns=df['id'][0:rows], index=df['id'][0:rows])
+        print('CPU {:04d}: Converted numpy array to pandas DataFrame (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
+
+        data = find_components(tweet_data_working_overlap, filename, start_time)
+        df, components, idx, col, idx_list, col_list = data
+        number_of_components = len(components)
+        number_of_components = comm.bcast(number_of_components, root=0)
+        print('CPU {:04d}: Found {:d} components (Time: {:.2f} seconds)'.format(rank, number_of_components, timeit.default_timer() - start_time))
+
+        nsent = 0
+        for i in range(min(size - 1, number_of_components)):
+            comm.send(df.loc[idx_list[i],col_list[i]], dest=i + 1, tag=i)
+            nsent += 1
+
+        df_dist_list = []
+        for i in range(number_of_components):
+            D = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG, status=status)
+            src = status.Get_source()
+            tag = status.Get_tag()
+
+            # print('CPU {:04d}: Received data from CPU {:04d} (Time: {:.2f} seconds)'.format(rank, src, timeit.default_timer() - start_time))
+            df_dist_list.append(pd.DataFrame(data=D, columns=col_list[tag], index=idx_list[tag]))
+
+            if nsent < number_of_components:
+                comm.send(df.loc[idx_list[nsent],col_list[nsent]], dest=src, tag=nsent)
+            else:
+                comm.send([], dest=src, tag=number_of_components + 10)
+
+            nsent += 1
 
         print('CPU {:04d}: Constructing distance pandas DataFrame (Time: {:.2f} seconds)'.format(0, timeit.default_timer() - start_time))
         df_dist = np.ones(df.shape) * -1
         df_dist = pd.DataFrame(data=df_dist, columns=col, index=idx)
+        # print(len(idx_list), len(df_dist_list))
 
         for i in range(len(idx_list)):
             idx_local = df_dist_list[i].index
@@ -288,17 +294,6 @@ def build_distance_matrix(df, components, idx, col, idx_list, col_list, filename
         minute = math.floor((elapsed_time - hour * 3600) / 60)
         second = elapsed_time - 3600 * hour - 60 * minute
         print('Time elapsed: {:d} hours {:d} minutes {:.2f} seconds'.format(hour, minute, second))
-
-def build_overlap_matrix_parallel_block(df, rows, filename='./overlap_matrix_parallel_block.csv'):
-    start_time = timeit.default_timer()
-    comm = MPI.COMM_WORLD
-    size = comm.Get_size()
-    rank = comm.Get_rank()
-    status = MPI.Status()
-    data = []
-    n_indices = 0
-    n, _ = df.shape
-    # print('Total CPUs: {:4d}, Rank {:4d}, rows: {:5d}, rows_per_cpu: {:5d}, row_start: {:5d}, cols_per_cpu: {:5d}, col_start: {:5d}'.format(size, rank, rows, rows_local, row_start, cols_local, col_start))
 
     if rank > 0:
         n_indices = comm.bcast(n_indices, root=0)
@@ -319,41 +314,20 @@ def build_overlap_matrix_parallel_block(df, rows, filename='./overlap_matrix_par
                             df['x'][j], df['y'][j], df['a'][j], df['b'][j], df['angle'][j])
                 comm.send(overlap, dest=0, tag=tag)
                 # print('CPU {:04d}: Sent data to CPU {:04d}'.format(rank,  0))
-    if rank == 0:
-        tweet_data_working_overlap = np.zeros((n, n))
-        indices = [(i, j) for i in range(n) for j in range(n) if j < i]
-        n_indices = len(indices)
-        n_indices, comm.bcast(n_indices, root=0)
-        n_sent = 0
-        for i in range(min(size - 1, n_indices)):
-            comm.send(indices[n_sent], dest=n_sent + 1, tag=n_sent)
-            n_sent += 1
 
-        while True:
-            overlap = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG, status=status)
-            src = status.Get_source()
-            tag = status.Get_tag()
-            i, j = indices[tag]
-            tweet_data_working_overlap[i, j] = overlap
-            if n_sent <= n_indices:
-                comm.send(indices[n_sent], dest=src, tag=n_sent)
-                n_sent += 1
-            else:
-                comm.send(indices[0], dest=src, tag=n ** 2)
-                break
-
-            print('CPU {:04d}: Received data from CPU {:04d} (Time: {:.2f} seconds)'.format(rank,  src, timeit.default_timer() - start_time))
-        tweet_data_working_overlap = tweet_data_working_overlap + tweet_data_working_overlap.T
-        print('CPU {:04d}: Merged received data to global numpy array (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
-
-        tweet_data_working_overlap = pd.DataFrame(data=tweet_data_working_overlap, columns=df['id'][0:rows], index=df['id'][0:rows])
-        print('CPU {:04d}: Converted numpy array to pandas DataFrame (Time: {:.2f} seconds)'.format(rank, timeit.default_timer() - start_time))
-        data = find_components(tweet_data_working_overlap, filename, start_time)
-
-
-    data = comm.bcast(data, root=0)
-    df, components, idx, col, idx_list, col_list = data
-    build_distance_matrix(df, components, idx, col, idx_list, col_list, filename, start_time)
+        number_of_components = 0
+        number_of_components = comm.bcast(number_of_components, root=0)
+        if rank < number_of_components:
+            while True:
+                A = comm.recv(source=0, tag=MPI.ANY_TAG, status=status)
+                tag = status.Get_tag()
+                if tag == number_of_components + 10:
+                    break
+                m, n = A.shape
+                if m > 1:
+                    print('CPU {:04d}: Starting APD for {:d}-by-{:d} matrix (Time: {:.2f} seconds)'.format(rank, m, n, timeit.default_timer() - start_time))
+                D = APD_recursive(np.array(A))
+                comm.send(D, dest=0, tag=tag)
 
 
 if __name__ == '__main__':
@@ -371,10 +345,6 @@ if __name__ == '__main__':
     hour = dt.hour
     minute = dt.minute
     second = dt.second
-
-    # algorithm = 'serial'
-    # algorithm = 'parallel'
-    algorithm = 'parallel_block'
 
     parser = ArgumentParser()
     parser.add_argument('-l', '--loc', dest='loc', help='Location to save the output file')
@@ -405,7 +375,14 @@ if __name__ == '__main__':
             node = 'intel'
             partition = 'partition'
 
-        name = 'overlap_matrix_{:s}_{:s}_{:s}_{:d}_{:02d}_{:02d}_{:02d}_{:02d}_{:02d}.csv'.format(node, partition, algorithm, year, month, day, hour, minute, second)
+    comm = MPI.COMM_WORLD
+    size = comm.Get_size()
+    if (size == 1):
+        algorithm = 'serial'
+    else:
+        algorithm = 'parallel'
+
+    name = 'overlap_matrix_{:s}_{:s}_{:s}_{:d}_{:02d}_{:02d}_{:02d}_{:02d}_{:02d}.csv'.format(node, partition, algorithm, year, month, day, hour, minute, second)
 
     if args.filename:
         filename = args.filename
@@ -417,12 +394,8 @@ if __name__ == '__main__':
         rows = int(args.rows)
     else:
         rows, _ = tdp.tweet_data_working.df.shape
-        print(rows)
 
-    if algorithm == 'serial':
+    if (size == 1):
         build_overlap_matrix(tdp.tweet_data_working.df, rows, filename)
-    elif algorithm == 'parallel':
-        build_overlap_matrix_parallel(tdp.tweet_data_working.df, rows, filename)
     else:
-        build_overlap_matrix_parallel_block(tdp.tweet_data_working.df, rows, filename)
-
+        build_overlap_matrix_parallel(tdp.tweet_data_working.df, rows, filename)
