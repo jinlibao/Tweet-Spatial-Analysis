@@ -14,6 +14,7 @@ import math
 import timeit
 import datetime
 import platform
+import mpi4py
 import numpy as np
 import pandas as pd
 from argparse import ArgumentParser
@@ -24,11 +25,20 @@ from utils import tweet_data_utilities as tdu
 from data_preprocessing import TweetDataPreProcessing
 from mpi4py import MPI
 
-def build_overlap_matrix(df, rows, filename='./overlap_matrix.csv'):
+def build_overlap_matrix(rows, filename='./overlap_matrix.csv'):
+    file_open = fu.FileOpen("data", "tweet-data.csv")
+    tweet_spatial_analysis_config = cu.TweetSpatialAnalysisConfig("conf/tweet_spatial_analysis.ini")
+    tdp = TweetDataPreProcessing(file_open, tweet_spatial_analysis_config)
+    tdp.read_from_json("data/tweet_mean_all.json",
+                       "data/tweets_median_working.json",
+                       "data/tweets_median_non_working.json")
+    df = tdp.tweet_data_working.df
     start_time = timeit.default_timer()
     comm = MPI.COMM_WORLD
     size = comm.Get_size()
     rank = comm.Get_rank()
+    if rows == 0:
+        rows, _ = df.shape
     if rank == 0:
         tweet_data_working_overlap = np.zeros((rows, rows))
         for i in range(rows):
@@ -204,7 +214,7 @@ def find_components(df, filename, start_time):
     df_orig.to_csv(filename_adj, sep=',', header=True, index=True)
     return (df, components, idx, col, idx_list, col_list)
 
-def build_overlap_matrix_parallel(df, n, filename='./overlap_matrix_parallel_block.csv'):
+def build_overlap_matrix_parallel(rows, filename='./overlap_matrix_parallel_block.csv'):
     start_time = timeit.default_timer()
     comm = MPI.COMM_WORLD
     size = comm.Get_size()
@@ -215,30 +225,51 @@ def build_overlap_matrix_parallel(df, n, filename='./overlap_matrix_parallel_blo
     # print('Total CPUs: {:4d}, Rank {:4d}, rows: {:5d}, rows_per_cpu: {:5d}, row_start: {:5d}, cols_per_cpu: {:5d}, col_start: {:5d}'.format(size, rank, rows, rows_local, row_start, cols_local, col_start))
 
     if rank == 0:
-        tweet_data_working_overlap = np.zeros((n, n))
-        indices = [(i, j) for i in range(n) for j in range(n) if j < i]
+        file_open = fu.FileOpen("data", "tweet-data.csv")
+        tweet_spatial_analysis_config = cu.TweetSpatialAnalysisConfig("conf/tweet_spatial_analysis.ini")
+        tdp = TweetDataPreProcessing(file_open, tweet_spatial_analysis_config)
+        tdp.read_from_json("data/tweet_mean_all.json",
+                           "data/tweets_median_working.json",
+                           "data/tweets_median_non_working.json")
+        df = tdp.tweet_data_working.df
+        if rows == 0:
+            rows, _ = df.shape
+        mpi4py.get_config()
+        np.__config__.show()
+        tweet_data_working_overlap = np.zeros((rows, rows))
+        indices = [(i, j) for i in range(rows) for j in range(rows) if j < i]
         n_indices = len(indices)
         n_indices = comm.bcast(n_indices, root=0)
         n_sent = 0
-        for i in range(min(size - 1, n_indices)):
-            comm.send(indices[n_sent], dest=n_sent + 1, tag=n_sent)
+        for k in range(min(size - 1, n_indices)):
+            i, j = indices[n_sent]
+            data =  i, j, \
+                    df['x'][i], df['y'][i], df['a'][i], df['b'][i], df['angle'][i], \
+                    df['x'][j], df['y'][j], df['a'][j], df['b'][j], df['angle'][j]
+            comm.send(data, dest=n_sent + 1, tag=n_sent)
             n_sent += 1
 
         for k in range(n_indices):
             overlap = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG, status=status)
             src = status.Get_source()
             tag = status.Get_tag()
+
             i, j = indices[tag]
             tweet_data_working_overlap[i, j] = overlap
             if n_sent < n_indices:
-                comm.send(indices[n_sent], dest=src, tag=n_sent)
+
+                i, j = indices[n_sent]
+                data =  i, j, \
+                        df['x'][i], df['y'][i], df['a'][i], df['b'][i], df['angle'][i], \
+                        df['x'][j], df['y'][j], df['a'][j], df['b'][j], df['angle'][j]
+                comm.send(data, dest=src, tag=n_sent)
                 n_sent += 1
             else:
-                comm.send(indices[0], dest=src, tag=n ** 2)
+                comm.send(indices[0], dest=src, tag=rows ** 2)
             # print('CPU {:04d}: Received data from CPU {:04d} (Time: {:.2f} seconds)'.format(rank,  src, timeit.default_timer() - start_time))
 
             # if ((k + 1) / n_indices * 100) % 10 < 0.01:
-            if ((k + 1) / n_indices * 1000) % 50 < 0.01:
+            if (k + 1) % 1000000 == 0:
                 print('CPU {:04d}: {:6.2f}% accomplished (Time: {:.2f} seconds)'.format(rank,  (k + 1) / n_indices * 100, timeit.default_timer() - start_time))
 
         tweet_data_working_overlap = tweet_data_working_overlap + tweet_data_working_overlap.T
@@ -299,19 +330,18 @@ def build_overlap_matrix_parallel(df, n, filename='./overlap_matrix_parallel_blo
         n_indices = comm.bcast(n_indices, root=0)
         if rank < n_indices:
             while True:
-                i, j = comm.recv(source=0, tag=MPI.ANY_TAG, status=status)
+                data = comm.recv(source=0, tag=MPI.ANY_TAG, status=status)
                 tag = status.Get_tag()
-                if tag == n ** 2:
+                if tag == rows ** 2:
                     break
+                i, j, x1, y1, a1, b1, t1, x2, y2, a2, b2, t2 = data
                 if i == j:
                     overlap = 0
                 elif j < i:
-                    if df['a'][i] == 0 or df['b'][i] == 0 or df['a'][j] == 0 or df['b'][j] == 0:
+                    if a1 == 0 or b1 == 0 or a2 == 0 or b2 == 0:
                         overlap = -1
                     else:
-                        overlap = au.are_two_ellipses_overlapping(
-                            df['x'][i], df['y'][i], df['a'][i], df['b'][i], df['angle'][i],
-                            df['x'][j], df['y'][j], df['a'][j], df['b'][j], df['angle'][j])
+                        overlap = au.are_two_ellipses_overlapping(x1, y1, a1, b1, t1, x2, y2, a2, b2, t2)
                 comm.send(overlap, dest=0, tag=tag)
                 # print('CPU {:04d}: Sent data to CPU {:04d}'.format(rank,  0))
 
@@ -331,13 +361,6 @@ def build_overlap_matrix_parallel(df, n, filename='./overlap_matrix_parallel_blo
 
 
 if __name__ == '__main__':
-    file_open = fu.FileOpen("data", "tweet-data.csv")
-    tweet_spatial_analysis_config = cu.TweetSpatialAnalysisConfig("conf/tweet_spatial_analysis.ini")
-    tdp = TweetDataPreProcessing(file_open, tweet_spatial_analysis_config)
-    tdp.read_from_json("data/tweet_mean_all.json",
-                       "data/tweets_median_working.json",
-                       "data/tweets_median_non_working.json")
-
     dt = datetime.datetime.now()
     year = dt.year
     month = dt.month
@@ -375,9 +398,7 @@ if __name__ == '__main__':
             node = 'intel'
             partition = 'partition'
 
-    comm = MPI.COMM_WORLD
-    size = comm.Get_size()
-    if (size == 1):
+    if (MPI.COMM_WORLD.Get_size() == 1):
         algorithm = 'serial'
     else:
         algorithm = 'parallel'
@@ -393,9 +414,9 @@ if __name__ == '__main__':
     if args.rows:
         rows = int(args.rows)
     else:
-        rows, _ = tdp.tweet_data_working.df.shape
+        rows = 0
 
-    if (size == 1):
-        build_overlap_matrix(tdp.tweet_data_working.df, rows, filename)
+    if (MPI.COMM_WORLD.Get_size() == 1):
+        build_overlap_matrix(rows, filename)
     else:
-        build_overlap_matrix_parallel(tdp.tweet_data_working.df, rows, filename)
+        build_overlap_matrix_parallel(rows, filename)
