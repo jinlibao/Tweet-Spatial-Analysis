@@ -45,4 +45,19 @@ fi
 
 # Run
 cd $PROJECT_DIR/cpp
-bin/main -i $DATA_DIR/adjacency_matrix.csv -o $DATA_DIR/distance_matrix.csv
+
+ROWS=5790
+ELLIPSECSV[0]=$PROJECT_DIR/data/tweets_mean_all_filtered.csv
+ADJ_MATRIX[0]=$DATA_DIR/tweets_mean_all_adjacency_matrix.csv
+DIS_MATRIX[0]=$DATA_DIR/tweets_mean_all_distance_matrix.csv
+ELLIPSECSV[1]=$PROJECT_DIR/data/tweets_median_working_filtered.csv
+ADJ_MATRIX[1]=$DATA_DIR/tweets_median_working_adjacency_matrix.csv
+DIS_MATRIX[1]=$DATA_DIR/tweets_median_working_distance_matrix.csv
+ELLIPSECSV[2]=$PROJECT_DIR/data/tweets_median_non_working_filtered.csv
+ADJ_MATRIX[2]=$DATA_DIR/tweets_median_non_working_adjacency_matrix.csv
+DIS_MATRIX[2]=$DATA_DIR/tweets_median_non_working_distance_matrix.csv
+
+for (( i=0; i < 3; ++i ))
+do
+    bin/main -r $ROWS -e ${ELLIPSECSV[i]} -i ${ADJ_MATRIX[i]} -o ${DIS_MATRIX[i]}
+done
