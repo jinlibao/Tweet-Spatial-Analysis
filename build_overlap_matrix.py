@@ -265,7 +265,7 @@ def build_overlap_matrix_parallel(rows, filename='./overlap_matrix_parallel_bloc
                 comm.send(data, dest=src, tag=n_sent)
                 n_sent += 1
             else:
-                comm.send(indices[0], dest=src, tag=rows ** 2)
+                comm.send(indices[0], dest=src, tag=60000)
             # print('CPU {:04d}: Received data from CPU {:04d} (Time: {:.2f} seconds)'.format(rank,  src, timeit.default_timer() - start_time))
 
             # if ((k + 1) / n_indices * 100) % 10 < 0.01:
@@ -332,7 +332,7 @@ def build_overlap_matrix_parallel(rows, filename='./overlap_matrix_parallel_bloc
             while True:
                 data = comm.recv(source=0, tag=MPI.ANY_TAG, status=status)
                 tag = status.Get_tag()
-                if tag == rows ** 2:
+                if tag == 60000:
                     break
                 i, j, x1, y1, a1, b1, t1, x2, y2, a2, b2, t2 = data
                 if i == j:
