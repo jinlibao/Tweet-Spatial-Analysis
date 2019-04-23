@@ -3,9 +3,14 @@
 # Libao Jin, 2019-04-08 01:50
 #
 
-#CXX = g++ 
+#CXX = g++
 CXX=/home/ljin1/.linuxbrew/bin/g++-8
 
+# Intel MKL for mac
+#CXXFLAGS=-std=c++11 -O2 -Wall -m64 -I$(MKL_INCLUDE) -I$(ARMADILLO_INCLUDE)
+#LINK=-L$(MKL_LIB) -lmkl_rt -lpthread -lm -ldl -L$(ARMADILLO_LIB) -larmadillo
+
+# For Linux
 # Intel MKL 1
 CXXFLAGS=-std=c++11 -O2 -Wall -m64 -I$(MKL_INCLUDE) -I$(ARMADILLO_INCLUDE)
 LINK=-L$(MKL_LIB) -Wl,--no-as-needed -lmkl_rt -lpthread -lm -ldl -L$(ARMADILLO_LIB) -larmadillo
