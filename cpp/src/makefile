@@ -32,7 +32,7 @@ ALLPROGS = main
 
 all: $(ALLPROGS)
 
-main: main.cpp apd.o
+main: main.cpp ellipse.o tweets_spatial_analysis.o
 	$(CXX) $? $(CXXFLAGS) -o $(BIN)/$@ $(LINK)
 
 clean:
