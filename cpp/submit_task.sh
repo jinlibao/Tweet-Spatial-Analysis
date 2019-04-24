@@ -105,19 +105,23 @@ export ROWS=10000
 
 ELLIPSECSV[0]=$PROJECT_DIR/data/tweets_mean_all_filtered.csv
 ADJ_MATRIX[0]=$DATA_DIR/tweets_mean_all_adjacency_matrix.csv
+ADJ_ORDER[0]=$DATA_DIR/tweets_mean_all_adjacency_matrix_ordered.csv
 DIS_MATRIX[0]=$DATA_DIR/tweets_mean_all_distance_matrix.csv
 ELLIPSECSV[1]=$PROJECT_DIR/data/tweets_median_working_filtered.csv
 ADJ_MATRIX[1]=$DATA_DIR/tweets_median_working_adjacency_matrix.csv
+ADJ_ORDER[1]=$DATA_DIR/tweets_median_working_adjacency_matrix_ordered.csv
 DIS_MATRIX[1]=$DATA_DIR/tweets_median_working_distance_matrix.csv
 ELLIPSECSV[2]=$PROJECT_DIR/data/tweets_median_non_working_filtered.csv
 ADJ_MATRIX[2]=$DATA_DIR/tweets_median_non_working_adjacency_matrix.csv
+ADJ_ORDER[2]=$DATA_DIR/tweets_median_non_working_adjacency_matrix_ordered.csv
 DIS_MATRIX[2]=$DATA_DIR/tweets_median_non_working_distance_matrix.csv
 
 for (( i=0; i < 3; ++i ))
 do
-    export ELLIPSECSV_FOLDER=${ELLIPSECSV[i]}
-    export ADJ_MATRIX_FOLDER=${ADJ_MATRIX[i]}
-    export DIS_MATRIX_FOLDER=${DIS_MATRIX[i]}
+    export ELLIPSECSV_FILE=${ELLIPSECSV[i]}
+    export ADJ_MATRIX_FILE=${ADJ_MATRIX[i]}
+    export ADJ_ORDER_FILE=${ADJ_MATRIX[i]}
+    export DIS_MATRIX_FILE=${DIS_MATRIX[i]}
     export NCPU=`echo ${NODES[k]} \* ${NTASKS_PER_NODE[k]}|bc`
     sbatch --partition=${PARTITION[k]} --nodes=${NODES[k]} --ntasks-per-node=${NTASKS_PER_NODE[k]} --mem=${MEM[k]} task.sh
 done

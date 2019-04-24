@@ -50,14 +50,16 @@ fi
 # Run
 cd $PROJECT_DIR/cpp
 
-if [ -z $ELLIPSECSV_FOLDER ]; then
-    ELLIPSECSV_FOLDER=$PROJECT_DIR/data/tweets_mean_all_filtered.csv
-    ADJ_MATRIX_FOLDER=$DATA_DIR/tweets_mean_all_adjacency_matrix.csv
-    DIS_MATRIX_FOLDER=$DATA_DIR/tweets_mean_all_distance_matrix.csv
+if [ -z $ELLIPSECSV_FILE ]; then
+    ELLIPSECSV_FILE=$PROJECT_DIR/data/tweets_median_working_filtered.csv
+    ADJ_MATRIX_FILE=$DATA_DIR/tweets_median_working_adjacency_matrix.csv
+    ADJ_ORDER_FILE=$DATA_DIR/tweets_median_working_adjacency_matrix_ordered.csv
+    DIS_MATRIX_FILE=$DATA_DIR/tweets_median_working_distance_matrix.csv
 fi
 
 if [ -z $ROWS ]; then
     #ROWS=5790
-    ROWS=2000
+    #ROWS=2000
+    ROWS=500
 fi
-bin/main -r $ROWS -e $ELLIPSECSV_FOLDER -i $ADJ_MATRIX_FOLDER -o $DIS_MATRIX_FOLDER
+bin/main -r $ROWS -e $ELLIPSECSV_FILE -a $ADJ_MATRIX_FILE -o $ADJ_ORDER_FILE -d $DIS_MATRIX_FILE
