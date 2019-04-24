@@ -6,20 +6,24 @@
 int main(int argc, char *argv[])
 {
     string ellipse_file("../data/tweets_median_working_filtered.csv");
-    string input_file("./data/tweets_median_working_adjacency_matrix.csv");
-    string output_file("./data/tweets_median_working_distance_matrix.csv");
+    string adj_file("./data/tweets_median_working_adjacency_matrix.csv");
+    string adj_ordered_file("./data/tweets_median_working_adjacency_matrix_ordered.csv");
+    string dis_file("./data/tweets_median_working_distance_matrix.csv");
 
     int c, rows = 0;
-    while ((c = getopt(argc, argv, "e:i:o:r:")) != -1) {
+    while ((c = getopt(argc, argv, "e:a:o:d:r:")) != -1) {
         switch (c) {
         case 'e':
             if (optarg) ellipse_file = optarg;
             break;
-        case 'i':
-            if (optarg) input_file = optarg;
+        case 'a':
+            if (optarg) adj_file = optarg;
             break;
         case 'o':
-            if (optarg) output_file = optarg;
+            if (optarg) adj_ordered_file = optarg;
+            break;
+        case 'd':
+            if (optarg) dis_file = optarg;
             break;
         case 'r':
             if (optarg) rows = atoi(optarg);
@@ -29,7 +33,8 @@ int main(int argc, char *argv[])
 
     shino::precise_stopwatch stopwatch;
 
-    build_overlap_matrix(ellipse_file, input_file, rows);
+    build_overlap_matrix(ellipse_file, adj_file, rows);
+    find_components(adj_file);
 
     auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
     cout << "Wall clock time elapsed: " << elapsed_time << " milliseconds" << endl;
