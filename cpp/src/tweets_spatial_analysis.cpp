@@ -5,7 +5,7 @@ void build_overlap_matrix(string ellipse_file, string adj_file, long rows)
 {
     mat A;
     vector<int> remove_idx;
-    vector<pair<unsigned int, unsigned long>> id;
+    vector<pair<unsigned int, long unsigned>> id;
 
     A.load(ellipse_file, csv_ascii);
     if (rows == 0) rows = A.n_rows;
@@ -30,7 +30,7 @@ void build_overlap_matrix(string ellipse_file, string adj_file, long rows)
                 printf("%7.4f%% completed\n", (double)mm / m * 100);
             }
         }
-        id.push_back({(unsigned int)i, (unsigned long)A(i, 5)});
+        id.push_back({(unsigned int)i, (long unsigned)A(i, 5)});
     }
     Adj = Adj + Adj.t();
 
@@ -41,7 +41,7 @@ void build_overlap_matrix(string ellipse_file, string adj_file, long rows)
         Adj.shed_col(i);
     }
     rows = Adj.n_rows;
-    Mat<unsigned long> id_mat(rows, 2, fill::zeros);
+    Mat<long unsigned> id_mat(rows, 2, fill::zeros);
     for (int i = 0; i < rows; ++i) {
         id_mat(i, 0) = i;
         id_mat(i, 1) = id[i].second;
@@ -71,25 +71,28 @@ void find_components(string adj_file)
 
     int rows = A.n_rows;
     int cur = 0;
-    vector<pair<long unsigned, long unsigned>> id;
+    vector<vector<long unsigned>> id;
     for (int i = 0; i < rows; i++) {
         id.push_back({(long unsigned)id_mat(i, 0), (long unsigned)id_mat(i, 1)});
     }
     Mat<short> B(rows, rows, fill::zeros);
+    int k = 0;
     for (auto& c : components) {
         int m = c.first;
         for (int i = 0; i < m; ++i) {
             for (int j = 0; j < m; ++j) {
                 B(cur + i, cur + j) = A(c.second[i], c.second[j]);
             }
-            id[c.second[i]].first = cur + i;
+            id[c.second[i]][0] = cur + i;
+            id[c.second[i]].insert(id[c.second[i]].begin() + 1, k);
         }
         cur += m;
+        ++k;
     }
     sort(id.begin(), id.end());
     for (int i = 0; i < rows; ++i) {
-        id_mat(i, 0) = i;
-        id_mat(i, 1) = id[i].second;
+        id_mat(i, 0) = id[i][1];
+        id_mat(i, 1) = id[i][2];
     }
 
     // output
