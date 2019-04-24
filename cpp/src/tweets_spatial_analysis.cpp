@@ -57,6 +57,44 @@ void build_overlap_matrix(string ellipse_file, string adj_file, long rows)
     Adj.save(adj_file, csv_ascii);
 }
 
+void build_distance_matrix(string adj_file, string dis_file)
+{
+    Mat<short> A;
+    Mat<long unsigned> id_mat;
+    A.load(adj_file, csv_ascii);
+    int rows = A.n_rows;
+    string adj_id_file = adj_file;
+    adj_id_file.replace(adj_id_file.end() - 4, adj_id_file.end(), "_id.csv");
+    id_mat.load(adj_id_file);
+
+    vector<pair<unsigned int, long unsigned>> id;
+    for (int i = 0; i < rows; i++) {
+        id.push_back({(long unsigned)id_mat(i, 0), (long unsigned)id_mat(i, 1)});
+    }
+
+    vector<pair<int, int>> idx;
+    for (int i = 0; i < rows;) {
+        int start = i;
+        while (i < rows && id[start].first == id[i].first) {
+            ++i;
+        }
+        int end = i - 1;
+        idx.push_back({start, end});
+    }
+
+    Mat<short> AA =  -1 * ones<Mat<short>>(rows, rows);
+    for (int i = 0; i < (int)idx.size(); ++i) {
+        Mat<short> D = APD(A.submat(idx[i].first, idx[i].first, idx[i].second, idx[i].second));
+        for (int j = idx[i].first; j < idx[i].second + 1; ++j) {
+            for (int k = idx[i].first; k < idx[i].second + 1; ++k) {
+                AA(j, k) = D(j - idx[i].first, k - idx[i].first);
+            }
+        }
+    }
+
+    AA.save(dis_file, csv_ascii);
+}
+
 void find_components(string adj_file)
 {
     Mat<short> A;
@@ -97,7 +135,8 @@ void find_components(string adj_file)
 
     // output
     adj_file.replace(adj_file.end() - 4, adj_file.end(), "_ordered.csv");
-    adj_id_file.replace(adj_id_file.end() - 4, adj_id_file.end(), "_ordered.csv");
+    adj_id_file = adj_file;
+    adj_id_file.replace(adj_id_file.end() - 4, adj_id_file.end(), "_id.csv");
     id_mat.save(adj_id_file, csv_ascii);
     B.save(adj_file, csv_ascii);
 }
@@ -136,12 +175,12 @@ vector<pair<int, vector<int>>> bfs(Mat<short>& A)
     return components;
 }
 
-imat APD(imat A)
+Mat<short> APD(Mat<short> A)
 {
     int n = A.n_rows;
-    imat Z = A * A;
-    imat B(n, n, fill::zeros);
-    int cnt = 0;
+    Mat<short> Z = A * A;
+    Mat<short> B(n, n, fill::zeros);
+    long cnt = 0;
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
             if (i != j && (A(i, j) == 1 || Z(i, j) > 0)) {
@@ -154,15 +193,15 @@ imat APD(imat A)
         }
     }
 
-    imat D(n, n, fill::ones);
+    Mat<short> D(n, n, fill::ones);
     D = -1 * D;
-    if (cnt == (n - 1) * n) {
+    if (cnt == (long)(n - 1) * n) {
         D = 2 * B - A;
         return D;
     }
-    imat T = APD(B);
+    Mat<short> T = APD(B);
 
-    imat X = T * A;
+    Mat<short> X = T * A;
     vec deg(n, fill::zeros);
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
