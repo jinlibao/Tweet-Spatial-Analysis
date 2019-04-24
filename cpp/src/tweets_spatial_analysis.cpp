@@ -1,14 +1,17 @@
 #include "include/tweets_spatial_analysis.h"
+#include <cstdio>
 
-void build_overlap_matrix(string input_file, string output_file, int rows)
+void build_overlap_matrix(string input_file, string output_file, long rows)
 {
     mat A;
-    imat Adj(rows, rows, fill::zeros);
     vector<int> remove_idx;
     vector<pair<unsigned int, unsigned long>> id;
 
     A.load(input_file, csv_ascii);
     if (rows == 0) rows = A.n_rows;
+    Mat<short> Adj(rows, rows, fill::zeros);
+    cout << input_file << ": " << rows << endl;
+    long m = rows * rows / 2, mm = 0;
     for (int i = 0; i < rows; ++i) {
         if (A(i, 2) == 0 || A(i, 3) == 0) {
             remove_idx.push_back(i);
@@ -18,7 +21,14 @@ void build_overlap_matrix(string input_file, string output_file, int rows)
         for (int j = 0; j < i; ++j) {
             Ellipse e1 = Ellipse(A(i, 0), A(i, 1), A(i, 2), A(i, 3), A(i, 4));
             Ellipse e2 = Ellipse(A(j, 0), A(j, 1), A(j, 2), A(j, 3), A(j, 4));
-            Adj(i, j) = e1.overlap(e2);
+            if (e1.overlap(e2))
+                Adj(i, j) = 1;
+            else
+                Adj(i, j) = 0;
+            ++mm;
+            if (mm % 1000000 == 0) {
+                printf("%7.4f%% completed\n", (double)mm / m * 100);
+            }
         }
         id.push_back({(unsigned int)i, (unsigned long)A(i, 5)});
     }
@@ -38,6 +48,9 @@ void build_overlap_matrix(string input_file, string output_file, int rows)
     }
 
     // output
+    char suffix[100] = "";
+    sprintf(suffix, "_%ld.csv", rows);
+    output_file.replace(output_file.end() - 4, output_file.end(), suffix);
     string output_file_id = output_file;
     output_file_id.replace(output_file_id.end() - 4, output_file_id.end(), "_id.csv");
     id_mat.save(output_file_id, csv_ascii);
