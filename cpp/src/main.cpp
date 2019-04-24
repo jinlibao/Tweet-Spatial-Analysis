@@ -33,6 +33,7 @@ int main(int argc, char *argv[])
 
     shino::precise_stopwatch stopwatch;
 
+    //test_matmul();
     build_overlap_matrix(ellipse_file, adj_file, rows);
     find_components(adj_file);
     build_distance_matrix(adj_ordered_file, dis_file);

@@ -14,5 +14,6 @@ void build_overlap_matrix(string input_file, string output_file, long rows = 0);
 void find_components(string adj_file);
 vector<pair<int, vector<int>>> bfs(Mat<short>& A);
 void build_distance_matrix(string adj_file, string dis_file);
+void test_matmul();
 
 #endif

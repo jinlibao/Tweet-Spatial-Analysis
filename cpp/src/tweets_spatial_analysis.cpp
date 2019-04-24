@@ -61,10 +61,12 @@ void build_distance_matrix(string adj_file, string dis_file)
 {
     Mat<short> A;
     Mat<long unsigned> id_mat;
+    cout << "Read from " << adj_file << endl;
     A.load(adj_file, csv_ascii);
     int rows = A.n_rows;
     string adj_id_file = adj_file;
     adj_id_file.replace(adj_id_file.end() - 4, adj_id_file.end(), "_id.csv");
+    cout << "Read from " << adj_id_file << endl;
     id_mat.load(adj_id_file);
 
     vector<pair<unsigned int, long unsigned>> id;
@@ -80,6 +82,7 @@ void build_distance_matrix(string adj_file, string dis_file)
         }
         int end = i - 1;
         idx.push_back({start, end});
+        cout << start << ' ' << end << endl;
     }
 
     Mat<short> AA =  -1 * ones<Mat<short>>(rows, rows);
@@ -92,6 +95,7 @@ void build_distance_matrix(string adj_file, string dis_file)
         }
     }
 
+    cout << "Write to " << dis_file << endl;
     AA.save(dis_file, csv_ascii);
 }
 
@@ -219,4 +223,16 @@ Mat<short> APD(Mat<short> A)
         }
     }
     return D;
+}
+
+void test_matmul()
+{
+    cout << rows << endl;
+    cout << "Generating matrix A... " << endl;
+    mat A(rows, rows, fill::randn);
+    cout << "Generating matrix B... " << endl;
+    mat B(rows, rows, fill::randn);
+
+    cout << "Calculating matrix C... " << endl;
+    mat C = A * B;
 }
