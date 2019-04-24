@@ -4,8 +4,7 @@
 #SBATCH --account=dpicls
 #SBATCH --output=/gscratch/ljin1/data/twitter/log/overlap.%j.out
 #SBATCH --error=/gscratch/ljin1/data/twitter/log/overlap.%j.err
-#SBATCH --mail-type=END,FAIL
-## SBATCH --mail-type=NONE
+#SBATCH --mail-type=END
 #SBATCH --mail-user=ljin1@uwyo.edu
 #SBATCH --time=6-23:59:59
 
@@ -28,7 +27,7 @@ elif [[ $OSTYPE == linux-gnu ]] # Teton @ UWyo ARCC (Linux)
 then
     module purge -q
     module use ~/.modulefiles
-    module load swset/2018.05 gcc/7.3.0 openmpi/3.1.0 intel-mkl/2018.2.199 armadillo/$ARMADILLO_VER-mkl
+    module load arcc/0.1 slurm/18.08 swset/2018.05 gcc/7.3.0 openmpi/3.1.0 intel-mkl/2018.2.199 armadillo/$ARMADILLO_VER-mkl
     PROJECT_DIR=/home/ljin1/repos/Tweet-Spatial-Analysis
     DATA_DIR=/gscratch/ljin1/data/twitter/csv
     export INTEL_ROOT=/apps/u/gcc/7.3.0/intel-mkl/2018.2.199-isxsqpg
@@ -58,8 +57,7 @@ if [ -z $ELLIPSECSV_FILE ]; then
 fi
 
 if [ -z $ROWS ]; then
-    #ROWS=5790
-    #ROWS=2000
     ROWS=500
 fi
+
 bin/main -r $ROWS -e $ELLIPSECSV_FILE -a $ADJ_MATRIX_FILE -o $ADJ_ORDER_FILE -d $DIS_MATRIX_FILE
