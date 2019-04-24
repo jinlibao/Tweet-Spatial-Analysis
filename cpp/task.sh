@@ -1,9 +1,13 @@
 #!/bin/bash
-#
-# run.sh
-# Copyright (C) 2019 Libao Jin <jinlibao@outlook.com>
-#
-# Distributed under terms of the MIT license.
+
+#SBATCH --job-name overlap
+#SBATCH --account=dpicls
+#SBATCH --output=/gscratch/ljin1/data/twitter/log/overlap.%j.out
+#SBATCH --error=/gscratch/ljin1/data/twitter/log/overlap.%j.err
+#SBATCH --mail-type=END,FAIL
+## SBATCH --mail-type=NONE
+#SBATCH --mail-user=ljin1@uwyo.edu
+#SBATCH --time=6-23:59:59
 
 ARMADILLO_VER=9.300.2
 
@@ -46,18 +50,14 @@ fi
 # Run
 cd $PROJECT_DIR/cpp
 
-ROWS=5790
-ELLIPSECSV[0]=$PROJECT_DIR/data/tweets_mean_all_filtered.csv
-ADJ_MATRIX[0]=$DATA_DIR/tweets_mean_all_adjacency_matrix.csv
-DIS_MATRIX[0]=$DATA_DIR/tweets_mean_all_distance_matrix.csv
-ELLIPSECSV[1]=$PROJECT_DIR/data/tweets_median_working_filtered.csv
-ADJ_MATRIX[1]=$DATA_DIR/tweets_median_working_adjacency_matrix.csv
-DIS_MATRIX[1]=$DATA_DIR/tweets_median_working_distance_matrix.csv
-ELLIPSECSV[2]=$PROJECT_DIR/data/tweets_median_non_working_filtered.csv
-ADJ_MATRIX[2]=$DATA_DIR/tweets_median_non_working_adjacency_matrix.csv
-DIS_MATRIX[2]=$DATA_DIR/tweets_median_non_working_distance_matrix.csv
+if [ -z $ELLIPSECSV_FOLDER ]; then
+    ELLIPSECSV_FOLDER=$PROJECT_DIR/data/tweets_mean_all_filtered.csv
+    ADJ_MATRIX_FOLDER=$DATA_DIR/tweets_mean_all_adjacency_matrix.csv
+    DIS_MATRIX_FOLDER=$DATA_DIR/tweets_mean_all_distance_matrix.csv
+fi
 
-for (( i=0; i < 3; ++i ))
-do
-    bin/main -r $ROWS -e ${ELLIPSECSV[i]} -i ${ADJ_MATRIX[i]} -o ${DIS_MATRIX[i]}
-done
+if [ -z $ROWS ]; then
+    #ROWS=5790
+    ROWS=2000
+fi
+bin/main -r $ROWS -e $ELLIPSECSV_FOLDER -i $ADJ_MATRIX_FOLDER -o $DIS_MATRIX_FOLDER
