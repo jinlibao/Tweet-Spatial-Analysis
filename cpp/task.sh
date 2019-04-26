@@ -15,7 +15,7 @@ then
     source /usr/local/opt/lmod/init/profile
     module purge -q
     module use ~/.modulefiles
-    module load armadillo/$ARMADILLO_VER-mkl
+    module load armadillo/$ARMADILLO_VER-mkl openmpi/4.0.0-self
     PROJECT_DIR=/Users/libao/Documents/work/projects/research/Tweet-Spatial-Analysis
     DATA_DIR=/Users/libao/Documents/data/twitter/csv
     export MKL_INCLUDE=/opt/intel/mkl/include
@@ -60,4 +60,5 @@ if [ -z $ROWS ]; then
     ROWS=500
 fi
 
-bin/main -r $ROWS -e $ELLIPSECSV_FILE -a $ADJ_MATRIX_FILE -o $ADJ_ORDER_FILE -d $DIS_MATRIX_FILE
+mpirun -n 1 bin/main -t 0 -r 2000 -c 407 -n 24 -e $ELLIPSECSV_FILE -a $ADJ_MATRIX_FILE -o $ADJ_ORDER_FILE -d $DIS_MATRIX_FILE
+mpirun -n 4 bin/main -t 1 -r 2000 -c 407 -n 24 -e $ELLIPSECSV_FILE -a $ADJ_MATRIX_FILE -o $ADJ_ORDER_FILE -d $DIS_MATRIX_FILE

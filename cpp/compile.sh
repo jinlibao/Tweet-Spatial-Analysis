@@ -13,7 +13,7 @@ then
     source /usr/local/opt/lmod/init/profile
     module purge -q
     module use ~/.modulefiles
-    module load armadillo/$ARMADILLO_VER-mkl
+    module load armadillo/$ARMADILLO_VER-mkl openmpi/4.0.0-self
     PROJECT_DIR=/Users/libao/Documents/work/projects/research/Tweet-Spatial-Analysis
     export MKL_INCLUDE=/opt/intel/mkl/include
     export MKL_LIB=/opt/intel/mkl/lib
