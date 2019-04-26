@@ -225,14 +225,21 @@ Mat<short> APD(Mat<short> A)
     return D;
 }
 
-void test_matmul()
+void test_parallel_matmul(int rows, int *argc, char*** argv)
+{
+    Mat<short> A(rows, rows, fill::randn);
+    Mat<short> B(rows, rows, fill::randn);
+    Mat<short> C = parallel_matmul(A, B, argc, argv);
+}
+
+void test_matmul(int rows)
 {
     cout << rows << endl;
     cout << "Generating matrix A... " << endl;
-    mat A(rows, rows, fill::randn);
+    Mat<short> A(rows, rows, fill::randn);
     cout << "Generating matrix B... " << endl;
-    mat B(rows, rows, fill::randn);
+    Mat<short> B(rows, rows, fill::randn);
 
     cout << "Calculating matrix C... " << endl;
-    mat C = A * B;
+    Mat<short> C = A * B;
 }
