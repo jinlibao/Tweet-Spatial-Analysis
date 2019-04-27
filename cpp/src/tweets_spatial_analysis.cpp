@@ -1,8 +1,10 @@
 #include "include/tweets_spatial_analysis.h"
+#include "include/timer.h"
 #include <cstdio>
 
 void build_overlap_matrix(string ellipse_file, string adj_file, long rows)
 {
+    shino::precise_stopwatch stopwatch;
     mat A;
     vector<int> remove_idx;
     vector<pair<unsigned int, long unsigned>> id;
@@ -55,10 +57,14 @@ void build_overlap_matrix(string ellipse_file, string adj_file, long rows)
     adj_id_file.replace(adj_id_file.end() - 4, adj_id_file.end(), "_id.csv");
     id_mat.save(adj_id_file, csv_ascii);
     Adj.save(adj_file, csv_ascii);
+
+    auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+    cout << "Wall clock time elapsed: " << elapsed_time << " milliseconds" << endl;
 }
 
 void build_distance_matrix(string adj_file, string dis_file)
 {
+    shino::precise_stopwatch stopwatch;
     Mat<short> A;
     Mat<long unsigned> id_mat;
     cout << "Read from " << adj_file << endl;
@@ -97,10 +103,14 @@ void build_distance_matrix(string adj_file, string dis_file)
 
     cout << "Write to " << dis_file << endl;
     AA.save(dis_file, csv_ascii);
+
+    auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+    cout << "Wall clock time elapsed: " << elapsed_time << " milliseconds" << endl;
 }
 
 void find_components(string adj_file)
 {
+    shino::precise_stopwatch stopwatch;
     Mat<short> A;
     Mat<long unsigned> id_mat;
     A.load(adj_file, csv_ascii);
@@ -143,6 +153,9 @@ void find_components(string adj_file)
     adj_id_file.replace(adj_id_file.end() - 4, adj_id_file.end(), "_id.csv");
     id_mat.save(adj_id_file, csv_ascii);
     B.save(adj_file, csv_ascii);
+
+    auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+    cout << "Wall clock time elapsed: " << elapsed_time << " milliseconds" << endl;
 }
 
 vector<pair<int, vector<int>>> bfs(Mat<short>& A)
@@ -234,12 +247,11 @@ void test_parallel_matmul(int rows, int *argc, char*** argv)
 
 void test_matmul(int rows)
 {
-    cout << rows << endl;
-    cout << "Generating matrix A... " << endl;
     Mat<short> A(rows, rows, fill::randn);
-    cout << "Generating matrix B... " << endl;
     Mat<short> B(rows, rows, fill::randn);
-
-    cout << "Calculating matrix C... " << endl;
+    shino::precise_stopwatch stopwatch;
     Mat<short> C = A * B;
+    auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+    cout << "Number of CPUs: 1, rows: " << rows << endl;
+    cout << "Wall clock time elapsed: " << elapsed_time << " milliseconds" << endl;
 }

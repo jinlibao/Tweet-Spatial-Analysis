@@ -40,19 +40,14 @@ int main(int argc, char *argv[])
         }
     }
 
-    shino::precise_stopwatch stopwatch;
-
-    if (t == 0)
+    if (t == 0) {
         test_matmul(rows);
-    else
+        //build_overlap_matrix(ellipse_file, adj_file, rows);
+        //find_components(adj_file);
+        //build_distance_matrix(adj_ordered_file, dis_file);
+    } else {
         test_parallel_matmul(rows, &argc, &argv);
-    //build_overlap_matrix(ellipse_file, adj_file, rows);
-    //find_components(adj_file);
-    //build_distance_matrix(adj_ordered_file, dis_file);
-    //pair<vector<pair<int, int>>, vector<pair<int, int>>> p = configure_cpu(rows, cols, n_procs);
-
-    auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
-    cout << "Wall clock time elapsed: " << elapsed_time << " milliseconds" << endl;
+    }
 
     return 0;
 }

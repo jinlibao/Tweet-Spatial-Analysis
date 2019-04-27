@@ -1,4 +1,5 @@
 #include "include/matmul.h"
+#include "include/timer.h"
 
 Mat<short> parallel_matmul(Mat<short> A, Mat<short> B, int *argc, char ***argv)
 {
@@ -10,104 +11,45 @@ Mat<short> parallel_matmul(Mat<short> A, Mat<short> B, int *argc, char ***argv)
     MPI_Comm_size(comm, &n_procs);
     MPI_Comm_rank(comm, &rank);
 
-    int a_rows = A.n_rows, a_cols = A.n_cols;
-    int b_rows = B.n_rows, b_cols = B.n_cols;
-    int rows = a_rows, cols = b_cols;
+    long rows = A.n_rows, cols = B.n_cols;
     pair<vector<pair<int, int>>, vector<pair<int, int>>> ranges = configure_cpu(rows, cols, n_procs);
     vector<pair<int, int>> row_idx = ranges.first;
     vector<pair<int, int>> col_idx = ranges.second;
-    int n_procs_row = (int)row_idx.size();
     int n_procs_col = (int)col_idx.size();
     int r1, r2, c1, c2;
     Mat<short> C(rows, cols, fill::zeros);
-    double start_time, end_time;
+    shino::precise_stopwatch stopwatch;
 
     if (rank == 0) {
-        start_time = MPI_Wtime();
-        vector<pair<short*, long>> arrays_row;
-        vector<pair<short*, long>> arrays_col;
-
-        for (int i = 0; i < n_procs_row; ++i) {
-            r1 = row_idx[i].first;
-            r2 = row_idx[i].second;
-            short *a;
-            mat2array(&a, A.rows(r1, r2));
-            arrays_row.push_back({a, (r2 - r1 + 1) * a_cols});
-        }
-
-        for (int j = 0; j < n_procs_col; ++j) {
-            c1 = col_idx[j].first;
-            c2 = col_idx[j].second;
-            short *b;
-            mat2array(&b, B.cols(c1, c2));
-            arrays_col.push_back({b, (c2 - c1 + 1) * b_rows});
-        }
-
-        //cout << "Starting calculation...\n";
-        for (int i = 0; i < n_procs_row; ++i) {
-            r1 = row_idx[i].first;
-            r2 = row_idx[i].second;
-            for (int j = 0; j < n_procs_col; ++j) {
-                c1 = col_idx[j].first;
-                c2 = col_idx[j].second;
-                if (i + j == 0) continue;
-                //printf("CPU %d: Send row block %d of A to CPU %d (%d, %d)\n", rank, i, i * n_procs_col + j, i, j);
-                MPI_Send(arrays_row[i].first, arrays_row[i].second, MPI_SHORT, i * n_procs_col + j, 1, comm);
-                //printf("CPU %d: Send col block %d of B to CPU %d (%d, %d)\n", rank, j, i * n_procs_col + j, i, j);
-                MPI_Send(arrays_col[j].first, arrays_col[j].second, MPI_SHORT, i * n_procs_col + j, 2, comm);
-            }
-        }
-
-        for (auto r : arrays_row) {
-            delete[] r.first;
-        }
-
-        for (auto c : arrays_col) {
-            delete[] c.first;
-        }
-
         r1 = row_idx[0].first;
         r2 = row_idx[0].second;
         c1 = col_idx[0].first;
         c2 = col_idx[0].second;
         C.submat(r1, c1, r2, c2) = A.rows(r1, r2) * B.cols(c1, c2);
+        int size = (r2 - r1 + 1) * (c2 - c1 + 1);
 
-        // int n_recv = 1;
-        // while (n_recv++ < n_procs) {
-        //     int size = (row_idx[0].second - row_idx[0].first + 1) * (col_idx[0].second - col_idx[0].first + 1);
-        //     short *c = new short[size];
-        //     MPI_Recv(c, size, MPI_SHORT, MPI_ANY_SOURCE, MPI_ANY_TAG, comm, &status);
-        //     int tag = status.MPI_TAG;
-        //     int i = tag / n_procs_col;
-        //     int j = tag % n_procs_col;
-        //     r1 = row_idx[i].first;
-        //     r2 = row_idx[i].second;
-        //     c1 = col_idx[j].first;
-        //     c2 = col_idx[j].second;
-        //     Mat<short> C_sub(r2 - r1 + 1, c2 - c1 + 1, fill::zeros);
-        //     array2mat(&c, C_sub);
-        //     printf("CPU %d: Receive C(%d, %d) from CPU %d (%d, %d): %d-by-%d, %d\n", rank, i, j,  i * n_procs_col + j, i, j, (int)C_sub.n_rows, (int)C_sub.n_cols, (int)(C_sub.n_rows * C_sub.n_cols));
-        //     C.submat(r1, c1, r2, c2) = C_sub;
-        // }
-
-        for (int i = 0; i < n_procs_row; ++i) {
+        for (int k = 0; k < n_procs - 1; ++k) {
+            short  *c;
+            c = new short[size];
+            //MPI_Alloc_mem(sizeof(short)*size, MPI_INFO_NULL, &c);
+            MPI_Recv(c, size, MPI_SHORT, MPI_ANY_SOURCE, MPI_ANY_TAG, comm, &status);
+            int tag = status.MPI_TAG;
+            int i = tag / n_procs_col;
+            int j = tag % n_procs_col;
             r1 = row_idx[i].first;
             r2 = row_idx[i].second;
-            for (int j = 0; j < n_procs_col; ++j) {
-                if (i + j == 0) continue;
-                c1 = col_idx[j].first;
-                c2 = col_idx[j].second;
-                long size = (c2 - c1 + 1) * (r2 - r1 + 1);
-                short *c = new short[size];
-                Mat<short> C_sub(r2 - r1 + 1, c2 - c1 + 1, fill::zeros);
-                //printf("CPU %d: Receive C(%d, %d) from CPU %d (%d, %d): %d-by-%d, %d\n", rank, i, j,  i * n_procs_col + j, i, j, (int)C_sub.n_rows, (int)C_sub.n_cols, (int)(C_sub.n_rows * C_sub.n_cols));
-                MPI_Recv(c, size, MPI_SHORT, i * n_procs_col + j, i * n_procs_col + j, comm, &status);
-                array2mat(&c, C_sub);
-                C.submat(r1, c1, r2, c2) = C_sub;
-            }
+            c1 = col_idx[j].first;
+            c2 = col_idx[j].second;
+            Mat<short> C_sub(r2 - r1 + 1, c2 - c1 + 1, fill::zeros);
+            array2mat(&c, C_sub);
+            //printf("CPU %d: Receive C(%d, %d) from CPU %d (%d, %d): %d-by-%d, %d\n", rank, i, j,  i * n_procs_col + j, i, j, (int)C_sub.n_rows, (int)C_sub.n_cols, (int)(C_sub.n_rows * C_sub.n_cols));
+            C.submat(r1, c1, r2, c2) = C_sub;
         }
-        end_time = MPI_Wtime();
-        cout << "Elapsed time for calculating matrix D: " << end_time - start_time << endl;
+
+        short *c = new short[rows * cols];
+        mat2array(&c, C);
+        MPI_Barrier(comm);
+        MPI_Bcast(c, rows * cols, MPI_SHORT, 0, comm);
     }
 
     if (rank > 0) {
@@ -117,31 +59,26 @@ Mat<short> parallel_matmul(Mat<short> A, Mat<short> B, int *argc, char ***argv)
         r2 = row_idx[i].second;
         c1 = col_idx[j].first;
         c2 = col_idx[j].second;
-        long a_size = (r2 - r1 + 1) * cols;
-        long b_size = (c2 - c1 + 1) * rows;
         long size = (r2 - r1 + 1) * (c2 - c1 + 1);
-        short *a = new short[a_size];
-        short *b = new short[b_size];
-        //short *a = (short *)malloc(sizeof(short) * a_size);
-        //short *b = (short *)malloc(sizeof(short) * b_size);
-        //printf("CPU %d: Receive row block %d of A from CPU %d (%d, %d)\n", rank, i, 0, 0, 0);
-        MPI_Recv(a, a_size, MPI_SHORT, 0, 1, comm, &status);
-        //printf("CPU %d: Receive col block %d of B from CPU %d (%d, %d)\n", rank, j, 0, 0, 0);
-        MPI_Recv(b, b_size, MPI_SHORT, 0, 2, comm, &status);
-        Mat<short> TA(r2 - r1 + 1, cols, fill::zeros);
-        Mat<short> TB(rows, c2 - c1 + 1, fill::zeros);
-        array2mat(&a, TA);
-        array2mat(&b, TB);
-        Mat<short> TC = TA * TB;
-        //cout << "CPU " << rank << ": \n" << TC << endl;
-        //printf("CPU %d: C(%d, %d): %d-by-%d\n", rank, i, j, (int)TC.n_rows, (int)TC.n_cols);
+        Mat<short> TC = A.rows(r1, r2) * B.cols(c1, c2);
         short *c;
         mat2array(&c, TC);
-
         //printf("CPU %d: Send C(%d, %d) to CPU 0 (0, 0)\n", rank, i, j);
         MPI_Send(c, size, MPI_SHORT, 0, rank, comm);
         delete[] c;
+
+        c = new short[rows * cols];
+        MPI_Barrier(comm);
+        MPI_Bcast(c, rows * cols, MPI_SHORT, 0, comm);
+        array2mat(&c, C);
     }
+
+    if (rank == 0) {
+        auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+        cout << "Number of CPUs: " <<  n_procs << ", rows: " << rows << endl;
+        cout << "Wall clock time elapsed: " << elapsed_time << " milliseconds" << endl;
+    }
+
     MPI_Finalize();
     return C;
 }
