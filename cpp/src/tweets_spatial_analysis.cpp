@@ -1,23 +1,24 @@
 #include "include/tweets_spatial_analysis.h"
+#include "include/matmul.h"
 #include "include/timer.h"
 #include <cstdio>
 
-void build_overlap_matrix(string ellipse_file, string adj_file, long rows)
-{
+void build_overlap_matrix(string ellipse_file, string adj_file, long rows) {
     shino::precise_stopwatch stopwatch;
     mat A;
     vector<int> remove_idx;
     vector<pair<unsigned int, long unsigned>> id;
 
     A.load(ellipse_file, csv_ascii);
-    if (rows == 0) rows = A.n_rows;
+    if (rows == 0)
+        rows = A.n_rows;
     Mat<short> Adj(rows, rows, fill::zeros);
     cout << ellipse_file << ": " << rows << endl;
     long m = rows * rows / 2, mm = 0;
     for (int i = 0; i < rows; ++i) {
         if (A(i, 2) == 0 || A(i, 3) == 0) {
             remove_idx.push_back(i);
-            //Adj.row(i) = -1 * ones<ivec>(rows).t();
+            // Adj.row(i) = -1 * ones<ivec>(rows).t();
             continue;
         }
         for (int j = 0; j < i; ++j) {
@@ -38,7 +39,7 @@ void build_overlap_matrix(string ellipse_file, string adj_file, long rows)
 
     // remove rows and cols that contain -1
     reverse(remove_idx.begin(), remove_idx.end());
-    for (auto& i : remove_idx) {
+    for (auto &i : remove_idx) {
         Adj.shed_row(i);
         Adj.shed_col(i);
     }
@@ -50,9 +51,9 @@ void build_overlap_matrix(string ellipse_file, string adj_file, long rows)
     }
 
     // output
-    char suffix[100] = "";
-    sprintf(suffix, "_%ld.csv", rows);
-    adj_file.replace(adj_file.end() - 4, adj_file.end(), suffix);
+    // char suffix[100] = "";
+    // sprintf(suffix, "_%ld.csv", rows);
+    // adj_file.replace(adj_file.end() - 4, adj_file.end(), suffix);
     string adj_id_file = adj_file;
     adj_id_file.replace(adj_id_file.end() - 4, adj_id_file.end(), "_id.csv");
     id_mat.save(adj_id_file, csv_ascii);
@@ -62,8 +63,7 @@ void build_overlap_matrix(string ellipse_file, string adj_file, long rows)
     cout << "Wall clock time elapsed: " << elapsed_time << " milliseconds" << endl;
 }
 
-void build_distance_matrix(string adj_file, string dis_file)
-{
+void build_distance_matrix(string adj_file, string dis_file) {
     shino::precise_stopwatch stopwatch;
     Mat<short> A;
     Mat<long unsigned> id_mat;
@@ -88,15 +88,21 @@ void build_distance_matrix(string adj_file, string dis_file)
         }
         int end = i - 1;
         idx.push_back({start, end});
-        cout << start << ' ' << end << endl;
+        // cout << start << ' ' << end << endl;
     }
-
-    Mat<short> AA =  -1 * ones<Mat<short>>(rows, rows);
+    Mat<short> AA = -1 * ones<Mat<short>>(rows, rows);
     for (int i = 0; i < (int)idx.size(); ++i) {
-        Mat<short> D = APD(A.submat(idx[i].first, idx[i].first, idx[i].second, idx[i].second));
-        for (int j = idx[i].first; j < idx[i].second + 1; ++j) {
-            for (int k = idx[i].first; k < idx[i].second + 1; ++k) {
-                AA(j, k) = D(j - idx[i].first, k - idx[i].first);
+        int r1 = idx[i].first;
+        int c1 = idx[i].first;
+        int r2 = idx[i].second;
+        int c2 = idx[i].second;
+
+        cout << "Applying APD to Block matrix " << i << endl;
+        Mat<short> D;
+        D = APD(A.submat(r1, c1, r2, c2));
+        for (int j = r1; j < r2 + 1; ++j) {
+            for (int k = c1; k < c2 + 1; ++k) {
+                AA(j, k) = D(j - r1, k - c1);
             }
         }
     }
@@ -108,8 +114,7 @@ void build_distance_matrix(string adj_file, string dis_file)
     cout << "Wall clock time elapsed: " << elapsed_time << " milliseconds" << endl;
 }
 
-void find_components(string adj_file)
-{
+void find_components(string adj_file) {
     shino::precise_stopwatch stopwatch;
     Mat<short> A;
     Mat<long unsigned> id_mat;
@@ -129,7 +134,7 @@ void find_components(string adj_file)
     }
     Mat<short> B(rows, rows, fill::zeros);
     int k = 0;
-    for (auto& c : components) {
+    for (auto &c : components) {
         int m = c.first;
         for (int i = 0; i < m; ++i) {
             for (int j = 0; j < m; ++j) {
@@ -158,8 +163,7 @@ void find_components(string adj_file)
     cout << "Wall clock time elapsed: " << elapsed_time << " milliseconds" << endl;
 }
 
-vector<pair<int, vector<int>>> bfs(Mat<short>& A)
-{
+vector<pair<int, vector<int>>> bfs(Mat<short> &A) {
     int rows = A.n_rows;
     Col<short> visited(rows, fill::zeros);
     vector<pair<int, vector<int>>> components;
@@ -192,8 +196,7 @@ vector<pair<int, vector<int>>> bfs(Mat<short>& A)
     return components;
 }
 
-Mat<short> APD(Mat<short> A)
-{
+Mat<short> APD(const Mat<short> &A) {
     int n = A.n_rows;
     Mat<short> Z = A * A;
     Mat<short> B(n, n, fill::zeros);
@@ -203,8 +206,7 @@ Mat<short> APD(Mat<short> A)
             if (i != j && (A(i, j) == 1 || Z(i, j) > 0)) {
                 B(i, j) = 1;
                 ++cnt;
-            }
-            else {
+            } else {
                 B(i, j) = 0;
             }
         }
@@ -229,8 +231,7 @@ Mat<short> APD(Mat<short> A)
         for (int j = 0; j < n; ++j) {
             if (X(i, j) >= T(i, j) * deg(j)) {
                 D(i, j) = 2 * T(i, j);
-            }
-            else {
+            } else {
                 D(i, j) = 2 * T(i, j) - 1;
             }
         }
@@ -238,20 +239,129 @@ Mat<short> APD(Mat<short> A)
     return D;
 }
 
-void test_parallel_matmul(int rows, int *argc, char*** argv)
-{
-    Mat<short> A(rows, rows, fill::randn);
-    Mat<short> B(rows, rows, fill::randn);
-    Mat<short> C = parallel_matmul(A, B, argc, argv);
+Mat<short> APD_parallel(const Mat<short> &A, int rank, int n_procs) {
+    int n = A.n_rows;
+    Mat<short> Z;
+
+    if (n > 100) {
+        Z = parallel_matmul(A, A, rank, n_procs);
+    } else {
+        Z = A * A;
+    }
+    Mat<short> B(n, n, fill::zeros);
+    long cnt = 0;
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (i != j && (A(i, j) == 1 || Z(i, j) > 0)) {
+                B(i, j) = 1;
+                ++cnt;
+            } else {
+                B(i, j) = 0;
+            }
+        }
+    }
+
+    Mat<short> D(n, n, fill::ones);
+    D = -1 * D;
+    if (cnt == (long)(n - 1) * n) {
+        D = 2 * B - A;
+        return D;
+    }
+    Mat<short> T = APD_parallel(B, rank, n_procs);
+
+    Mat<short> X;
+    if (n > 100) {
+        X = parallel_matmul(T, A, rank, n_procs);
+    } else {
+        X = T * A;
+    }
+    vec deg(n, fill::zeros);
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            deg(i) += A(i, j);
+        }
+    }
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (X(i, j) >= T(i, j) * deg(j)) {
+                D(i, j) = 2 * T(i, j);
+            } else {
+                D(i, j) = 2 * T(i, j) - 1;
+            }
+        }
+    }
+    return D;
 }
 
-void test_matmul(int rows)
-{
-    Mat<short> A(rows, rows, fill::randn);
-    Mat<short> B(rows, rows, fill::randn);
+void build_distance_matrix_parallel(string adj_file, string dis_file, int *argc, char ***argv) {
+    int n_procs, rank;
+    MPI_Comm comm = MPI_COMM_WORLD;
+
+    MPI_Init(argc, argv);
+    MPI_Comm_size(comm, &n_procs);
+    MPI_Comm_rank(comm, &rank);
+
     shino::precise_stopwatch stopwatch;
-    Mat<short> C = A * B;
-    auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
-    cout << "Number of CPUs: 1, rows: " << rows << endl;
-    cout << "Wall clock time elapsed: " << elapsed_time << " milliseconds" << endl;
+
+    Mat<short> A;
+    Mat<long unsigned> id_mat;
+    if (rank == 0) {
+        cout << "Read from " << adj_file << endl;
+    }
+    A.load(adj_file, csv_ascii);
+    int rows = A.n_rows;
+    string adj_id_file = adj_file;
+    adj_id_file.replace(adj_id_file.end() - 4, adj_id_file.end(), "_id.csv");
+    if (rank == 0) {
+        cout << "Read from " << adj_id_file << endl;
+    }
+    id_mat.load(adj_id_file);
+
+    vector<pair<unsigned int, long unsigned>> id;
+    for (int i = 0; i < rows; i++) {
+        id.push_back({(long unsigned)id_mat(i, 0), (long unsigned)id_mat(i, 1)});
+    }
+
+    vector<pair<int, int>> idx;
+    for (int i = 0; i < rows;) {
+        int start = i;
+        while (i < rows && id[start].first == id[i].first) {
+            ++i;
+        }
+        int end = i - 1;
+        idx.push_back({start, end});
+        // cout << start << ' ' << end << endl;
+    }
+
+    Mat<short> AA = -1 * ones<Mat<short>>(rows, rows);
+    for (int i = 0; i < (int)idx.size(); ++i) {
+        int r1 = idx[i].first;
+        int c1 = idx[i].first;
+        int r2 = idx[i].second;
+        int c2 = idx[i].second;
+
+        if (rank == 0) {
+            cout << "Applying APD to Block matrix " << i << endl;
+        }
+
+        Mat<short> D;
+        D = APD_parallel(A.submat(r1, c1, r2, c2), rank, n_procs);
+        if (rank == 0) {
+            for (int j = r1; j < r2 + 1; ++j) {
+                for (int k = c1; k < c2 + 1; ++k) {
+                    AA(j, k) = D(j - r1, k - c1);
+                }
+            }
+        }
+    }
+
+    if (rank == 0) {
+        cout << "Write to " << dis_file << endl;
+        AA.save(dis_file, csv_ascii);
+
+        auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+        cout << "Wall clock time elapsed: " << elapsed_time << " milliseconds" << endl;
+    }
+
+    MPI_Finalize();
 }

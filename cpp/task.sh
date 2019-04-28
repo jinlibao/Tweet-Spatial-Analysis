@@ -57,8 +57,8 @@ if [ -z $ELLIPSECSV_FILE ]; then
 fi
 
 if [ -z $ROWS ]; then
-    ROWS=500
+    ROWS=2000
+    NCPUS=4
 fi
 
-mpirun -n 1 bin/main -t 0 -r 2000 -c 407 -n 24 -e $ELLIPSECSV_FILE -a $ADJ_MATRIX_FILE -o $ADJ_ORDER_FILE -d $DIS_MATRIX_FILE
-mpirun -n 4 bin/main -t 1 -r 2000 -c 407 -n 24 -e $ELLIPSECSV_FILE -a $ADJ_MATRIX_FILE -o $ADJ_ORDER_FILE -d $DIS_MATRIX_FILE
+mpirun -n $NCPUS bin/main -r $ROWS -c $ROWS -n $NCPUS -e $ELLIPSECSV_FILE -a $ADJ_MATRIX_FILE -o $ADJ_ORDER_FILE -d $DIS_MATRIX_FILE
