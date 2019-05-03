@@ -26,10 +26,8 @@ MORAN_HUGEMEM_MEM=1024000
 
 TETON_PARTITION=teton
 TETON_MAX_NODES=128
-#TETON_NODES=8
-#TETON_NTASKS_PER_NODE=32
-TETON_NODES=1
-TETON_NTASKS_PER_NODE=1
+TETON_NODES=8
+TETON_NTASKS_PER_NODE=32
 TETON_MEM=128000
 
 TETON_GPU_PARTITION=teton-gpu
@@ -100,7 +98,7 @@ if [ ! -d $DATA_DIR ]; then
     mkdir -p $DATA_DIR
 fi
 
-k=3
+k=5
 ROW[0]=2000
 ROW[1]=4000
 ROW[2]=8000
@@ -110,15 +108,19 @@ ROW[4]=57909
 ELLIPSECSV[0]=$PROJECT_DIR/data/tweets_mean_all_filtered.csv
 ELLIPSECSV[1]=$PROJECT_DIR/data/tweets_median_working_filtered.csv
 ELLIPSECSV[2]=$PROJECT_DIR/data/tweets_median_non_working_filtered.csv
-ADJ_MATRIX[0]=$DATA_DIR/tweets_mean_all_adjacency_matrix.csv
-ADJ_MATRIX[1]=$DATA_DIR/tweets_median_working_adjacency_matrix.csv
-ADJ_MATRIX[2]=$DATA_DIR/tweets_median_non_working_adjacency_matrix.csv
-DIS_MATRIX[0]=$DATA_DIR/tweets_mean_all_distance_matrix.csv
-DIS_MATRIX[1]=$DATA_DIR/tweets_median_working_distance_matrix.csv
-DIS_MATRIX[2]=$DATA_DIR/tweets_median_non_working_distance_matrix.csv
- ADJ_ORDER[0]=$DATA_DIR/tweets_mean_all_adjacency_matrix_ordered.csv
- ADJ_ORDER[1]=$DATA_DIR/tweets_median_working_adjacency_matrix_ordered.csv
- ADJ_ORDER[2]=$DATA_DIR/tweets_median_non_working_adjacency_matrix_ordered.csv
+ADJ_MATRIX[0]=$DATA_DIR/cpp_total/tweets_mean_all_adjacency_matrix.csv
+ADJ_MATRIX[1]=$DATA_DIR/cpp_total/tweets_median_working_adjacency_matrix.csv
+ADJ_MATRIX[2]=$DATA_DIR/cpp_total/tweets_median_non_working_adjacency_matrix.csv
+DIS_MATRIX[0]=$DATA_DIR/cpp_total/tweets_mean_all_distance_matrix.csv
+DIS_MATRIX[1]=$DATA_DIR/cpp_total/tweets_median_working_distance_matrix.csv
+DIS_MATRIX[2]=$DATA_DIR/cpp_total/tweets_median_non_working_distance_matrix.csv
+ ADJ_ORDER[0]=$DATA_DIR/cpp_total/tweets_mean_all_adjacency_matrix_ordered.csv
+ ADJ_ORDER[1]=$DATA_DIR/cpp_total/tweets_median_working_adjacency_matrix_ordered.csv
+ ADJ_ORDER[2]=$DATA_DIR/cpp_total/tweets_median_non_working_adjacency_matrix_ordered.csv
+
+export MAT_A_FILE=$DATA_DIR/matmul/mat_A.csv
+export MAT_B_FILE=$DATA_DIR/matmul/mat_B.csv
+export MAT_C_FILE=$DATA_DIR/matmul/mat_C.csv
 
 for (( j=4; j<5; ++j ))
 do

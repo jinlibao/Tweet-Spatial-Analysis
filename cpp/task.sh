@@ -2,8 +2,8 @@
 
 #SBATCH --job-name overlap
 #SBATCH --account=dpicls
-#SBATCH --output=/gscratch/ljin1/data/twitter/log/overlap.%j.out
-#SBATCH --error=/gscratch/ljin1/data/twitter/log/overlap.%j.err
+#SBATCH --output=/gscratch/ljin1/data/twitter/log/cpp_total/overlap.%j.out
+#SBATCH --error=/gscratch/ljin1/data/twitter/log/cpp_total/overlap.%j.err
 #SBATCH --mail-type=END
 #SBATCH --mail-user=ljin1@uwyo.edu
 #SBATCH --time=6-23:59:59
@@ -25,7 +25,7 @@ then
     export ARMADILLO_LIB=$ARMADILLO_ROOT/lib
 elif [[ $OSTYPE == linux-gnu ]] # Teton @ UWyo ARCC (Linux)
 then
-    module purge -q
+    #module purge -q
     module use ~/.modulefiles
     module load arcc/0.1 slurm/18.08 swset/2018.05 gcc/7.3.0 openmpi/3.1.0 intel-mkl/2018.2.199 armadillo/$ARMADILLO_VER-mkl
     PROJECT_DIR=/home/ljin1/repos/Tweet-Spatial-Analysis
@@ -54,11 +54,19 @@ if [ -z $ELLIPSECSV_FILE ]; then
     ADJ_MATRIX_FILE=$DATA_DIR/tweets_median_working_adjacency_matrix.csv
     ADJ_ORDER_FILE=$DATA_DIR/tweets_median_working_adjacency_matrix_ordered.csv
     DIS_MATRIX_FILE=$DATA_DIR/tweets_median_working_distance_matrix.csv
+    MAT_A_FILE=$DATA_DIR/matmul/mat_A.csv
+    MAT_B_FILE=$DATA_DIR/matmul/mat_B.csv
+    MAT_C_FILE=$DATA_DIR/matmul/mat_C.csv
 fi
 
 if [ -z $ROWS ]; then
     ROWS=2000
-    NCPUS=4
+    NCPU=4 # 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66, 78, 91, 105, 120, 136, 153, 171, 190, 210, 231, 253, 276, 300, 325, 351, 378, 406, 435, 465, 496, 528, 561, 595, 630, 666, 703, 741, 780, 820, 861, 903
+
 fi
 
-mpirun -n $NCPUS bin/main -r $ROWS -c $ROWS -n $NCPUS -e $ELLIPSECSV_FILE -a $ADJ_MATRIX_FILE -o $ADJ_ORDER_FILE -d $DIS_MATRIX_FILE
+#mpirun -n $NCPU bin/main -j 0 -r $ROWS -c $ROWS -n $NCPU -e $ELLIPSECSV_FILE -a $ADJ_MATRIX_FILE -o $ADJ_ORDER_FILE -d $DIS_MATRIX_FILE -A $MAT_A_FILE -B $MAT_B_FILE -C $MAT_C_FILE
+#mpirun -n $NCPU bin/main -j 1 -r $ROWS -c $ROWS -n $NCPU -e $ELLIPSECSV_FILE -a $ADJ_MATRIX_FILE -o $ADJ_ORDER_FILE -d $DIS_MATRIX_FILE -A $MAT_A_FILE -B $MAT_B_FILE -C $MAT_C_FILE
+#mpirun -n $NCPU bin/main -j 2 -r $ROWS -c $ROWS -n $NCPU -e $ELLIPSECSV_FILE -a $ADJ_MATRIX_FILE -o $ADJ_ORDER_FILE -d $DIS_MATRIX_FILE -A $MAT_A_FILE -B $MAT_B_FILE -C $MAT_C_FILE
+mpirun -n $NCPU bin/main -j 3 -r $ROWS -c $ROWS -n $NCPU -e $ELLIPSECSV_FILE -a $ADJ_MATRIX_FILE -o $ADJ_ORDER_FILE -d $DIS_MATRIX_FILE -A $MAT_A_FILE -B $MAT_B_FILE -C $MAT_C_FILE
+
