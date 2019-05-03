@@ -13,10 +13,11 @@ int main(int argc, char *argv[]) {
     string adj_ordered_file("./data/tweets_median_working_adjacency_matrix_ordered.csv");
     string dis_file("./data/tweets_median_working_distance_matrix.csv");
 
-    int c, rows, cols, n_procs;
+    int c, rows, cols, n_procs, job;
     rows = cols = 0;
     n_procs = 1;
-    while ((c = getopt(argc, argv, "A:B:C:e:a:o:d:r:c:n:t:")) != -1) {
+    job = 0;
+    while ((c = getopt(argc, argv, "A:B:C:e:a:o:d:r:c:n:t:j:")) != -1) {
         switch (c) {
         case 'A':
             if (optarg)
@@ -58,25 +59,39 @@ int main(int argc, char *argv[]) {
             if (optarg)
                 n_procs = atoi(optarg);
             break;
+        case 'j':
+            if (optarg)
+                job = atoi(optarg);
+            break;
         }
     }
 
-    if (n_procs == 1) {
-        // test_matmul(rows);
-        // test_matmul(rows, 1, mat_A, mat_B, mat_C);
-        // test_matsq(rows);
-        test_matsq(rows, 1, mat_A, mat_C);
-    } else {
-        // test_parallel_matmul(rows, &argc, &argv);
-        test_parallel_matmul(rows, &argc, &argv, 1, mat_A, mat_B, mat_C);
-        // test_parallel_matsq(rows, &argc, &argv);
-        // test_parallel_matsq(rows, &argc, &argv, 1, mat_A, mat_C);
+    if (job == 0) {
+        if (n_procs == 1) {
+            test_APD(mat_A);
+            // test_matmul(rows);
+            // test_matmul(rows, 1, mat_A, mat_B, mat_C);
+            // test_matsq(rows);
+            // test_matsq(rows, 1, mat_A, mat_C);
+        } else {
+            test_APD_parallel(mat_A, 1, &argc, &argv);
+            // test_parallel_matmul(rows, &argc, &argv);
+            // test_parallel_matmul(rows, &argc, &argv, 1, mat_A, mat_B, mat_C);
+            // test_parallel_matsq(rows, &argc, &argv);
+            // test_parallel_matsq(rows, &argc, &argv, 1, mat_A, mat_C);
+        }
     }
-    // build_overlap_matrix(ellipse_file, adj_file, rows);
-    // find_components(adj_file);
-    // build_distance_matrix(adj_ordered_file, dis_file);
-    // dis_file.replace(dis_file.end() - 4, dis_file.end(), "_parallel.csv");
-    // build_distance_matrix_parallel(adj_ordered_file, dis_file, &argc, &argv);
+    
+    if (job == 1) {
+        build_overlap_matrix(ellipse_file, adj_file, rows);
+        find_components(adj_file);
+    }
+    if (job == 2) {
+        build_distance_matrix(adj_ordered_file, dis_file);
+    }
+    if (job == 3) {
+        build_distance_matrix_parallel(adj_ordered_file, dis_file, &argc, &argv);
+    }
 
     return 0;
 }
