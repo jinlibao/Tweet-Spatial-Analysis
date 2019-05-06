@@ -1,6 +1,6 @@
 #include "include/matmul.h"
-#include "include/timer.h"
 #include "include/tweets_spatial_analysis.h"
+#include "include/timer.h"
 #include <cstdlib>
 #include <iostream>
 
@@ -68,30 +68,29 @@ int main(int argc, char *argv[]) {
 
     if (job == 0) {
         if (n_procs == 1) {
-            test_APD(mat_A);
-            // test_matmul(rows);
-            // test_matmul(rows, 1, mat_A, mat_B, mat_C);
-            // test_matsq(rows);
-            // test_matsq(rows, 1, mat_A, mat_C);
+            test_APD<float>(mat_A);
+            // test_matmul<float>(rows);
+            // test_matmul<float>(rows, 1, mat_A, mat_B, mat_C);
+            // test_matsq<float>(rows);
+            // test_matsq<float>(rows, 1, mat_A, mat_C);
         } else {
-            test_APD_parallel(mat_A, 1, &argc, &argv);
-            // test_parallel_matmul(rows, &argc, &argv);
-            // test_parallel_matmul(rows, &argc, &argv, 1, mat_A, mat_B, mat_C);
-            // test_parallel_matsq(rows, &argc, &argv);
-            // test_parallel_matsq(rows, &argc, &argv, 1, mat_A, mat_C);
+            test_APD_parallel<float>(mat_A, 1, &argc, &argv);
+            // test_parallel_matmul<float>(rows, &argc, &argv);
+            // test_parallel_matmul<float>(rows, &argc, &argv, 1, mat_A, mat_B, mat_C);
+            // test_parallel_matsq<float>(rows, &argc, &argv);
+            // test_parallel_matsq<float>(rows, &argc, &argv, 1, mat_A, mat_C);
         }
     }
-    
+
     if (job == 1) {
-        build_overlap_matrix(ellipse_file, adj_file, rows);
-        find_components(adj_file);
+        build_overlap_matrix<float>(ellipse_file, adj_file, rows);
+        find_components<float>(adj_file);
     }
     if (job == 2) {
-        build_distance_matrix(adj_ordered_file, dis_file);
+        build_distance_matrix<float>(adj_ordered_file, dis_file);
     }
     if (job == 3) {
-        build_distance_matrix_parallel(adj_ordered_file, dis_file, &argc, &argv);
+        build_distance_matrix_parallel<short>(adj_ordered_file, dis_file, &argc, &argv);
     }
-
     return 0;
 }

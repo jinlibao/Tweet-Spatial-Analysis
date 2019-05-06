@@ -1,8 +1,59 @@
-#include "include/tweets_spatial_analysis.h"
 #include "include/matmul.h"
+#include "include/tweets_spatial_analysis.h"
 #include "include/timer.h"
 #include <cstdio>
 
+template void build_overlap_matrix<short>(string input_file, string output_file, long rows = 0);
+template void find_components<short>(string adj_file);
+template vector<pair<int, vector<int>>> bfs<short>(Mat<short>& A);
+template void build_distance_matrix<short>(string adj_file, string dis_file);
+template void build_distance_matrix_parallel<short>(string adj_file, string dis_file, int *argc, char ***argv);
+template Mat<short> APD<short>(const Mat<short>& A);
+template Mat<short> APD_parallel<short>(const Mat<short> &A, int rank, int n_procs);
+template void test_APD<short>(string mat_file);
+template void test_APD_parallel<short>(string mat_file, int mode, int *argc, char ***argv);
+
+template void build_overlap_matrix<int>(string input_file, string output_file, long rows = 0);
+template void find_components<int>(string adj_file);
+template vector<pair<int, vector<int>>> bfs<int>(Mat<int>& A);
+template void build_distance_matrix<int>(string adj_file, string dis_file);
+template void build_distance_matrix_parallel<int>(string adj_file, string dis_file, int *argc, char ***argv);
+template Mat<int> APD<int>(const Mat<int>& A);
+template Mat<int> APD_parallel<int>(const Mat<int> &A, int rank, int n_procs);
+template void test_APD<int>(string mat_file);
+template void test_APD_parallel<int>(string mat_file, int mode, int *argc, char ***argv);
+
+template void build_overlap_matrix<long>(string input_file, string output_file, long rows = 0);
+template void find_components<long>(string adj_file);
+template vector<pair<int, vector<int>>> bfs<long>(Mat<long>& A);
+template void build_distance_matrix<long>(string adj_file, string dis_file);
+template void build_distance_matrix_parallel<long>(string adj_file, string dis_file, int *argc, char ***argv);
+template Mat<long> APD<long>(const Mat<long>& A);
+template Mat<long> APD_parallel<long>(const Mat<long> &A, int rank, int n_procs);
+template void test_APD<long>(string mat_file);
+template void test_APD_parallel<long>(string mat_file, int mode, int *argc, char ***argv);
+
+template void build_overlap_matrix<float>(string input_file, string output_file, long rows = 0);
+template void find_components<float>(string adj_file);
+template vector<pair<int, vector<int>>> bfs<float>(Mat<float>& A);
+template void build_distance_matrix<float>(string adj_file, string dis_file);
+template void build_distance_matrix_parallel<float>(string adj_file, string dis_file, int *argc, char ***argv);
+template Mat<float> APD<float>(const Mat<float>& A);
+template Mat<float> APD_parallel<float>(const Mat<float> &A, int rank, int n_procs);
+template void test_APD<float>(string mat_file);
+template void test_APD_parallel<float>(string mat_file, int mode, int *argc, char ***argv);
+
+template void build_overlap_matrix<double>(string input_file, string output_file, long rows = 0);
+template void find_components<double>(string adj_file);
+template vector<pair<int, vector<int>>> bfs<double>(Mat<double>& A);
+template void build_distance_matrix<double>(string adj_file, string dis_file);
+template void build_distance_matrix_parallel<double>(string adj_file, string dis_file, int *argc, char ***argv);
+template Mat<double> APD<double>(const Mat<double>& A);
+template Mat<double> APD_parallel<double>(const Mat<double> &A, int rank, int n_procs);
+template void test_APD<double>(string mat_file);
+template void test_APD_parallel<double>(string mat_file, int mode, int *argc, char ***argv);
+
+template <class T>
 void build_overlap_matrix(string ellipse_file, string adj_file, long rows) {
     shino::precise_stopwatch stopwatch;
     mat A;
@@ -12,7 +63,7 @@ void build_overlap_matrix(string ellipse_file, string adj_file, long rows) {
     A.load(ellipse_file, csv_ascii);
     if (rows == 0)
         rows = A.n_rows;
-    Mat<float> Adj(rows, rows, fill::zeros);
+    Mat<T> Adj(rows, rows, fill::zeros);
     cout << ellipse_file << ": " << rows << endl;
     long m = rows * rows / 2, mm = 0;
     for (int i = 0; i < rows; ++i) {
@@ -63,9 +114,10 @@ void build_overlap_matrix(string ellipse_file, string adj_file, long rows) {
     cout << "Wall clock time elapsed: " << elapsed_time << " ms" << endl;
 }
 
+template <class T>
 void build_distance_matrix(string adj_file, string dis_file) {
     shino::precise_stopwatch stopwatch;
-    Mat<float> A;
+    Mat<T> A;
     Mat<long unsigned> id_mat;
     cout << "Read from " << adj_file << endl;
     A.load(adj_file, csv_ascii);
@@ -90,7 +142,7 @@ void build_distance_matrix(string adj_file, string dis_file) {
         idx.push_back({start, end});
         // cout << start << ' ' << end << endl;
     }
-    Mat<float> AA = -1 * ones<Mat<float>>(rows, rows);
+    Mat<T> AA = -1 * ones<Mat<T>>(rows, rows);
     for (int i = 0; i < (int)idx.size(); ++i) {
         int r1 = idx[i].first;
         int c1 = idx[i].first;
@@ -98,7 +150,7 @@ void build_distance_matrix(string adj_file, string dis_file) {
         int c2 = idx[i].second;
 
         cout << "Applying APD to Block matrix " << i << endl;
-        Mat<float> D = APD(A.submat(r1, c1, r2, c2));
+        Mat<T> D = APD<T>(A.submat(r1, c1, r2, c2));
         for (int j = r1; j < r2 + 1; ++j) {
             for (int k = c1; k < c2 + 1; ++k) {
                 AA(j, k) = D(j - r1, k - c1);
@@ -113,9 +165,10 @@ void build_distance_matrix(string adj_file, string dis_file) {
     cout << "Wall clock time elapsed: " << elapsed_time << " ms" << endl;
 }
 
+template <class T>
 void find_components(string adj_file) {
     shino::precise_stopwatch stopwatch;
-    Mat<float> A;
+    Mat<T> A;
     Mat<long unsigned> id_mat;
     A.load(adj_file, csv_ascii);
     string adj_id_file = adj_file;
@@ -131,7 +184,7 @@ void find_components(string adj_file) {
     for (int i = 0; i < rows; i++) {
         id.push_back({(long unsigned)id_mat(i, 0), (long unsigned)id_mat(i, 1)});
     }
-    Mat<float> B(rows, rows, fill::zeros);
+    Mat<T> B(rows, rows, fill::zeros);
     int k = 0;
     for (auto &c : components) {
         int m = c.first;
@@ -162,9 +215,10 @@ void find_components(string adj_file) {
     cout << "Wall clock time elapsed: " << elapsed_time << " ms" << endl;
 }
 
-vector<pair<int, vector<int>>> bfs(Mat<float> &A) {
+template <class T>
+vector<pair<int, vector<int>>> bfs(Mat<T> &A) {
     int rows = A.n_rows;
-    Col<float> visited(rows, fill::zeros);
+    Col<T> visited(rows, fill::zeros);
     vector<pair<int, vector<int>>> components;
     for (int i = 0; i < rows; ++i) {
         if (!visited(i)) {
@@ -195,10 +249,11 @@ vector<pair<int, vector<int>>> bfs(Mat<float> &A) {
     return components;
 }
 
-Mat<float> APD(const Mat<float> &A) {
+template <class T>
+Mat<T> APD(const Mat<T> &A) {
     long n = A.n_rows;
-    Mat<float> Z = A * A;
-    Mat<float> B(n, n, fill::zeros);
+    Mat<T> Z = A * A;
+    Mat<T> B(n, n, fill::zeros);
     long cnt = 0;
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
@@ -211,15 +266,15 @@ Mat<float> APD(const Mat<float> &A) {
         }
     }
 
-    Mat<float> D(n, n, fill::ones);
+    Mat<T> D(n, n, fill::ones);
     D = -1 * D;
     if (cnt == (long)(n - 1) * n) {
         D = 2 * B - A;
         return D;
     }
-    Mat<float> T = APD(B);
+    Mat<T> S = APD<T>(B);
 
-    Mat<float> X = T * A;
+    Mat<T> X = S * A;
     vec deg(n, fill::zeros);
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
@@ -228,19 +283,20 @@ Mat<float> APD(const Mat<float> &A) {
     }
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
-            if (X(i, j) >= T(i, j) * deg(j)) {
-                D(i, j) = 2 * T(i, j);
+            if (X(i, j) >= S(i, j) * deg(j)) {
+                D(i, j) = 2 * S(i, j);
             } else {
-                D(i, j) = 2 * T(i, j) - 1;
+                D(i, j) = 2 * S(i, j) - 1;
             }
         }
     }
     return D;
 }
 
-Mat<float> APD_parallel(const Mat<float> &A, int node, int n_procs) {
+template <class T>
+Mat<T> APD_parallel(const Mat<T> &A, int node, int n_procs) {
     long n = A.n_rows;
-    Mat<float> Z;
+    Mat<T> Z;
 
     if (n > 100) {
         Z = parallel_matsq(A, A, node, n_procs);
@@ -248,7 +304,7 @@ Mat<float> APD_parallel(const Mat<float> &A, int node, int n_procs) {
         Z = A * A;
     }
 
-    Mat<float> B(n, n, fill::zeros);
+    Mat<T> B(n, n, fill::zeros);
     long cnt = 0;
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
@@ -261,20 +317,20 @@ Mat<float> APD_parallel(const Mat<float> &A, int node, int n_procs) {
         }
     }
 
-    Mat<float> D(n, n, fill::ones);
+    Mat<T> D(n, n, fill::ones);
     D = -1 * D;
     if (cnt == (n - 1) * n) {
         D = 2 * B - A;
         return D;
     }
 
-    Mat<float> T = APD_parallel(B, node, n_procs);
+    Mat<T> S = APD_parallel<T>(B, node, n_procs);
 
-    Mat<float> X;
+    Mat<T> X;
     if (n > 100) {
-        X = parallel_matmul(T, A, node, n_procs);
+        X = parallel_matmul(S, A, node, n_procs);
     } else {
-        X = T * A;
+        X = S * A;
     }
 
     vec deg(n, fill::zeros);
@@ -285,16 +341,17 @@ Mat<float> APD_parallel(const Mat<float> &A, int node, int n_procs) {
     }
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
-            if (X(i, j) >= T(i, j) * deg(j)) {
-                D(i, j) = 2 * T(i, j);
+            if (X(i, j) >= S(i, j) * deg(j)) {
+                D(i, j) = 2 * S(i, j);
             } else {
-                D(i, j) = 2 * T(i, j) - 1;
+                D(i, j) = 2 * S(i, j) - 1;
             }
         }
     }
     return D;
 }
 
+template <class T>
 void build_distance_matrix_parallel(string adj_file, string dis_file, int *argc, char ***argv) {
     shino::precise_stopwatch stopwatch;
     int n_procs, node;
@@ -309,7 +366,7 @@ void build_distance_matrix_parallel(string adj_file, string dis_file, int *argc,
         printf("CPU %d: MPI initialized (%u ms)\n", node, elapsed_time);
     }
 
-    Mat<float> A;
+    Mat<T> A;
     Mat<long unsigned> id_mat;
     if (node == 0) {
         elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
@@ -345,7 +402,7 @@ void build_distance_matrix_parallel(string adj_file, string dis_file, int *argc,
         idx.push_back({start, end});
     }
 
-    Mat<float> AA = -1 * ones<Mat<float>>(rows, rows);
+    Mat<T> AA = -1 * ones<Mat<T>>(rows, rows);
     for (int i = 0; i < (int)idx.size(); ++i) {
         int r1 = idx[i].first;
         int c1 = idx[i].first;
@@ -357,7 +414,7 @@ void build_distance_matrix_parallel(string adj_file, string dis_file, int *argc,
             printf("CPU %d: Applying APD to block matrix %d (%d-by-%d) (%u ms)\n", node, i, r2 - r1 + 1, c2 - c1 + 1, elapsed_time);
         }
 
-        Mat<float> D = APD_parallel(A.submat(r1, c1, r2, c2), node, n_procs);
+        Mat<T> D = APD_parallel<T>(A.submat(r1, c1, r2, c2), node, n_procs);
         if (node == 0) {
             //elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
             //printf("CPU %d: Assemble the distance matrix... (%u ms)\n", node, elapsed_time);
@@ -380,13 +437,15 @@ void build_distance_matrix_parallel(string adj_file, string dis_file, int *argc,
     MPI_Finalize();
 }
 
+template <class T>
 void test_APD(string mat_file) {
-    Mat<float> A;
+    Mat<T> A;
     A.load(mat_file, csv_ascii);
-    Mat<float> D = APD(A);
+    Mat<T> D = APD<T>(A);
     D.save(mat_file.replace(mat_file.end() - 4, mat_file.end(), "_D.csv"), csv_ascii);
 }
 
+template <class T>
 void test_APD_parallel(string mat_file, int mode, int *argc, char ***argv) {
     int node, n_procs;
     MPI_Comm comm = MPI_COMM_WORLD;
@@ -395,9 +454,9 @@ void test_APD_parallel(string mat_file, int mode, int *argc, char ***argv) {
     MPI_Comm_rank(comm, &node);
     MPI_Comm_size(comm, &n_procs);
 
-    Mat<float> A;
+    Mat<T> A;
     A.load(mat_file, csv_ascii);
-    Mat<float> D = APD_parallel(A, node, n_procs);
+    Mat<T> D = APD_parallel<T>(A, node, n_procs);
     if (mode == 2) {
         D.save(mat_file.replace(mat_file.end() - 4, mat_file.end(), "_D_parallel_" + to_string(node) +  ".csv"), csv_ascii);
     } else {

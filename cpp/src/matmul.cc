@@ -1,230 +1,132 @@
 #include "include/matmul.h"
 #include "include/timer.h"
 
-Mat<float> parallel_matmul(const Mat<float> &A, const Mat<float> &B, int node, int n_procs) {
-    shino::precise_stopwatch stopwatch;
-    MPI_Comm comm = MPI_COMM_WORLD;
-    MPI_Status status;
-    long rows = A.n_rows, cols = B.n_cols;
-    pair<vector<pair<int, int>>, vector<pair<int, int>>> ranges = configure_cpu_rectangular(rows, cols, n_procs);
-    vector<pair<int, int>> row_idx = ranges.first;
-    vector<pair<int, int>> col_idx = ranges.second;
-    int n_procs_col = (int)col_idx.size();
-    int n_procs_required = n_procs_col * n_procs_col;
-    Mat<float> C(rows, cols, fill::zeros);
+template Mat<short> parallel_matmul<short>(const Mat<short> &A, const Mat<short> &B, int node, int n_procs);
+template Mat<short> parallel_matsq<short>(const Mat<short> &A, const Mat<short> &B, int node, int n_procs);
+template void mat2array<short>(short **A, const Mat<short> &B);
+template void array2mat<short>(short **A, Mat<short> &B);
+template void mat2array_square<short>(short **A, const Mat<short> &B);
+template void array2mat_square<short>(short **A, Mat<short> &B);
+template void get_mpi_type<short>(MPI_Datatype *mpi_type);
+template void test_matmul<short>(int rows, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
+template void test_matsq<short>(int rows, int mode = 0, string mat_A = "", string mat_C = "");
+template void test_parallel_matmul<short>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
+template void test_parallel_matsq<short>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
 
-    // int MPI_Type_contiguous(int count, MPI_Datatype oldtype, MPI_Datatype * newtype)
-    long limit = INT_MAX;
-    int mpi_count = ceil((double)rows * cols / limit);
-    int mpi_unit = ceil((double)rows * cols / mpi_count);
-    MPI_Datatype MPI_LARGE;
-    if (rows * cols > limit) {
-        MPI_Type_contiguous(mpi_unit, MPI_FLOAT, &MPI_LARGE);
-        MPI_Type_commit(&MPI_LARGE);
-        if (node == 0) {
-            printf("CPU %d: rows: %ld, cols: %ld, limit: %ld, mpi_count: %d, mpi_unit: %d\n ", node, rows, cols, limit, mpi_count, mpi_unit);
-        }
-    }
+template Mat<int> parallel_matmul<int>(const Mat<int> &A, const Mat<int> &B, int node, int n_procs);
+template Mat<int> parallel_matsq<int>(const Mat<int> &A, const Mat<int> &B, int node, int n_procs);
+template void mat2array<int>(int **A, const Mat<int> &B);
+template void array2mat<int>(int **A, Mat<int> &B);
+template void mat2array_square<int>(int **A, const Mat<int> &B);
+template void array2mat_square<int>(int **A, Mat<int> &B);
+template void get_mpi_type<int>(MPI_Datatype *mpi_type);
+template void test_matmul<int>(int rows, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
+template void test_matsq<int>(int rows, int mode = 0, string mat_A = "", string mat_C = "");
+template void test_parallel_matmul<int>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
+template void test_parallel_matsq<int>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
 
-    if (node == 0) {
-        long r1 = row_idx[0].first;
-        long r2 = row_idx[0].second;
-        long c1 = col_idx[0].first;
-        long c2 = col_idx[0].second;
-        long size = (r2 - r1 + 1) * (c2 - c1 + 1);
-        try {
-            C.submat(r1, c1, r2, c2) = A.rows(r1, r2) * B.cols(c1, c2);
-        } catch (const std::exception &e) {
-            cout << e.what() << endl;
-            printf("CPU %d: row_idx[%d]: r1 - r2: %ld - %ld, col_idx[%d] c1 - c2: %ld - %ld, A.n_rows: %ld, B.n_cols: %ld\n", node, 0, r1, r2, 0, c1, c2, rows, cols);
-        }
-        auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
-        printf("CPU %d: CPU used: %d, Receive C(%d, %d) from CPU %d (%d, %d): %ld-by-%ld, %ld", node, n_procs_required, 0, 0, 0, 0, 0, r2 - r1 + 1, c2 - c1 + 1, size);
-        cout << " (" << elapsed_time << " ms)\n";
+template Mat<long> parallel_matmul<long>(const Mat<long> &A, const Mat<long> &B, int node, int n_procs);
+template Mat<long> parallel_matsq<long>(const Mat<long> &A, const Mat<long> &B, int node, int n_procs);
+template void mat2array<long>(long **A, const Mat<long> &B);
+template void array2mat<long>(long **A, Mat<long> &B);
+template void mat2array_square<long>(long **A, const Mat<long> &B);
+template void array2mat_square<long>(long **A, Mat<long> &B);
+template void get_mpi_type<long>(MPI_Datatype *mpi_type);
+template void test_matmul<long>(int rows, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
+template void test_matsq<long>(int rows, int mode = 0, string mat_A = "", string mat_C = "");
+template void test_parallel_matmul<long>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
+template void test_parallel_matsq<long>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
 
-        for (int k = 1; k < n_procs_required; ++k) {
-            float *c = new float[size];
-            MPI_Recv(c, size, MPI_FLOAT, MPI_ANY_SOURCE, MPI_ANY_TAG, comm, &status);
-            int tag = status.MPI_TAG;
-            int i = tag / n_procs_col;
-            int j = tag % n_procs_col;
-            long r1 = row_idx[i].first;
-            long r2 = row_idx[i].second;
-            long c1 = col_idx[j].first;
-            long c2 = col_idx[j].second;
-            Mat<float> C_sub(r2 - r1 + 1, c2 - c1 + 1, fill::zeros);
-            array2mat(&c, C_sub);
-            delete[] c;
-            C.submat(r1, c1, r2, c2) = C_sub;
-            elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
-            printf("CPU %d: CPU used: %d, Receive C(%d, %d) from CPU %d (%d, %d): %ld-by-%ld, %ld", node, n_procs_required, i, j, i * n_procs_col + j, i, j, (long)C_sub.n_rows, (long)C_sub.n_cols, (long)(C_sub.n_rows * C_sub.n_cols));
-            cout << " (" << elapsed_time << " ms)\n";
-        }
+template Mat<float> parallel_matmul<float>(const Mat<float> &A, const Mat<float> &B, int node, int n_procs);
+template Mat<float> parallel_matsq<float>(const Mat<float> &A, const Mat<float> &B, int node, int n_procs);
+template void mat2array<float>(float **A, const Mat<float> &B);
+template void array2mat<float>(float **A, Mat<float> &B);
+template void mat2array_square<float>(float **A, const Mat<float> &B);
+template void array2mat_square<float>(float **A, Mat<float> &B);
+template void get_mpi_type<float>(MPI_Datatype *mpi_type);
+template void test_matmul<float>(int rows, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
+template void test_matsq<float>(int rows, int mode = 0, string mat_A = "", string mat_C = "");
+template void test_parallel_matmul<float>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
+template void test_parallel_matsq<float>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
 
-        float *c;
-        size = rows * cols;
-        MPI_Barrier(comm);
-        if (size > limit) {
-            c = new float[mpi_count * mpi_unit];
-            mat2array(&c, C);
-            MPI_Bcast(c, mpi_count, MPI_LARGE, 0, comm);
-        } else {
-            c = new float[size];
-            MPI_Bcast(c, size, MPI_FLOAT, 0, comm);
-        }
-        delete[] c;
-    }
+template Mat<double> parallel_matmul<double>(const Mat<double> &A, const Mat<double> &B, int node, int n_procs);
+template Mat<double> parallel_matsq<double>(const Mat<double> &A, const Mat<double> &B, int node, int n_procs);
+template void mat2array<double>(double **A, const Mat<double> &B);
+template void array2mat<double>(double **A, Mat<double> &B);
+template void mat2array_square<double>(double **A, const Mat<double> &B);
+template void array2mat_square<double>(double **A, Mat<double> &B);
+template void get_mpi_type<double>(MPI_Datatype *mpi_type);
+template void test_matmul<double>(int rows, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
+template void test_matsq<double>(int rows, int mode = 0, string mat_A = "", string mat_C = "");
+template void test_parallel_matmul<double>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
+template void test_parallel_matsq<double>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
 
-    if (node > 0 && node < n_procs_required) {
-        int i = node / n_procs_col;
-        int j = node % n_procs_col;
-        long r1 = row_idx[i].first;
-        long r2 = row_idx[i].second;
-        long c1 = col_idx[j].first;
-        long c2 = col_idx[j].second;
-        long size = (r2 - r1 + 1) * (c2 - c1 + 1);
-        Mat<float> TC;
-        try {
-            TC = A.rows(r1, r2) * B.cols(c1, c2);
-        } catch (const std::exception &e) {
-            cout << e.what() << endl;
-            printf("CPU %d: row_idx[%d]: r1 - r2: %ld - %ld, col_idx[%d] c1 - c2: %ld - %ld, A.n_rows: %ld, B.n_cols: %ld\n", node, 0, r1, r2, 0, c1, c2, rows, cols);
-        }
-        float *c = new float[size];
-        mat2array(&c, TC);
-        // printf("CPU %d: Send C(%d, %d) to CPU 0 (0, 0)\n", node, i, j);
-        MPI_Send(c, size, MPI_FLOAT, 0, node, comm);
-        delete[] c;
-    }
-
-    if (node > 0) {
-        float *c;
-        long size = rows * cols;
-        MPI_Barrier(comm);
-        if (size > limit) {
-            c = new float[mpi_count * mpi_unit];
-            MPI_Bcast(c, mpi_count, MPI_LARGE, 0, comm);
-        } else {
-            c = new float[size];
-            MPI_Bcast(c, size, MPI_FLOAT, 0, comm);
-        }
-        array2mat(&c, C);
-        delete[] c;
-    }
-    return C;
-}
-
-Mat<float> parallel_matsq(const Mat<float> &A, const Mat<float> &B, int node, int n_procs) {
-    shino::precise_stopwatch stopwatch;
-    MPI_Comm comm = MPI_COMM_WORLD;
-    MPI_Status status;
-    long rows = A.n_rows;
-    long cols = B.n_cols;
-    Mat<float> C(rows, cols, fill::zeros);
-    pair<vector<pair<int, int>>, vector<pair<int, int>>> ranges = configure_cpu_triangular(rows, cols, n_procs);
-    vector<pair<int, int>> row_idx = ranges.first;
-    vector<pair<int, int>> col_idx = ranges.second;
-    int n_procs_required = (int)col_idx.size();
-
-    if (node == 0) {
-        long r1 = row_idx[node].first;
-        long r2 = row_idx[node].second;
-        long c1 = col_idx[node].first;
-        long c2 = col_idx[node].second;
-        long size = (r2 - r1 + 1) * (c2 - c1 + 1);
-        C.submat(r1, c1, r2, c2) = A.rows(r1, r2) * B.cols(c1, c2);
-        auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
-        printf("CPU_required: %d: CPU %d: Receive C(%d, %d) from CPU %d (%d, %d): %ld-by-%ld, %ld", n_procs_required, node, 0, 0, 0, 0, 0, r2 - r1 + 1, c2 - c1 + 1, size);
-        cout << " (" << elapsed_time << " ms)\n";
-
-        for (int k = 1; k < n_procs_required; ++k) {
-            float *c = new float[size];
-            MPI_Recv(c, size, MPI_FLOAT, MPI_ANY_SOURCE, MPI_ANY_TAG, comm, &status);
-            int tag = status.MPI_TAG;
-            long r1 = row_idx[tag].first;
-            long r2 = row_idx[tag].second;
-            long c1 = col_idx[tag].first;
-            long c2 = col_idx[tag].second;
-            Mat<float> C_sub(r2 - r1 + 1, c2 - c1 + 1, fill::zeros);
-            array2mat(&c, C_sub);
-            C.submat(r1, c1, r2, c2) = C_sub;
-            int i = floor(sqrt(2 * tag + 1.0 / 4) - 1.0 / 2);
-            int j = tag - i * (i + 1) / 2;
-            if (i != j)
-                C.submat(c1, r1, c2, r2) = C_sub.t();
-            elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
-            printf("CPU_required: %d: CPU %d: Receive C(%d, %d) from CPU %d (%d, %d): %ld-by-%ld, %ld", n_procs_required, node, i, j, tag, i, j, (long)C_sub.n_rows, (long)C_sub.n_cols, (long)(C_sub.n_rows * C_sub.n_cols));
-            cout << " (" << elapsed_time << " ms)\n";
-            delete[] c;
-        }
-
-        size = rows * (cols + 1) / 2;
-        float *c = new float[size];
-        mat2array_square(&c, C);
-        MPI_Barrier(comm);
-        MPI_Bcast(c, size, MPI_FLOAT, 0, comm);
-        delete[] c;
-
-        // cout << "Number of CPUs: " << n_procs << ", rows: " << rows;
-        // cout << ", wall clock time elapsed to perform parallel_matmul: " << elapsed_time << " ms" << endl;
-    }
-
-    if (node > 0 && node < n_procs_required) {
-        long r1 = row_idx[node].first;
-        long r2 = row_idx[node].second;
-        long c1 = col_idx[node].first;
-        long c2 = col_idx[node].second;
-        // printf("%02d: r1: %ld, r2: %ld, c1: %ld, c2: %ld\n", node, r1, r2, c1, c2);
-        Mat<float> TC;
-        TC = A.rows(r1, r2) * B.cols(c1, c2);
-        long size = (r2 - r1 + 1) * (c2 - c1 + 1);
-        float *c = new float[size];
-        mat2array(&c, TC);
-        // printf("CPU %d: Send C(%d, %d) to CPU 0 (0, 0)\n", node, i, j);
-        MPI_Send(c, size, MPI_FLOAT, 0, node, comm);
-        delete[] c;
-    }
-
-    if (node > 0) {
-        long size = rows * (cols + 1) / 2;
-        float *c = new float[size];
-        MPI_Barrier(comm);
-        MPI_Bcast(c, size, MPI_FLOAT, 0, comm);
-        array2mat_square(&c, C);
-        delete[] c;
-    }
-
-    return C;
-}
-
-void mat2array(float **A, const Mat<float> &B) {
+template <class T>
+void mat2array(T **A, const Mat<T> &B) {
     long n_rows = B.n_rows, n_cols = B.n_cols;
     for (long i = 0; i < n_rows; ++i)
         for (long j = 0; j < n_cols; ++j)
             (*A)[i * n_cols + j] = B(i, j);
 }
 
-void array2mat(float **A, Mat<float> &B) {
+template <class T>
+void array2mat(T **A, Mat<T> &B) {
     long n_rows = B.n_rows, n_cols = B.n_cols;
     for (long i = 0; i < n_rows; ++i)
         for (long j = 0; j < n_cols; ++j)
             B(i, j) = (*A)[i * n_cols + j];
 }
 
-void mat2array_square(float **A, const Mat<float> &B) {
+template <class T>
+void mat2array_square(T **A, const Mat<T> &B) {
     long n_rows = B.n_rows;
     for (long i = 0; i < n_rows; ++i)
         for (long j = 0; j <= i; ++j)
             (*A)[i * (i + 1) / 2 + j] = B(i, j);
 }
 
-void array2mat_square(float **A, Mat<float> &B) {
+template <class T>
+void array2mat_square(T **A, Mat<T> &B) {
     long n_rows = B.n_rows;
     for (long i = 0; i < n_rows; ++i) {
         for (long j = 0; j <= i; ++j) {
             B(i, j) = (*A)[i * (i + 1) / 2 + j];
             B(j, i) = (*A)[i * (i + 1) / 2 + j];
         }
+    }
+}
+
+template<class T>
+void get_mpi_type(MPI_Datatype *mpi_type) {
+    auto name = typeid(T).name();
+    if (strcmp(name, "c") == 0) {
+        *mpi_type = MPI_CHAR;
+    } else if (strcmp(name, "h") == 0) {
+        *mpi_type = MPI_UNSIGNED_CHAR;
+    } else if (strcmp(name, "s") == 0) {
+        *mpi_type = MPI_SHORT;
+    } else if (strcmp(name, "t") == 0) {
+        *mpi_type = MPI_UNSIGNED_SHORT;
+    } else if (strcmp(name, "i") == 0) {
+        *mpi_type = MPI_INT;
+    } else if (strcmp(name, "j") == 0) {
+        *mpi_type = MPI_UNSIGNED;
+    } else if (strcmp(name, "l") == 0) {
+        *mpi_type = MPI_LONG;
+    } else if (strcmp(name, "m") == 0) {
+        *mpi_type = MPI_UNSIGNED_LONG;
+    } else if (strcmp(name, "x") == 0) {
+        *mpi_type = MPI_LONG_LONG;
+    } else if (strcmp(name, "y") == 0) {
+        *mpi_type = MPI_UNSIGNED_LONG_LONG;
+    } else if (strcmp(name, "f") == 0) {
+        *mpi_type = MPI_FLOAT;
+    } else if (strcmp(name, "d") == 0) {
+        *mpi_type = MPI_DOUBLE;
+    } else if (strcmp(name, "e") == 0) {
+        *mpi_type = MPI_LONG_DOUBLE;
+    } else {
+        *mpi_type = MPI_SHORT;
     }
 }
 
@@ -305,6 +207,209 @@ pair<vector<pair<int, int>>, vector<pair<int, int>>> configure_cpu_rectangular(i
     return {row_idx, col_idx};
 }
 
+template <class T>
+Mat<T> parallel_matmul(const Mat<T> &A, const Mat<T> &B, int node, int n_procs) {
+    shino::precise_stopwatch stopwatch;
+    MPI_Comm comm = MPI_COMM_WORLD;
+    MPI_Status status;
+    MPI_Datatype mpi_type;
+    get_mpi_type<T>(&mpi_type);
+    long rows = A.n_rows, cols = B.n_cols;
+    pair<vector<pair<int, int>>, vector<pair<int, int>>> ranges = configure_cpu_rectangular(rows, cols, n_procs);
+    vector<pair<int, int>> row_idx = ranges.first;
+    vector<pair<int, int>> col_idx = ranges.second;
+    int n_procs_col = (int)col_idx.size();
+    int n_procs_required = n_procs_col * n_procs_col;
+    Mat<T> C(rows, cols, fill::zeros);
+
+    // int MPI_Type_contiguous(int count, MPI_Datatype oldtype, MPI_Datatype * newtype)
+    long limit = INT_MAX;
+    int mpi_count = ceil((double)rows * cols / limit);
+    int mpi_unit = ceil((double)rows * cols / mpi_count);
+    MPI_Datatype MPI_LARGE;
+    if (rows * cols > limit) {
+        MPI_Type_contiguous(mpi_unit, mpi_type, &MPI_LARGE);
+        MPI_Type_commit(&MPI_LARGE);
+        if (node == 0) {
+            printf("CPU %d: rows: %ld, cols: %ld, limit: %ld, mpi_count: %d, mpi_unit: %d\n ", node, rows, cols, limit, mpi_count, mpi_unit);
+        }
+    }
+
+    if (node == 0) {
+        long r1 = row_idx[0].first;
+        long r2 = row_idx[0].second;
+        long c1 = col_idx[0].first;
+        long c2 = col_idx[0].second;
+        long size = (r2 - r1 + 1) * (c2 - c1 + 1);
+        try {
+            C.submat(r1, c1, r2, c2) = A.rows(r1, r2) * B.cols(c1, c2);
+        } catch (const std::exception &e) {
+            cout << e.what() << endl;
+            printf("CPU %d: row_idx[%d]: r1 - r2: %ld - %ld, col_idx[%d] c1 - c2: %ld - %ld, A.n_rows: %ld, B.n_cols: %ld\n", node, 0, r1, r2, 0, c1, c2, rows, cols);
+        }
+        auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+        printf("CPU %d: CPU used: %d, Receive C(%d, %d) from CPU %d (%d, %d): %ld-by-%ld, %ld", node, n_procs_required, 0, 0, 0, 0, 0, r2 - r1 + 1, c2 - c1 + 1, size);
+        cout << " (" << elapsed_time << " ms)\n";
+
+        for (int k = 1; k < n_procs_required; ++k) {
+            T *c = new T[size];
+            MPI_Recv(c, size, mpi_type, MPI_ANY_SOURCE, MPI_ANY_TAG, comm, &status);
+            int tag = status.MPI_TAG;
+            int i = tag / n_procs_col;
+            int j = tag % n_procs_col;
+            long r1 = row_idx[i].first;
+            long r2 = row_idx[i].second;
+            long c1 = col_idx[j].first;
+            long c2 = col_idx[j].second;
+            Mat<T> C_sub(r2 - r1 + 1, c2 - c1 + 1, fill::zeros);
+            array2mat<T>(&c, C_sub);
+            delete[] c;
+            C.submat(r1, c1, r2, c2) = C_sub;
+            elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+            printf("CPU %d: CPU used: %d, Receive C(%d, %d) from CPU %d (%d, %d): %ld-by-%ld, %ld", node, n_procs_required, i, j, i * n_procs_col + j, i, j, (long)C_sub.n_rows, (long)C_sub.n_cols, (long)(C_sub.n_rows * C_sub.n_cols));
+            cout << " (" << elapsed_time << " ms)\n";
+        }
+
+        T *c;
+        size = rows * cols;
+        MPI_Barrier(comm);
+        if (size > limit) {
+            c = new T[mpi_count * mpi_unit];
+            mat2array(&c, C);
+            MPI_Bcast(c, mpi_count, MPI_LARGE, 0, comm);
+        } else {
+            c = new T[size];
+            MPI_Bcast(c, size, mpi_type, 0, comm);
+        }
+        delete[] c;
+    }
+
+    if (node > 0 && node < n_procs_required) {
+        int i = node / n_procs_col;
+        int j = node % n_procs_col;
+        long r1 = row_idx[i].first;
+        long r2 = row_idx[i].second;
+        long c1 = col_idx[j].first;
+        long c2 = col_idx[j].second;
+        long size = (r2 - r1 + 1) * (c2 - c1 + 1);
+        Mat<T> TC;
+        try {
+            TC = A.rows(r1, r2) * B.cols(c1, c2);
+        } catch (const std::exception &e) {
+            cout << e.what() << endl;
+            printf("CPU %d: row_idx[%d]: r1 - r2: %ld - %ld, col_idx[%d] c1 - c2: %ld - %ld, A.n_rows: %ld, B.n_cols: %ld\n", node, 0, r1, r2, 0, c1, c2, rows, cols);
+        }
+        T *c = new T[size];
+        mat2array(&c, TC);
+        // printf("CPU %d: Send C(%d, %d) to CPU 0 (0, 0)\n", node, i, j);
+        MPI_Send(c, size, mpi_type, 0, node, comm);
+        delete[] c;
+    }
+
+    if (node > 0) {
+        T *c;
+        long size = rows * cols;
+        MPI_Barrier(comm);
+        if (size > limit) {
+            c = new T[mpi_count * mpi_unit];
+            MPI_Bcast(c, mpi_count, MPI_LARGE, 0, comm);
+        } else {
+            c = new T[size];
+            MPI_Bcast(c, size, mpi_type, 0, comm);
+        }
+        array2mat<T>(&c, C);
+        delete[] c;
+    }
+    return C;
+}
+
+template <class T>
+Mat<T> parallel_matsq(const Mat<T> &A, const Mat<T> &B, int node, int n_procs) {
+    shino::precise_stopwatch stopwatch;
+
+    MPI_Datatype mpi_type;
+    MPI_Comm comm = MPI_COMM_WORLD;
+    MPI_Status status;
+    get_mpi_type<T>(&mpi_type);
+    long rows = A.n_rows;
+    long cols = B.n_cols;
+    Mat<T> C(rows, cols, fill::zeros);
+    pair<vector<pair<int, int>>, vector<pair<int, int>>> ranges = configure_cpu_triangular(rows, cols, n_procs);
+    vector<pair<int, int>> row_idx = ranges.first;
+    vector<pair<int, int>> col_idx = ranges.second;
+    int n_procs_required = (int)col_idx.size();
+
+    if (node == 0) {
+        long r1 = row_idx[node].first;
+        long r2 = row_idx[node].second;
+        long c1 = col_idx[node].first;
+        long c2 = col_idx[node].second;
+        long size = (r2 - r1 + 1) * (c2 - c1 + 1);
+        C.submat(r1, c1, r2, c2) = A.rows(r1, r2) * B.cols(c1, c2);
+        auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+        printf("CPU_required: %d: CPU %d: Receive C(%d, %d) from CPU %d (%d, %d): %ld-by-%ld, %ld", n_procs_required, node, 0, 0, 0, 0, 0, r2 - r1 + 1, c2 - c1 + 1, size);
+        cout << " (" << elapsed_time << " ms)\n";
+
+        for (int k = 1; k < n_procs_required; ++k) {
+            T *c = new T[size];
+            MPI_Recv(c, size, mpi_type, MPI_ANY_SOURCE, MPI_ANY_TAG, comm, &status);
+            int tag = status.MPI_TAG;
+            long r1 = row_idx[tag].first;
+            long r2 = row_idx[tag].second;
+            long c1 = col_idx[tag].first;
+            long c2 = col_idx[tag].second;
+            Mat<T> C_sub(r2 - r1 + 1, c2 - c1 + 1, fill::zeros);
+            array2mat<T>(&c, C_sub);
+            C.submat(r1, c1, r2, c2) = C_sub;
+            int i = floor(sqrt(2 * tag + 1.0 / 4) - 1.0 / 2);
+            int j = tag - i * (i + 1) / 2;
+            if (i != j)
+                C.submat(c1, r1, c2, r2) = C_sub.t();
+            elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+            printf("CPU_required: %d: CPU %d: Receive C(%d, %d) from CPU %d (%d, %d): %ld-by-%ld, %ld", n_procs_required, node, i, j, tag, i, j, (long)C_sub.n_rows, (long)C_sub.n_cols, (long)(C_sub.n_rows * C_sub.n_cols));
+            cout << " (" << elapsed_time << " ms)\n";
+            delete[] c;
+        }
+
+        size = rows * (cols + 1) / 2;
+        T *c = new T[size];
+        mat2array_square<T>(&c, C);
+        MPI_Barrier(comm);
+        MPI_Bcast(c, size, mpi_type, 0, comm);
+        delete[] c;
+
+        // cout << "Number of CPUs: " << n_procs << ", rows: " << rows;
+        // cout << ", wall clock time elapsed to perform parallel_matmul: " << elapsed_time << " ms" << endl;
+    }
+
+    if (node > 0 && node < n_procs_required) {
+        long r1 = row_idx[node].first;
+        long r2 = row_idx[node].second;
+        long c1 = col_idx[node].first;
+        long c2 = col_idx[node].second;
+        // printf("%02d: r1: %ld, r2: %ld, c1: %ld, c2: %ld\n", node, r1, r2, c1, c2);
+        Mat<T> TC;
+        TC = A.rows(r1, r2) * B.cols(c1, c2);
+        long size = (r2 - r1 + 1) * (c2 - c1 + 1);
+        T *c = new T[size];
+        mat2array(&c, TC);
+        // printf("CPU %d: Send C(%d, %d) to CPU 0 (0, 0)\n", node, i, j);
+        MPI_Send(c, size, mpi_type, 0, node, comm);
+        delete[] c;
+    }
+
+    if (node > 0) {
+        long size = rows * (cols + 1) / 2;
+        T *c = new T[size];
+        MPI_Barrier(comm);
+        MPI_Bcast(c, size, mpi_type, 0, comm);
+        array2mat_square<T>(&c, C);
+        delete[] c;
+    }
+    return C;
+}
+
+template <class T>
 void test_parallel_matmul(int rows, int *argc, char ***argv, int mode, string mat_A, string mat_B, string mat_C) {
     shino::precise_stopwatch stopwatch;
     int n_procs, node;
@@ -324,8 +429,8 @@ void test_parallel_matmul(int rows, int *argc, char ***argv, int mode, string ma
         }
     }
 
-    Mat<float> A;
-    Mat<float> B;
+    Mat<T> A;
+    Mat<T> B;
     if (mode == 1) {
         A.load(mat_A, csv_ascii);
         B.load(mat_B, csv_ascii);
@@ -339,7 +444,7 @@ void test_parallel_matmul(int rows, int *argc, char ***argv, int mode, string ma
         cout << "Performing matrix multiplication A * B..."
              << " (" << elapsed_time << " ms)" << endl;
     }
-    Mat<float> C = parallel_matmul(A, B, node, n_procs);
+    Mat<T> C = parallel_matmul<T>(A, B, node, n_procs);
     elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
     if (mode == 2) {
         mat_C.replace(mat_C.end() - 4, mat_C.end(), "_parallel_matmul_" + to_string(node) + ".csv");
@@ -361,6 +466,7 @@ void test_parallel_matmul(int rows, int *argc, char ***argv, int mode, string ma
     MPI_Finalize();
 }
 
+template <class T>
 void test_parallel_matsq(int rows, int *argc, char ***argv, int mode, string mat_A, string mat_C) {
     shino::precise_stopwatch stopwatch;
     int n_procs, node;
@@ -379,7 +485,7 @@ void test_parallel_matsq(int rows, int *argc, char ***argv, int mode, string mat
         }
     }
 
-    Mat<float> A;
+    Mat<T> A;
     if (mode == 1) {
         A.load(mat_A, csv_ascii);
     } else {
@@ -391,7 +497,7 @@ void test_parallel_matsq(int rows, int *argc, char ***argv, int mode, string mat
         cout << "Performing matrix squaring A * A..."
              << " (" << elapsed_time << " ms)" << endl;
     }
-    Mat<float> C = parallel_matsq(A, A, node, n_procs);
+    Mat<T> C = parallel_matsq<T>(A, A, node, n_procs);
     elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
     if (node == 0) {
         if (mode == 1) {
@@ -407,10 +513,11 @@ void test_parallel_matsq(int rows, int *argc, char ***argv, int mode, string mat
     MPI_Finalize();
 }
 
+template <class T>
 void test_matmul(int rows, int mode, string mat_A, string mat_B, string mat_C) {
     shino::precise_stopwatch stopwatch;
-    Mat<float> A;
-    Mat<float> B;
+    Mat<T> A;
+    Mat<T> B;
 
     cout << "-----------------------------------" << endl;
     cout << "Number of CPUs: 1" << endl;
@@ -431,7 +538,7 @@ void test_matmul(int rows, int mode, string mat_A, string mat_B, string mat_C) {
     cout << "Performing matrix multiplication A * B..."
          << " (" << elapsed_time << " ms)" << endl;
     // perform matrix-matrix multiplication
-    Mat<float> C = A * B;
+    Mat<T> C = A * B;
     elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
     if (mode == 1) {
         mat_C.replace(mat_C.end() - 4, mat_C.end(), "_matmul.csv");
@@ -444,9 +551,10 @@ void test_matmul(int rows, int mode, string mat_A, string mat_B, string mat_C) {
     cout << "-----------------------------------" << endl;
 }
 
+template <class T>
 void test_matsq(int rows, int mode, string mat_A, string mat_C) {
     shino::precise_stopwatch stopwatch;
-    Mat<float> A;
+    Mat<T> A;
 
     cout << "-----------------------------------" << endl;
     cout << "Number of CPUs: 1" << endl;
@@ -464,7 +572,7 @@ void test_matsq(int rows, int mode, string mat_A, string mat_C) {
     cout << "Performing matrix squaring A * A..."
          << " (" << elapsed_time << " ms)" << endl;
     // perform matrix-matrix multiplication
-    Mat<float> C = A * A;
+    Mat<T> C = A * A;
     elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
     if (mode == 1) {
         mat_C.replace(mat_C.end() - 4, mat_C.end(), "_matsq.csv");

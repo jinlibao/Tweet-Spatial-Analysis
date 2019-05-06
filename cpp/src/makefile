@@ -31,7 +31,7 @@ ALLPROGS = main
 
 all: $(ALLPROGS)
 
-main: main.cpp ellipse.o matmul.o tweets_spatial_analysis.o
+main: main.cc ellipse.o matmul.o tweets_spatial_analysis.o
 	$(CXX) $? $(CXXFLAGS) -o $(BIN)/$@ $(LINK)
 
 clean:
