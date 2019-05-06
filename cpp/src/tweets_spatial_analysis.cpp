@@ -12,7 +12,7 @@ void build_overlap_matrix(string ellipse_file, string adj_file, long rows) {
     A.load(ellipse_file, csv_ascii);
     if (rows == 0)
         rows = A.n_rows;
-    Mat<short> Adj(rows, rows, fill::zeros);
+    Mat<float> Adj(rows, rows, fill::zeros);
     cout << ellipse_file << ": " << rows << endl;
     long m = rows * rows / 2, mm = 0;
     for (int i = 0; i < rows; ++i) {
@@ -65,7 +65,7 @@ void build_overlap_matrix(string ellipse_file, string adj_file, long rows) {
 
 void build_distance_matrix(string adj_file, string dis_file) {
     shino::precise_stopwatch stopwatch;
-    Mat<short> A;
+    Mat<float> A;
     Mat<long unsigned> id_mat;
     cout << "Read from " << adj_file << endl;
     A.load(adj_file, csv_ascii);
@@ -90,7 +90,7 @@ void build_distance_matrix(string adj_file, string dis_file) {
         idx.push_back({start, end});
         // cout << start << ' ' << end << endl;
     }
-    Mat<short> AA = -1 * ones<Mat<short>>(rows, rows);
+    Mat<float> AA = -1 * ones<Mat<float>>(rows, rows);
     for (int i = 0; i < (int)idx.size(); ++i) {
         int r1 = idx[i].first;
         int c1 = idx[i].first;
@@ -98,7 +98,7 @@ void build_distance_matrix(string adj_file, string dis_file) {
         int c2 = idx[i].second;
 
         cout << "Applying APD to Block matrix " << i << endl;
-        Mat<short> D = APD(A.submat(r1, c1, r2, c2));
+        Mat<float> D = APD(A.submat(r1, c1, r2, c2));
         for (int j = r1; j < r2 + 1; ++j) {
             for (int k = c1; k < c2 + 1; ++k) {
                 AA(j, k) = D(j - r1, k - c1);
@@ -115,7 +115,7 @@ void build_distance_matrix(string adj_file, string dis_file) {
 
 void find_components(string adj_file) {
     shino::precise_stopwatch stopwatch;
-    Mat<short> A;
+    Mat<float> A;
     Mat<long unsigned> id_mat;
     A.load(adj_file, csv_ascii);
     string adj_id_file = adj_file;
@@ -131,7 +131,7 @@ void find_components(string adj_file) {
     for (int i = 0; i < rows; i++) {
         id.push_back({(long unsigned)id_mat(i, 0), (long unsigned)id_mat(i, 1)});
     }
-    Mat<short> B(rows, rows, fill::zeros);
+    Mat<float> B(rows, rows, fill::zeros);
     int k = 0;
     for (auto &c : components) {
         int m = c.first;
@@ -162,9 +162,9 @@ void find_components(string adj_file) {
     cout << "Wall clock time elapsed: " << elapsed_time << " ms" << endl;
 }
 
-vector<pair<int, vector<int>>> bfs(Mat<short> &A) {
+vector<pair<int, vector<int>>> bfs(Mat<float> &A) {
     int rows = A.n_rows;
-    Col<short> visited(rows, fill::zeros);
+    Col<float> visited(rows, fill::zeros);
     vector<pair<int, vector<int>>> components;
     for (int i = 0; i < rows; ++i) {
         if (!visited(i)) {
@@ -195,10 +195,10 @@ vector<pair<int, vector<int>>> bfs(Mat<short> &A) {
     return components;
 }
 
-Mat<short> APD(const Mat<short> &A) {
+Mat<float> APD(const Mat<float> &A) {
     long n = A.n_rows;
-    Mat<short> Z = A * A;
-    Mat<short> B(n, n, fill::zeros);
+    Mat<float> Z = A * A;
+    Mat<float> B(n, n, fill::zeros);
     long cnt = 0;
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
@@ -211,15 +211,15 @@ Mat<short> APD(const Mat<short> &A) {
         }
     }
 
-    Mat<short> D(n, n, fill::ones);
+    Mat<float> D(n, n, fill::ones);
     D = -1 * D;
     if (cnt == (long)(n - 1) * n) {
         D = 2 * B - A;
         return D;
     }
-    Mat<short> T = APD(B);
+    Mat<float> T = APD(B);
 
-    Mat<short> X = T * A;
+    Mat<float> X = T * A;
     vec deg(n, fill::zeros);
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
@@ -238,9 +238,9 @@ Mat<short> APD(const Mat<short> &A) {
     return D;
 }
 
-Mat<short> APD_parallel(const Mat<short> &A, int node, int n_procs) {
+Mat<float> APD_parallel(const Mat<float> &A, int node, int n_procs) {
     long n = A.n_rows;
-    Mat<short> Z;
+    Mat<float> Z;
 
     if (n > 100) {
         Z = parallel_matsq(A, A, node, n_procs);
@@ -248,7 +248,7 @@ Mat<short> APD_parallel(const Mat<short> &A, int node, int n_procs) {
         Z = A * A;
     }
 
-    Mat<short> B(n, n, fill::zeros);
+    Mat<float> B(n, n, fill::zeros);
     long cnt = 0;
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
@@ -261,16 +261,16 @@ Mat<short> APD_parallel(const Mat<short> &A, int node, int n_procs) {
         }
     }
 
-    Mat<short> D(n, n, fill::ones);
+    Mat<float> D(n, n, fill::ones);
     D = -1 * D;
     if (cnt == (n - 1) * n) {
         D = 2 * B - A;
         return D;
     }
 
-    Mat<short> T = APD_parallel(B, node, n_procs);
+    Mat<float> T = APD_parallel(B, node, n_procs);
 
-    Mat<short> X;
+    Mat<float> X;
     if (n > 100) {
         X = parallel_matmul(T, A, node, n_procs);
     } else {
@@ -309,7 +309,7 @@ void build_distance_matrix_parallel(string adj_file, string dis_file, int *argc,
         printf("CPU %d: MPI initialized (%u ms)\n", node, elapsed_time);
     }
 
-    Mat<short> A;
+    Mat<float> A;
     Mat<long unsigned> id_mat;
     if (node == 0) {
         elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
@@ -345,7 +345,7 @@ void build_distance_matrix_parallel(string adj_file, string dis_file, int *argc,
         idx.push_back({start, end});
     }
 
-    Mat<short> AA = -1 * ones<Mat<short>>(rows, rows);
+    Mat<float> AA = -1 * ones<Mat<float>>(rows, rows);
     for (int i = 0; i < (int)idx.size(); ++i) {
         int r1 = idx[i].first;
         int c1 = idx[i].first;
@@ -357,7 +357,7 @@ void build_distance_matrix_parallel(string adj_file, string dis_file, int *argc,
             printf("CPU %d: Applying APD to block matrix %d (%d-by-%d) (%u ms)\n", node, i, r2 - r1 + 1, c2 - c1 + 1, elapsed_time);
         }
 
-        Mat<short> D = APD_parallel(A.submat(r1, c1, r2, c2), node, n_procs);
+        Mat<float> D = APD_parallel(A.submat(r1, c1, r2, c2), node, n_procs);
         if (node == 0) {
             //elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
             //printf("CPU %d: Assemble the distance matrix... (%u ms)\n", node, elapsed_time);
@@ -381,9 +381,9 @@ void build_distance_matrix_parallel(string adj_file, string dis_file, int *argc,
 }
 
 void test_APD(string mat_file) {
-    Mat<short> A;
+    Mat<float> A;
     A.load(mat_file, csv_ascii);
-    Mat<short> D = APD(A);
+    Mat<float> D = APD(A);
     D.save(mat_file.replace(mat_file.end() - 4, mat_file.end(), "_D.csv"), csv_ascii);
 }
 
@@ -395,9 +395,9 @@ void test_APD_parallel(string mat_file, int mode, int *argc, char ***argv) {
     MPI_Comm_rank(comm, &node);
     MPI_Comm_size(comm, &n_procs);
 
-    Mat<short> A;
+    Mat<float> A;
     A.load(mat_file, csv_ascii);
-    Mat<short> D = APD_parallel(A, node, n_procs);
+    Mat<float> D = APD_parallel(A, node, n_procs);
     if (mode == 2) {
         D.save(mat_file.replace(mat_file.end() - 4, mat_file.end(), "_D_parallel_" + to_string(node) +  ".csv"), csv_ascii);
     } else {
