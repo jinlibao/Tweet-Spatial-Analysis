@@ -1,5 +1,5 @@
-#ifndef TIMER_H
-#define TIMER_H
+#ifndef STOPWATCH_H
+#define STOPWATCH_H
 
 #include <chrono>
 #include <atomic>

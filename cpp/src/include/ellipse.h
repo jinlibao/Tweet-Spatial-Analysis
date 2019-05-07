@@ -1,9 +1,9 @@
 #ifndef ELLIPSE_H
 #define ELLIPSE_H
 
+#include <algorithm>
 #include <cmath>
 #include <utility>
-#include <algorithm>
 
 using namespace std;
 
