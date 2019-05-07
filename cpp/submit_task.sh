@@ -125,7 +125,7 @@ export MAT_C_FILE=$DATA_DIR/matmul/mat_C.csv
 for (( j=4; j<5; ++j ))
 do
     export ROWS=${ROW[j]}
-    for (( i=0; i < 3; ++i ))
+    for (( i=0; i<3; ++i ))
     do
         export ELLIPSECSV_FILE=${ELLIPSECSV[i]}
         export ADJ_MATRIX_FILE=${ADJ_MATRIX[i]}
