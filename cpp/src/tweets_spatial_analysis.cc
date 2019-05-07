@@ -1,7 +1,7 @@
-#include "include/matmul.h"
 #include "include/tweets_spatial_analysis.h"
-#include "include/timer.h"
+#include "include/stopwatch.h"
 #include <cstdio>
+#include <stack>
 
 template void build_overlap_matrix<short>(string input_file, string output_file, long rows = 0);
 template void find_components<short>(string adj_file);
@@ -10,8 +10,10 @@ template void build_distance_matrix<short>(string adj_file, string dis_file);
 template void build_distance_matrix_parallel<short>(string adj_file, string dis_file, int *argc, char ***argv);
 template Mat<short> APD<short>(const Mat<short>& A);
 template Mat<short> APD_parallel<short>(const Mat<short> &A, int rank, int n_procs);
+template Mat<short> APD_parallel_non_recursive<short>(const Mat<short> &A, int rank, int n_procs);
 template void test_APD<short>(string mat_file);
 template void test_APD_parallel<short>(string mat_file, int mode, int *argc, char ***argv);
+template void test_APD_parallel_non_recursive<short>(string mat_file, int mode, int *argc, char ***argv);
 
 template void build_overlap_matrix<int>(string input_file, string output_file, long rows = 0);
 template void find_components<int>(string adj_file);
@@ -20,8 +22,10 @@ template void build_distance_matrix<int>(string adj_file, string dis_file);
 template void build_distance_matrix_parallel<int>(string adj_file, string dis_file, int *argc, char ***argv);
 template Mat<int> APD<int>(const Mat<int>& A);
 template Mat<int> APD_parallel<int>(const Mat<int> &A, int rank, int n_procs);
+template Mat<int> APD_parallel_non_recursive<int>(const Mat<int> &A, int rank, int n_procs);
 template void test_APD<int>(string mat_file);
 template void test_APD_parallel<int>(string mat_file, int mode, int *argc, char ***argv);
+template void test_APD_parallel_non_recursive<int>(string mat_file, int mode, int *argc, char ***argv);
 
 template void build_overlap_matrix<long>(string input_file, string output_file, long rows = 0);
 template void find_components<long>(string adj_file);
@@ -30,8 +34,10 @@ template void build_distance_matrix<long>(string adj_file, string dis_file);
 template void build_distance_matrix_parallel<long>(string adj_file, string dis_file, int *argc, char ***argv);
 template Mat<long> APD<long>(const Mat<long>& A);
 template Mat<long> APD_parallel<long>(const Mat<long> &A, int rank, int n_procs);
+template Mat<long> APD_parallel_non_recursive<long>(const Mat<long> &A, int rank, int n_procs);
 template void test_APD<long>(string mat_file);
 template void test_APD_parallel<long>(string mat_file, int mode, int *argc, char ***argv);
+template void test_APD_parallel_non_recursive<long>(string mat_file, int mode, int *argc, char ***argv);
 
 template void build_overlap_matrix<float>(string input_file, string output_file, long rows = 0);
 template void find_components<float>(string adj_file);
@@ -40,8 +46,10 @@ template void build_distance_matrix<float>(string adj_file, string dis_file);
 template void build_distance_matrix_parallel<float>(string adj_file, string dis_file, int *argc, char ***argv);
 template Mat<float> APD<float>(const Mat<float>& A);
 template Mat<float> APD_parallel<float>(const Mat<float> &A, int rank, int n_procs);
+template Mat<float> APD_parallel_non_recursive<float>(const Mat<float> &A, int rank, int n_procs);
 template void test_APD<float>(string mat_file);
 template void test_APD_parallel<float>(string mat_file, int mode, int *argc, char ***argv);
+template void test_APD_parallel_non_recursive<float>(string mat_file, int mode, int *argc, char ***argv);
 
 template void build_overlap_matrix<double>(string input_file, string output_file, long rows = 0);
 template void find_components<double>(string adj_file);
@@ -50,8 +58,10 @@ template void build_distance_matrix<double>(string adj_file, string dis_file);
 template void build_distance_matrix_parallel<double>(string adj_file, string dis_file, int *argc, char ***argv);
 template Mat<double> APD<double>(const Mat<double>& A);
 template Mat<double> APD_parallel<double>(const Mat<double> &A, int rank, int n_procs);
+template Mat<double> APD_parallel_non_recursive<double>(const Mat<double> &A, int rank, int n_procs);
 template void test_APD<double>(string mat_file);
 template void test_APD_parallel<double>(string mat_file, int mode, int *argc, char ***argv);
+template void test_APD_parallel_non_recursive<double>(string mat_file, int mode, int *argc, char ***argv);
 
 template <class T>
 void build_overlap_matrix(string ellipse_file, string adj_file, long rows) {
@@ -63,7 +73,7 @@ void build_overlap_matrix(string ellipse_file, string adj_file, long rows) {
     A.load(ellipse_file, csv_ascii);
     if (rows == 0)
         rows = A.n_rows;
-    Mat<T> Adj(rows, rows, fill::zeros);
+    Mat<short> Adj(rows, rows, fill::zeros);
     cout << ellipse_file << ": " << rows << endl;
     long m = rows * rows / 2, mm = 0;
     for (int i = 0; i < rows; ++i) {
@@ -142,7 +152,7 @@ void build_distance_matrix(string adj_file, string dis_file) {
         idx.push_back({start, end});
         // cout << start << ' ' << end << endl;
     }
-    Mat<T> AA = -1 * ones<Mat<T>>(rows, rows);
+    Mat<int> AA = -1 * ones<Mat<int>>(rows, rows);
     for (int i = 0; i < (int)idx.size(); ++i) {
         int r1 = idx[i].first;
         int c1 = idx[i].first;
@@ -153,7 +163,7 @@ void build_distance_matrix(string adj_file, string dis_file) {
         Mat<T> D = APD<T>(A.submat(r1, c1, r2, c2));
         for (int j = r1; j < r2 + 1; ++j) {
             for (int k = c1; k < c2 + 1; ++k) {
-                AA(j, k) = D(j - r1, k - c1);
+                AA(j, k) = (int)D(j - r1, k - c1);
             }
         }
     }
@@ -184,13 +194,13 @@ void find_components(string adj_file) {
     for (int i = 0; i < rows; i++) {
         id.push_back({(long unsigned)id_mat(i, 0), (long unsigned)id_mat(i, 1)});
     }
-    Mat<T> B(rows, rows, fill::zeros);
+    Mat<short> B(rows, rows, fill::zeros);
     int k = 0;
     for (auto &c : components) {
         int m = c.first;
         for (int i = 0; i < m; ++i) {
             for (int j = 0; j < m; ++j) {
-                B(cur + i, cur + j) = A(c.second[i], c.second[j]);
+                B(cur + i, cur + j) = (short)A(c.second[i], c.second[j]);
             }
             id[c.second[i]][0] = cur + i;
             id[c.second[i]].insert(id[c.second[i]].begin() + 1, k);
@@ -275,6 +285,12 @@ Mat<T> APD(const Mat<T> &A) {
     Mat<T> S = APD<T>(B);
 
     Mat<T> X = S * A;
+    if (n > 1000) {
+        //S.save("/gscratch/ljin1/data/twitter/csv/matmul_test/mat_S.csv", csv_ascii);
+        //A.save("/gscratch/ljin1/data/twitter/csv/matmul_test/mat_A.csv", csv_ascii);
+        //X.save("/gscratch/ljin1/data/twitter/csv/matmul_test/mat_X.csv", csv_ascii);
+    }
+
     vec deg(n, fill::zeros);
     for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
@@ -298,7 +314,7 @@ Mat<T> APD_parallel(const Mat<T> &A, int node, int n_procs) {
     long n = A.n_rows;
     Mat<T> Z;
 
-    if (n > 100) {
+    if (n >= 100) {
         Z = parallel_matsq(A, A, node, n_procs);
     } else {
         Z = A * A;
@@ -327,8 +343,11 @@ Mat<T> APD_parallel(const Mat<T> &A, int node, int n_procs) {
     Mat<T> S = APD_parallel<T>(B, node, n_procs);
 
     Mat<T> X;
-    if (n > 100) {
+    if (n >= 100) {
         X = parallel_matmul(S, A, node, n_procs);
+        //S.save("/gscratch/ljin1/data/twitter/csv/matmul_test/mat_S_" + to_string(node) + ".csv", csv_ascii);
+        //A.save("/gscratch/ljin1/data/twitter/csv/matmul_test/mat_A_" + to_string(node) + ".csv", csv_ascii);
+        //X.save("/gscratch/ljin1/data/twitter/csv/matmul_test/mat_X_" + to_string(node) + ".csv", csv_ascii);
     } else {
         X = S * A;
     }
@@ -345,6 +364,77 @@ Mat<T> APD_parallel(const Mat<T> &A, int node, int n_procs) {
                 D(i, j) = 2 * S(i, j);
             } else {
                 D(i, j) = 2 * S(i, j) - 1;
+            }
+        }
+    }
+    return D;
+}
+
+template <class T>
+Mat<T> APD_parallel_non_recursive(const Mat<T> &AA, int node, int n_procs) {
+    long n = AA.n_rows;
+
+    stack<Mat<T>> A_stack;
+    Mat<T> A = AA;
+    Mat<T> D;
+    while (true) {
+        Mat<T> Z;
+
+        if (n >= 100) {
+            Z = parallel_matsq(A, A, node, n_procs);
+        } else {
+            Z = A * A;
+        }
+
+        Mat<T> B(n, n, fill::zeros);
+        long cnt = 0;
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (i != j && (A(i, j) == 1 || Z(i, j) > 0)) {
+                    B(i, j) = 1;
+                    ++cnt;
+                } else {
+                    B(i, j) = 0;
+                }
+            }
+        }
+
+        if (cnt == (n - 1) * n) {
+            D = 2 * B - A;
+            break;
+        }
+
+        A_stack.push(A);
+        A = B;
+    }
+    while (!A_stack.empty()) {
+        A = A_stack.top();
+        A_stack.pop();
+
+        Mat<T> S = D;
+        Mat<T> X;
+        if (n >= 100) {
+            X = parallel_matmul(S, A, node, n_procs);
+            //S.save("/gscratch/ljin1/data/twitter/csv/matmul_test/mat_S_" + to_string(node) + ".csv", csv_ascii);
+            //A.save("/gscratch/ljin1/data/twitter/csv/matmul_test/mat_A_" + to_string(node) + ".csv", csv_ascii);
+            //X.save("/gscratch/ljin1/data/twitter/csv/matmul_test/mat_X_" + to_string(node) + ".csv", csv_ascii);
+        } else {
+            X = S * A;
+        }
+
+        vec deg(n, fill::zeros);
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                deg(i) += A(i, j);
+            }
+        }
+        for (int i = 0; i < n; ++i) {
+            for (int j = 0; j < n; ++j) {
+                if (X(i, j) >= S(i, j) * deg(j)) {
+                    D(i, j) = 2 * S(i, j);
+                } else {
+                    D(i, j) = 2 * S(i, j) - 1;
+                }
             }
         }
     }
@@ -402,7 +492,7 @@ void build_distance_matrix_parallel(string adj_file, string dis_file, int *argc,
         idx.push_back({start, end});
     }
 
-    Mat<T> AA = -1 * ones<Mat<T>>(rows, rows);
+    Mat<int> AA = -1 * ones<Mat<int>>(rows, rows);
     for (int i = 0; i < (int)idx.size(); ++i) {
         int r1 = idx[i].first;
         int c1 = idx[i].first;
@@ -414,20 +504,22 @@ void build_distance_matrix_parallel(string adj_file, string dis_file, int *argc,
             printf("CPU %d: Applying APD to block matrix %d (%d-by-%d) (%u ms)\n", node, i, r2 - r1 + 1, c2 - c1 + 1, elapsed_time);
         }
 
-        Mat<T> D = APD_parallel<T>(A.submat(r1, c1, r2, c2), node, n_procs);
+        //Mat<T> D = APD_parallel<T>(A.submat(r1, c1, r2, c2), node, n_procs);
+        Mat<T> D = APD_parallel_non_recursive<T>(A.submat(r1, c1, r2, c2), node, n_procs);
         if (node == 0) {
             //elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
             //printf("CPU %d: Assemble the distance matrix... (%u ms)\n", node, elapsed_time);
             for (int j = r1; j < r2 + 1; ++j) {
                 for (int k = c1; k < c2 + 1; ++k) {
-                    AA(j, k) = D(j - r1, k - c1);
+                    AA(j, k) = (int)D(j - r1, k - c1);
                 }
             }
         }
     }
 
     if (node == 0) {
-        dis_file.replace(dis_file.end() - 4, dis_file.end(), "_parallel.csv");
+        //dis_file.replace(dis_file.end() - 4, dis_file.end(), "_parallel_recursive.csv");
+        dis_file.replace(dis_file.end() - 4, dis_file.end(), "_parallel_non_recursive.csv");
         elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
         printf("CPU %d: Writing to %s... (%u ms)\n", node, dis_file.c_str(), elapsed_time);
         AA.save(dis_file, csv_ascii);
@@ -457,6 +549,28 @@ void test_APD_parallel(string mat_file, int mode, int *argc, char ***argv) {
     Mat<T> A;
     A.load(mat_file, csv_ascii);
     Mat<T> D = APD_parallel<T>(A, node, n_procs);
+    if (mode == 2) {
+        D.save(mat_file.replace(mat_file.end() - 4, mat_file.end(), "_D_parallel_" + to_string(node) +  ".csv"), csv_ascii);
+    } else {
+        if (node == 0) {
+            D.save(mat_file.replace(mat_file.end() - 4, mat_file.end(), "_D_parallel.csv"), csv_ascii);
+        }
+    }
+    MPI_Finalize();
+}
+
+template <class T>
+void test_APD_parallel_non_recursive(string mat_file, int mode, int *argc, char ***argv) {
+    int node, n_procs;
+    MPI_Comm comm = MPI_COMM_WORLD;
+
+    MPI_Init(argc, argv);
+    MPI_Comm_rank(comm, &node);
+    MPI_Comm_size(comm, &n_procs);
+
+    Mat<T> A;
+    A.load(mat_file, csv_ascii);
+    Mat<T> D = APD_parallel_non_recursive<T>(A, node, n_procs);
     if (mode == 2) {
         D.save(mat_file.replace(mat_file.end() - 4, mat_file.end(), "_D_parallel_" + to_string(node) +  ".csv"), csv_ascii);
     } else {
