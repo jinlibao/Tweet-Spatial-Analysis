@@ -1,5 +1,5 @@
 #include "include/matmul.h"
-#include "include/timer.h"
+#include "include/stopwatch.h"
 
 template Mat<short> parallel_matmul<short>(const Mat<short> &A, const Mat<short> &B, int node, int n_procs);
 template Mat<short> parallel_matsq<short>(const Mat<short> &A, const Mat<short> &B, int node, int n_procs);
@@ -224,14 +224,14 @@ Mat<T> parallel_matmul(const Mat<T> &A, const Mat<T> &B, int node, int n_procs) 
 
     // int MPI_Type_contiguous(int count, MPI_Datatype oldtype, MPI_Datatype * newtype)
     long limit = INT_MAX;
-    int mpi_count = ceil((double)rows * cols / limit);
-    int mpi_unit = ceil((double)rows * cols / mpi_count);
+    long mpi_count = ceil((double)rows * cols / limit);
+    long mpi_unit = ceil((double)rows * cols / mpi_count);
     MPI_Datatype MPI_LARGE;
     if (rows * cols > limit) {
         MPI_Type_contiguous(mpi_unit, mpi_type, &MPI_LARGE);
         MPI_Type_commit(&MPI_LARGE);
         if (node == 0) {
-            printf("CPU %d: rows: %ld, cols: %ld, limit: %ld, mpi_count: %d, mpi_unit: %d\n ", node, rows, cols, limit, mpi_count, mpi_unit);
+            printf("CPU %d: rows: %ld, cols: %ld, limit: %ld, mpi_count: %ld, mpi_unit: %ld\n", node, rows, cols, limit, mpi_count, mpi_unit);
         }
     }
 
@@ -279,6 +279,7 @@ Mat<T> parallel_matmul(const Mat<T> &A, const Mat<T> &B, int node, int n_procs) 
             MPI_Bcast(c, mpi_count, MPI_LARGE, 0, comm);
         } else {
             c = new T[size];
+            mat2array(&c, C);
             MPI_Bcast(c, size, mpi_type, 0, comm);
         }
         delete[] c;

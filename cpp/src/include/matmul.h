@@ -1,5 +1,5 @@
-#ifndef MATMUL_TEMPLATE_H
-#define MATMUL_TEMPLATE_H
+#ifndef MATMUL_H
+#define MATMUL_H
 
 #include <armadillo>
 #include <climits>
@@ -26,9 +26,7 @@ template <class T> void test_matmul(int rows, int mode = 0, string mat_A = "", s
 template <class T> void test_matsq(int rows, int mode = 0, string mat_A = "", string mat_C = "");
 template <class T> void test_parallel_matmul(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
 template <class T> void test_parallel_matsq(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
-
 pair<vector<pair<int, int>>, vector<pair<int, int>>> configure_cpu_triangular(int rows, int cols, int n_procs);
-pair<vector<pair<int, int>>, vector<pair<int, int>>> configure_cpu_rectangular(int rows, int cols, int n_procs, int n_procs_row = 0,
-                                                                               int n_procs_col = 0);
+pair<vector<pair<int, int>>, vector<pair<int, int>>> configure_cpu_rectangular(int rows, int cols, int n_procs, int n_procs_row = 0, int n_procs_col = 0);
 
 #endif
