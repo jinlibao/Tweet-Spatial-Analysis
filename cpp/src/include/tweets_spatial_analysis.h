@@ -11,7 +11,7 @@ using namespace arma;
 using namespace std;
 
 template <class T> void build_overlap_matrix(string input_file, string output_file, long rows = 0);
-template <class T> void find_components(string adj_file);
+template <class T> void find_components(string adj_file, string outlier_file = "");
 template <class T> vector<pair<int, vector<int>>> bfs(Mat<T> &A);
 template <class T> void build_distance_matrix(string adj_file, string dis_file);
 template <class T> void build_distance_matrix_parallel(string adj_file, string dis_file, int *argc, char ***argv);

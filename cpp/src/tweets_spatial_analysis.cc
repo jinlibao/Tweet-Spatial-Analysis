@@ -2,9 +2,10 @@
 #include "include/stopwatch.h"
 #include <cstdio>
 #include <stack>
+#include <unordered_map>
 
 template void build_overlap_matrix<short>(string input_file, string output_file, long rows = 0);
-template void find_components<short>(string adj_file);
+template void find_components<short>(string adj_file, string outlier_file = "");
 template vector<pair<int, vector<int>>> bfs<short>(Mat<short>& A);
 template void build_distance_matrix<short>(string adj_file, string dis_file);
 template void build_distance_matrix_parallel<short>(string adj_file, string dis_file, int *argc, char ***argv);
@@ -16,7 +17,7 @@ template void test_APD_parallel<short>(string mat_file, int mode, int *argc, cha
 template void test_APD_parallel_non_recursive<short>(string mat_file, int mode, int *argc, char ***argv);
 
 template void build_overlap_matrix<int>(string input_file, string output_file, long rows = 0);
-template void find_components<int>(string adj_file);
+template void find_components<int>(string adj_file, string outlier_file = "");
 template vector<pair<int, vector<int>>> bfs<int>(Mat<int>& A);
 template void build_distance_matrix<int>(string adj_file, string dis_file);
 template void build_distance_matrix_parallel<int>(string adj_file, string dis_file, int *argc, char ***argv);
@@ -28,7 +29,7 @@ template void test_APD_parallel<int>(string mat_file, int mode, int *argc, char 
 template void test_APD_parallel_non_recursive<int>(string mat_file, int mode, int *argc, char ***argv);
 
 template void build_overlap_matrix<long>(string input_file, string output_file, long rows = 0);
-template void find_components<long>(string adj_file);
+template void find_components<long>(string adj_file, string outlier_file = "");
 template vector<pair<int, vector<int>>> bfs<long>(Mat<long>& A);
 template void build_distance_matrix<long>(string adj_file, string dis_file);
 template void build_distance_matrix_parallel<long>(string adj_file, string dis_file, int *argc, char ***argv);
@@ -40,7 +41,7 @@ template void test_APD_parallel<long>(string mat_file, int mode, int *argc, char
 template void test_APD_parallel_non_recursive<long>(string mat_file, int mode, int *argc, char ***argv);
 
 template void build_overlap_matrix<float>(string input_file, string output_file, long rows = 0);
-template void find_components<float>(string adj_file);
+template void find_components<float>(string adj_file, string outlier_file = "");
 template vector<pair<int, vector<int>>> bfs<float>(Mat<float>& A);
 template void build_distance_matrix<float>(string adj_file, string dis_file);
 template void build_distance_matrix_parallel<float>(string adj_file, string dis_file, int *argc, char ***argv);
@@ -52,7 +53,7 @@ template void test_APD_parallel<float>(string mat_file, int mode, int *argc, cha
 template void test_APD_parallel_non_recursive<float>(string mat_file, int mode, int *argc, char ***argv);
 
 template void build_overlap_matrix<double>(string input_file, string output_file, long rows = 0);
-template void find_components<double>(string adj_file);
+template void find_components<double>(string adj_file, string outlier_file = "");
 template vector<pair<int, vector<int>>> bfs<double>(Mat<double>& A);
 template void build_distance_matrix<double>(string adj_file, string dis_file);
 template void build_distance_matrix_parallel<double>(string adj_file, string dis_file, int *argc, char ***argv);
@@ -176,7 +177,7 @@ void build_distance_matrix(string adj_file, string dis_file) {
 }
 
 template <class T>
-void find_components(string adj_file) {
+void find_components(string adj_file, string outlier_file) {
     shino::precise_stopwatch stopwatch;
     Mat<T> A;
     Mat<long unsigned> id_mat;
@@ -184,6 +185,37 @@ void find_components(string adj_file) {
     string adj_id_file = adj_file;
     adj_id_file.replace(adj_id_file.end() - 4, adj_id_file.end(), "_id.csv");
     id_mat.load(adj_id_file);
+
+    if (outlier_file.size() > 0) {
+        Col<long unsigned> outlier_id;
+        outlier_id.load(outlier_file);
+        unordered_map<long unsigned, int> id_map;
+        int n = A.n_rows;
+        for (int i = 0; i < n; ++i) {
+            id_map[id_mat(i, 1)] = id_mat(i, 0);
+        }
+
+        int m = outlier_id.n_rows;
+        vector<int> outlier_idx;
+        for (int i = 0; i < m; ++i) {
+            outlier_idx.push_back(id_map[outlier_id(i)]);
+        }
+
+        sort(outlier_idx.begin(), outlier_idx.end());
+        reverse(outlier_idx.begin(), outlier_idx.end());
+
+        uvec indices(m);
+        for (int i = 0; i < m; ++i) {
+            indices(i) = outlier_idx[i];
+        }
+
+        A.shed_rows(indices);
+        A.shed_cols(indices);
+        id_mat.shed_rows(indices);
+
+        adj_file.replace(adj_file.end() - 4, adj_file.end(), "_" + to_string(m) + "_outlier.csv");
+    }
+
     vector<pair<int, vector<int>>> components = bfs(A);
     sort(components.begin(), components.end());
     reverse(components.begin(), components.end());

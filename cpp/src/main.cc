@@ -9,12 +9,13 @@ int main(int argc, char *argv[]) {
     string adj_file("./data/tweets_median_working_adjacency_matrix.csv");
     string adj_ordered_file("./data/tweets_median_working_adjacency_matrix_ordered.csv");
     string dis_file("./data/tweets_median_working_distance_matrix.csv");
+    string outlier_file("");
 
     int c, rows, cols, n_procs, job;
     rows = cols = 0;
     n_procs = 1;
     job = 0;
-    while ((c = getopt(argc, argv, "A:B:C:e:a:o:d:r:c:n:t:j:")) != -1) {
+    while ((c = getopt(argc, argv, "A:B:C:O:e:a:o:d:r:c:n:t:j:")) != -1) {
         switch (c) {
         case 'A':
             if (optarg)
@@ -27,6 +28,10 @@ int main(int argc, char *argv[]) {
         case 'C':
             if (optarg)
                 mat_C = optarg;
+            break;
+        case 'O':
+            if (optarg)
+                outlier_file = optarg;
             break;
         case 'e':
             if (optarg)
@@ -113,7 +118,7 @@ int main(int argc, char *argv[]) {
     if (job == 7) {
         if (n_procs == 1) {
             build_overlap_matrix<float>(ellipse_file, adj_file, rows);
-            find_components<float>(adj_file);
+            find_components<float>(adj_file, outlier_file);
             build_distance_matrix<float>(adj_ordered_file, dis_file);
         } else {
             build_distance_matrix_parallel<float>(adj_ordered_file, dis_file, &argc, &argv);
@@ -122,11 +127,14 @@ int main(int argc, char *argv[]) {
     if (job == 8) {
         if (n_procs == 1) {
             build_overlap_matrix<short>(ellipse_file, adj_file, rows);
-            find_components<short>(adj_file);
+            find_components<short>(adj_file, outlier_file);
             build_distance_matrix<short>(adj_ordered_file, dis_file);
         } else {
             build_distance_matrix_parallel<short>(adj_ordered_file, dis_file, &argc, &argv);
         }
+    }
+    if (job == 9) {
+        find_components<float>(adj_file, outlier_file);
     }
 
     return 0;
