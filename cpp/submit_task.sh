@@ -117,6 +117,9 @@ DIS_MATRIX[2]=$DATA_DIR/cpp_total/tweets_median_non_working_distance_matrix.csv
  ADJ_ORDER[0]=$DATA_DIR/cpp_total/tweets_mean_all_adjacency_matrix_ordered.csv
  ADJ_ORDER[1]=$DATA_DIR/cpp_total/tweets_median_working_adjacency_matrix_ordered.csv
  ADJ_ORDER[2]=$DATA_DIR/cpp_total/tweets_median_non_working_adjacency_matrix_ordered.csv
+   OUTLIER[0]=$DATA_DIR/cpp_total/tweets_mean_all_outlier.csv
+   OUTLIER[1]=$DATA_DIR/cpp_total/tweets_median_working_outlier.csv
+   OUTLIER[2]=$DATA_DIR/cpp_total/tweets_median_non_working_outlier.csv
 
 export MAT_A_FILE=$DATA_DIR/matmul/mat_A.csv
 export MAT_B_FILE=$DATA_DIR/matmul/mat_B.csv
@@ -131,6 +134,7 @@ do
         export ADJ_MATRIX_FILE=${ADJ_MATRIX[i]}
         export ADJ_ORDER_FILE=${ADJ_ORDER[i]}
         export DIS_MATRIX_FILE=${DIS_MATRIX[i]}
+        export OUTLIER_FILE=${OUTLIER[i]}
         export NCPU=`echo ${NODES[k]} \* ${NTASKS_PER_NODE[k]}|bc`
         sbatch --partition=${PARTITION[k]} --nodes=${NODES[k]} --ntasks-per-node=${NTASKS_PER_NODE[k]} --mem=${MEM[k]} task.sh
     done

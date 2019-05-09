@@ -5,7 +5,7 @@
 #
 # Distributed under terms of the MIT license.
 
-ARMADILLO_VER=9.300.2
+ARMADILLO_VER=9.400.3
 ROOT=~/.armadillo
 LOC=armadillo-$ARMADILLO_VER
 DIR=$ROOT/$LOC
@@ -59,6 +59,6 @@ if [ -d $DIR-mkl ]; then
     rm -rf $DIR-mkl
 fi
 
-cmake . -DCMAKE_INSTALL_PREFIX:PATH=$DIR-mkl
+CC=gcc CXX=g++ cmake . -DCMAKE_INSTALL_PREFIX:PATH=$DIR-mkl
 make
 make install

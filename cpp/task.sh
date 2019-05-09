@@ -8,7 +8,7 @@
 #SBATCH --mail-user=ljin1@uwyo.edu
 #SBATCH --time=6-23:59:59
 
-ARMADILLO_VER=9.300.2
+ARMADILLO_VER=9.400.3
 
 if [[ $OSTYPE == darwin* ]]     # MacBook Pro @ libaooutrage (macOS)
 then
@@ -54,6 +54,7 @@ if [ -z $ELLIPSECSV_FILE ]; then
     ADJ_MATRIX_FILE=$DATA_DIR/tweets_median_working_adjacency_matrix.csv
     ADJ_ORDER_FILE=$DATA_DIR/tweets_median_working_adjacency_matrix_ordered.csv
     DIS_MATRIX_FILE=$DATA_DIR/tweets_median_working_distance_matrix.csv
+    OUTLIER_FILE=$DATA_DIR/outliers.csv
     MAT_A_FILE=$DATA_DIR/matmul/mat_A.csv
     MAT_B_FILE=$DATA_DIR/matmul/mat_B.csv
     MAT_C_FILE=$DATA_DIR/matmul/mat_C.csv
@@ -65,6 +66,6 @@ if [ -z $ROWS ]; then
 
 fi
 
-JOB=0 # 0, 1, 2, 3, 4, 5, 6, 7, 8
+JOB=0 # 0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 
-mpirun -n $NCPU bin/main -j $JOB -r $ROWS -c $ROWS -n $NCPU -e $ELLIPSECSV_FILE -a $ADJ_MATRIX_FILE -o $ADJ_ORDER_FILE -d $DIS_MATRIX_FILE -A $MAT_A_FILE -B $MAT_B_FILE -C $MAT_C_FILE
+mpirun -n $NCPU bin/main -j $JOB -r $ROWS -c $ROWS -n $NCPU -e $ELLIPSECSV_FILE -a $ADJ_MATRIX_FILE -o $ADJ_ORDER_FILE -d $DIS_MATRIX_FILE -A $MAT_A_FILE -B $MAT_B_FILE -C $MAT_C_FILE -O $OUTLIER_FILE
