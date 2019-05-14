@@ -1,65 +1,55 @@
 #include "include/matmul.h"
 #include "include/stopwatch.h"
 
-template Mat<short> parallel_matmul<short>(const Mat<short> &A, const Mat<short> &B, int node, int n_procs);
-template Mat<short> parallel_matsq<short>(const Mat<short> &A, const Mat<short> &B, int node, int n_procs);
+template Mat<short> matrix_multiplication<short>(const Mat<short> &A, const Mat<short> &B, int node, int n_procs);
+template Mat<short> matrix_square<short>(const Mat<short> &A, int node, int n_procs);
 template void mat2array<short>(short **A, const Mat<short> &B);
 template void array2mat<short>(short **A, Mat<short> &B);
 template void mat2array_square<short>(short **A, const Mat<short> &B);
 template void array2mat_square<short>(short **A, Mat<short> &B);
 template void get_mpi_type<short>(MPI_Datatype *mpi_type);
-template void test_matmul<short>(int rows, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
-template void test_matsq<short>(int rows, int mode = 0, string mat_A = "", string mat_C = "");
-template void test_parallel_matmul<short>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
-template void test_parallel_matsq<short>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
+template void test_matrix_multiplication<short>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
+template void test_matrix_square<short>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
 
-template Mat<int> parallel_matmul<int>(const Mat<int> &A, const Mat<int> &B, int node, int n_procs);
-template Mat<int> parallel_matsq<int>(const Mat<int> &A, const Mat<int> &B, int node, int n_procs);
+template Mat<int> matrix_multiplication<int>(const Mat<int> &A, const Mat<int> &B, int node, int n_procs);
+template Mat<int> matrix_square<int>(const Mat<int> &A, int node, int n_procs);
 template void mat2array<int>(int **A, const Mat<int> &B);
 template void array2mat<int>(int **A, Mat<int> &B);
 template void mat2array_square<int>(int **A, const Mat<int> &B);
 template void array2mat_square<int>(int **A, Mat<int> &B);
 template void get_mpi_type<int>(MPI_Datatype *mpi_type);
-template void test_matmul<int>(int rows, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
-template void test_matsq<int>(int rows, int mode = 0, string mat_A = "", string mat_C = "");
-template void test_parallel_matmul<int>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
-template void test_parallel_matsq<int>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
+template void test_matrix_multiplication<int>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
+template void test_matrix_square<int>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
 
-template Mat<long> parallel_matmul<long>(const Mat<long> &A, const Mat<long> &B, int node, int n_procs);
-template Mat<long> parallel_matsq<long>(const Mat<long> &A, const Mat<long> &B, int node, int n_procs);
+template Mat<long> matrix_multiplication<long>(const Mat<long> &A, const Mat<long> &B, int node, int n_procs);
+template Mat<long> matrix_square<long>(const Mat<long> &A, int node, int n_procs);
 template void mat2array<long>(long **A, const Mat<long> &B);
 template void array2mat<long>(long **A, Mat<long> &B);
 template void mat2array_square<long>(long **A, const Mat<long> &B);
 template void array2mat_square<long>(long **A, Mat<long> &B);
 template void get_mpi_type<long>(MPI_Datatype *mpi_type);
-template void test_matmul<long>(int rows, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
-template void test_matsq<long>(int rows, int mode = 0, string mat_A = "", string mat_C = "");
-template void test_parallel_matmul<long>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
-template void test_parallel_matsq<long>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
+template void test_matrix_multiplication<long>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
+template void test_matrix_square<long>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
 
-template Mat<float> parallel_matmul<float>(const Mat<float> &A, const Mat<float> &B, int node, int n_procs);
-template Mat<float> parallel_matsq<float>(const Mat<float> &A, const Mat<float> &B, int node, int n_procs);
+template Mat<float> matrix_multiplication<float>(const Mat<float> &A, const Mat<float> &B, int node, int n_procs);
+template Mat<float> matrix_square<float>(const Mat<float> &A, int node, int n_procs);
 template void mat2array<float>(float **A, const Mat<float> &B);
 template void array2mat<float>(float **A, Mat<float> &B);
 template void mat2array_square<float>(float **A, const Mat<float> &B);
 template void array2mat_square<float>(float **A, Mat<float> &B);
 template void get_mpi_type<float>(MPI_Datatype *mpi_type);
-template void test_matmul<float>(int rows, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
-template void test_matsq<float>(int rows, int mode = 0, string mat_A = "", string mat_C = "");
-template void test_parallel_matmul<float>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
-template void test_parallel_matsq<float>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
+template void test_matrix_multiplication<float>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
+template void test_matrix_square<float>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
 
-template Mat<double> parallel_matmul<double>(const Mat<double> &A, const Mat<double> &B, int node, int n_procs);
-template Mat<double> parallel_matsq<double>(const Mat<double> &A, const Mat<double> &B, int node, int n_procs);
+template Mat<double> matrix_multiplication<double>(const Mat<double> &A, const Mat<double> &B, int node, int n_procs);
+template Mat<double> matrix_square<double>(const Mat<double> &A, int node, int n_procs);
 template void mat2array<double>(double **A, const Mat<double> &B);
 template void array2mat<double>(double **A, Mat<double> &B);
 template void mat2array_square<double>(double **A, const Mat<double> &B);
 template void array2mat_square<double>(double **A, Mat<double> &B);
 template void get_mpi_type<double>(MPI_Datatype *mpi_type);
-template void test_matmul<double>(int rows, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
-template void test_matsq<double>(int rows, int mode = 0, string mat_A = "", string mat_C = "");
-template void test_parallel_matmul<double>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
-template void test_parallel_matsq<double>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
+template void test_matrix_multiplication<double>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
+template void test_matrix_square<double>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
 
 template <class T>
 void mat2array(T **A, const Mat<T> &B) {
@@ -208,19 +198,26 @@ pair<vector<pair<int, int>>, vector<pair<int, int>>> configure_cpu_rectangular(i
 }
 
 template <class T>
-Mat<T> parallel_matmul(const Mat<T> &A, const Mat<T> &B, int node, int n_procs) {
+Mat<T> matrix_multiplication(const Mat<T> &A, const Mat<T> &B, int node, int n_procs) {
     shino::precise_stopwatch stopwatch;
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Status status;
     MPI_Datatype mpi_type;
     get_mpi_type<T>(&mpi_type);
     long rows = A.n_rows, cols = B.n_cols;
+
+    Mat<T> C(rows, cols, fill::zeros);
+
+    if (n_procs == 1) {
+        C = A * B;
+        return C;
+    }
+
     pair<vector<pair<int, int>>, vector<pair<int, int>>> ranges = configure_cpu_rectangular(rows, cols, n_procs);
     vector<pair<int, int>> row_idx = ranges.first;
     vector<pair<int, int>> col_idx = ranges.second;
     int n_procs_col = (int)col_idx.size();
     int n_procs_required = n_procs_col * n_procs_col;
-    Mat<T> C(rows, cols, fill::zeros);
 
     // int MPI_Type_contiguous(int count, MPI_Datatype oldtype, MPI_Datatype * newtype)
     long limit = INT_MAX;
@@ -325,7 +322,7 @@ Mat<T> parallel_matmul(const Mat<T> &A, const Mat<T> &B, int node, int n_procs) 
 }
 
 template <class T>
-Mat<T> parallel_matsq(const Mat<T> &A, const Mat<T> &B, int node, int n_procs) {
+Mat<T> matrix_square(const Mat<T> &A, int node, int n_procs) {
     shino::precise_stopwatch stopwatch;
 
     MPI_Datatype mpi_type;
@@ -333,12 +330,19 @@ Mat<T> parallel_matsq(const Mat<T> &A, const Mat<T> &B, int node, int n_procs) {
     MPI_Status status;
     get_mpi_type<T>(&mpi_type);
     long rows = A.n_rows;
-    long cols = B.n_cols;
+    long cols = A.n_cols;
     Mat<T> C(rows, cols, fill::zeros);
+
+    if (n_procs == 1) {
+        C = A * A;
+        return C;
+    }
+
     pair<vector<pair<int, int>>, vector<pair<int, int>>> ranges = configure_cpu_triangular(rows, cols, n_procs);
     vector<pair<int, int>> row_idx = ranges.first;
     vector<pair<int, int>> col_idx = ranges.second;
     int n_procs_required = (int)col_idx.size();
+
 
     if (node == 0) {
         long r1 = row_idx[node].first;
@@ -346,7 +350,7 @@ Mat<T> parallel_matsq(const Mat<T> &A, const Mat<T> &B, int node, int n_procs) {
         long c1 = col_idx[node].first;
         long c2 = col_idx[node].second;
         long size = (r2 - r1 + 1) * (c2 - c1 + 1);
-        C.submat(r1, c1, r2, c2) = A.rows(r1, r2) * B.cols(c1, c2);
+        C.submat(r1, c1, r2, c2) = A.rows(r1, r2) * A.cols(c1, c2);
         auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
         printf("CPU_required: %d: CPU %d: Receive C(%d, %d) from CPU %d (%d, %d): %ld-by-%ld, %ld", n_procs_required, node, 0, 0, 0, 0, 0, r2 - r1 + 1, c2 - c1 + 1, size);
         cout << " (" << elapsed_time << " ms)\n";
@@ -380,7 +384,7 @@ Mat<T> parallel_matsq(const Mat<T> &A, const Mat<T> &B, int node, int n_procs) {
         delete[] c;
 
         // cout << "Number of CPUs: " << n_procs << ", rows: " << rows;
-        // cout << ", wall clock time elapsed to perform parallel_matmul: " << elapsed_time << " ms" << endl;
+        // cout << ", wall clock time elapsed to perform matrix_multiplication: " << elapsed_time << " ms" << endl;
     }
 
     if (node > 0 && node < n_procs_required) {
@@ -390,7 +394,7 @@ Mat<T> parallel_matsq(const Mat<T> &A, const Mat<T> &B, int node, int n_procs) {
         long c2 = col_idx[node].second;
         // printf("%02d: r1: %ld, r2: %ld, c1: %ld, c2: %ld\n", node, r1, r2, c1, c2);
         Mat<T> TC;
-        TC = A.rows(r1, r2) * B.cols(c1, c2);
+        TC = A.rows(r1, r2) * A.cols(c1, c2);
         long size = (r2 - r1 + 1) * (c2 - c1 + 1);
         T *c = new T[size];
         mat2array(&c, TC);
@@ -411,7 +415,7 @@ Mat<T> parallel_matsq(const Mat<T> &A, const Mat<T> &B, int node, int n_procs) {
 }
 
 template <class T>
-void test_parallel_matmul(int rows, int *argc, char ***argv, int mode, string mat_A, string mat_B, string mat_C) {
+void test_matrix_multiplication(int rows, int *argc, char ***argv, int mode, string mat_A, string mat_B, string mat_C) {
     shino::precise_stopwatch stopwatch;
     int n_procs, node;
     MPI_Comm comm = MPI_COMM_WORLD;
@@ -445,14 +449,14 @@ void test_parallel_matmul(int rows, int *argc, char ***argv, int mode, string ma
         cout << "Performing matrix multiplication A * B..."
              << " (" << elapsed_time << " ms)" << endl;
     }
-    Mat<T> C = parallel_matmul<T>(A, B, node, n_procs);
+    Mat<T> C = matrix_multiplication<T>(A, B, node, n_procs);
     elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
     if (mode == 2) {
-        mat_C.replace(mat_C.end() - 4, mat_C.end(), "_parallel_matmul_" + to_string(node) + ".csv");
+        mat_C.replace(mat_C.end() - 4, mat_C.end(), "_matrix_multiplication_" + to_string(node) + ".csv");
         C.save(mat_C, csv_ascii);
     } else if (mode == 1) {
         if (node == 0) {
-            mat_C.replace(mat_C.end() - 4, mat_C.end(), "_parallel_matmul.csv");
+            mat_C.replace(mat_C.end() - 4, mat_C.end(), "_matrix_multiplication.csv");
             cout << "Writing to " << mat_C << " (" << elapsed_time << " ms)" << endl;
             C.save(mat_C, csv_ascii);
         }
@@ -468,7 +472,7 @@ void test_parallel_matmul(int rows, int *argc, char ***argv, int mode, string ma
 }
 
 template <class T>
-void test_parallel_matsq(int rows, int *argc, char ***argv, int mode, string mat_A, string mat_C) {
+void test_matrix_square(int rows, int *argc, char ***argv, int mode, string mat_A, string mat_C) {
     shino::precise_stopwatch stopwatch;
     int n_procs, node;
     MPI_Comm comm = MPI_COMM_WORLD;
@@ -498,11 +502,11 @@ void test_parallel_matsq(int rows, int *argc, char ***argv, int mode, string mat
         cout << "Performing matrix squaring A * A..."
              << " (" << elapsed_time << " ms)" << endl;
     }
-    Mat<T> C = parallel_matsq<T>(A, A, node, n_procs);
+    Mat<T> C = matrix_square<T>(A, node, n_procs);
     elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
     if (node == 0) {
         if (mode == 1) {
-            mat_C.replace(mat_C.end() - 4, mat_C.end(), "_parallel_matsq.csv");
+            mat_C.replace(mat_C.end() - 4, mat_C.end(), "_matrix_square.csv");
             cout << "Writing to " << mat_C << " (" << elapsed_time << " ms)" << endl;
             C.save(mat_C, csv_ascii);
         }
@@ -514,75 +518,3 @@ void test_parallel_matsq(int rows, int *argc, char ***argv, int mode, string mat
     MPI_Finalize();
 }
 
-template <class T>
-void test_matmul(int rows, int mode, string mat_A, string mat_B, string mat_C) {
-    shino::precise_stopwatch stopwatch;
-    Mat<T> A;
-    Mat<T> B;
-
-    cout << "-----------------------------------" << endl;
-    cout << "Number of CPUs: 1" << endl;
-    cout << "Loading/generating A and B..." << endl;
-    if (mat_A.size() > 0) {
-        cout << "Reading from " << mat_A << endl;
-        cout << "Reading from " << mat_B << endl;
-    }
-    // load/generate test data A, B
-    if (mode == 1) {
-        A.load(mat_A, csv_ascii);
-        B.load(mat_B, csv_ascii);
-    } else {
-        A.randn(rows, rows);
-        B.randn(rows, rows);
-    }
-    auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
-    cout << "Performing matrix multiplication A * B..."
-         << " (" << elapsed_time << " ms)" << endl;
-    // perform matrix-matrix multiplication
-    Mat<T> C = A * B;
-    elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
-    if (mode == 1) {
-        mat_C.replace(mat_C.end() - 4, mat_C.end(), "_matmul.csv");
-        cout << "Writing to " << mat_C << " (" << elapsed_time << " ms)" << endl;
-        C.save(mat_C, csv_ascii);
-    }
-    elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
-    cout << "Number of CPUs: 1, rows: " << C.n_rows;
-    cout << ", total wall clock time elapsed: " << elapsed_time << " ms" << endl;
-    cout << "-----------------------------------" << endl;
-}
-
-template <class T>
-void test_matsq(int rows, int mode, string mat_A, string mat_C) {
-    shino::precise_stopwatch stopwatch;
-    Mat<T> A;
-
-    cout << "-----------------------------------" << endl;
-    cout << "Number of CPUs: 1" << endl;
-    cout << "Loading/generating A..." << endl;
-    if (mat_A.size() > 0) {
-        cout << "Reading from " << mat_A << endl;
-    }
-    // load/generate test data A, B
-    if (mode == 1) {
-        A.load(mat_A, csv_ascii);
-    } else {
-        A.randn(rows, rows);
-    }
-    auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
-    cout << "Performing matrix squaring A * A..."
-         << " (" << elapsed_time << " ms)" << endl;
-    // perform matrix-matrix multiplication
-    Mat<T> C = A * A;
-    elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
-    if (mode == 1) {
-        mat_C.replace(mat_C.end() - 4, mat_C.end(), "_matsq.csv");
-        // cout << "Writing to " << mat_C << endl;
-        cout << "Writing to " << mat_C << " (" << elapsed_time << " ms)" << endl;
-        C.save(mat_C, csv_ascii);
-    }
-    elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
-    cout << "Number of CPUs: 1, rows: " << C.n_rows;
-    cout << ", total wall clock time elapsed: " << elapsed_time << " ms" << endl;
-    cout << "-----------------------------------" << endl;
-}
