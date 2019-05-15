@@ -7,47 +7,67 @@
 template void build_adjacency_matrix<short>(string input_file, string output_file, long rows = 0);
 template void find_components<short>(string adj_file, string outlier_file = "");
 template vector<pair<int, vector<int>>> bfs<short>(Mat<short>& A);
-template void build_distance_matrix<short>(string adj_file, string dis_file, int *argc, char ***argv);
+template void build_distance_matrix<short>(string adj_file, string dis_file, int node, int n_procs, bool non_recursive = true);
 template Mat<short> APD_recursive<short>(const Mat<short> &A, int rank, int n_procs);
 template Mat<short> APD<short>(const Mat<short> &A, int rank, int n_procs);
-template void test_APD_recursive<short>(string mat_file, int mode, int *argc, char ***argv);
-template void test_APD<short>(string mat_file, int mode, int *argc, char ***argv);
+template Mat<short> BPWM<short>(const Mat<short> &A, const Mat<short> &B, int node, int n_procs);
+template Mat<short> compute_successor_matrix<short>(const Mat<short> &A, const Mat<short> &D, int node, int n_procs);
+template void build_successor_matrix<short>(string adj_file, string dis_file, int node, int n_procs);
+template void APSP<short>(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
+template void test_APD_recursive<short>(string mat_file, int mode, int node, int n_procs);
+template void test_APD<short>(string mat_file, int mode, int node, int n_procs);
 
 template void build_adjacency_matrix<int>(string input_file, string output_file, long rows = 0);
 template void find_components<int>(string adj_file, string outlier_file = "");
 template vector<pair<int, vector<int>>> bfs<int>(Mat<int>& A);
-template void build_distance_matrix<int>(string adj_file, string dis_file, int *argc, char ***argv);
+template void build_distance_matrix<int>(string adj_file, string dis_file, int node, int n_procs, bool non_recursive = true);
 template Mat<int> APD_recursive<int>(const Mat<int> &A, int rank, int n_procs);
 template Mat<int> APD<int>(const Mat<int> &A, int rank, int n_procs);
-template void test_APD_recursive<int>(string mat_file, int mode, int *argc, char ***argv);
-template void test_APD<int>(string mat_file, int mode, int *argc, char ***argv);
+template Mat<int> BPWM<int>(const Mat<int> &A, const Mat<int> &B, int node, int n_procs);
+template Mat<int> compute_successor_matrix<int>(const Mat<int> &A, const Mat<int> &D, int node, int n_procs);
+template void build_successor_matrix<int>(string adj_file, string dis_file, int node, int n_procs);
+template void APSP<int>(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
+template void test_APD_recursive<int>(string mat_file, int mode, int node, int n_procs);
+template void test_APD<int>(string mat_file, int mode, int node, int n_procs);
 
 template void build_adjacency_matrix<long>(string input_file, string output_file, long rows = 0);
 template void find_components<long>(string adj_file, string outlier_file = "");
 template vector<pair<int, vector<int>>> bfs<long>(Mat<long>& A);
-template void build_distance_matrix<long>(string adj_file, string dis_file, int *argc, char ***argv);
+template void build_distance_matrix<long>(string adj_file, string dis_file, int node, int n_procs, bool non_recursive = true);
 template Mat<long> APD_recursive<long>(const Mat<long> &A, int rank, int n_procs);
 template Mat<long> APD<long>(const Mat<long> &A, int rank, int n_procs);
-template void test_APD_recursive<long>(string mat_file, int mode, int *argc, char ***argv);
-template void test_APD<long>(string mat_file, int mode, int *argc, char ***argv);
+template Mat<long> BPWM<long>(const Mat<long> &A, const Mat<long> &B, int node, int n_procs);
+template Mat<long> compute_successor_matrix<long>(const Mat<long> &A, const Mat<long> &D, int node, int n_procs);
+template void build_successor_matrix<long>(string adj_file, string dis_file, int node, int n_procs);
+template void APSP<long>(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
+template void test_APD_recursive<long>(string mat_file, int mode, int node, int n_procs);
+template void test_APD<long>(string mat_file, int mode, int node, int n_procs);
 
 template void build_adjacency_matrix<float>(string input_file, string output_file, long rows = 0);
 template void find_components<float>(string adj_file, string outlier_file = "");
 template vector<pair<int, vector<int>>> bfs<float>(Mat<float>& A);
-template void build_distance_matrix<float>(string adj_file, string dis_file, int *argc, char ***argv);
+template void build_distance_matrix<float>(string adj_file, string dis_file, int node, int n_procs, bool non_recursive = true);
 template Mat<float> APD_recursive<float>(const Mat<float> &A, int rank, int n_procs);
 template Mat<float> APD<float>(const Mat<float> &A, int rank, int n_procs);
-template void test_APD_recursive<float>(string mat_file, int mode, int *argc, char ***argv);
-template void test_APD<float>(string mat_file, int mode, int *argc, char ***argv);
+template Mat<float> BPWM<float>(const Mat<float> &A, const Mat<float> &B, int node, int n_procs);
+template Mat<float> compute_successor_matrix<float>(const Mat<float> &A, const Mat<float> &D, int node, int n_procs);
+template void build_successor_matrix<float>(string adj_file, string dis_file, int node, int n_procs);
+template void APSP<float>(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
+template void test_APD_recursive<float>(string mat_file, int mode, int node, int n_procs);
+template void test_APD<float>(string mat_file, int mode, int node, int n_procs);
 
 template void build_adjacency_matrix<double>(string input_file, string output_file, long rows = 0);
 template void find_components<double>(string adj_file, string outlier_file = "");
 template vector<pair<int, vector<int>>> bfs<double>(Mat<double>& A);
-template void build_distance_matrix<double>(string adj_file, string dis_file, int *argc, char ***argv);
+template void build_distance_matrix<double>(string adj_file, string dis_file, int node, int n_procs, bool non_recursive = true);
 template Mat<double> APD_recursive<double>(const Mat<double> &A, int rank, int n_procs);
 template Mat<double> APD<double>(const Mat<double> &A, int rank, int n_procs);
-template void test_APD_recursive<double>(string mat_file, int mode, int *argc, char ***argv);
-template void test_APD<double>(string mat_file, int mode, int *argc, char ***argv);
+template Mat<double> BPWM<double>(const Mat<double> &A, const Mat<double> &B, int node, int n_procs);
+template Mat<double> compute_successor_matrix<double>(const Mat<double> &A, const Mat<double> &D, int node, int n_procs);
+template void build_successor_matrix<double>(string adj_file, string dis_file, int node, int n_procs);
+template void APSP<double>(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
+template void test_APD_recursive<double>(string mat_file, int mode, int node, int n_procs);
+template void test_APD<double>(string mat_file, int mode, int node, int n_procs);
 
 template <class T>
 void build_adjacency_matrix(string ellipse_file, string adj_file, long rows) {
@@ -358,19 +378,9 @@ Mat<T> APD(const Mat<T> &AA, int node, int n_procs) {
 }
 
 template <class T>
-void build_distance_matrix(string adj_file, string dis_file, int *argc, char ***argv) {
+void build_distance_matrix(string adj_file, string dis_file, int node, int n_procs, bool non_recursive) {
     shino::precise_stopwatch stopwatch;
-    int n_procs, node;
-    MPI_Comm comm = MPI_COMM_WORLD;
-
-    MPI_Init(argc, argv);
-    MPI_Comm_size(comm, &n_procs);
-    MPI_Comm_rank(comm, &node);
-
     auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
-    if (node == 0) {
-        printf("CPU %d: MPI initialized (%u ms)\n", node, elapsed_time);
-    }
 
     Mat<T> A;
     Mat<long unsigned> id_mat;
@@ -420,11 +430,14 @@ void build_distance_matrix(string adj_file, string dis_file, int *argc, char ***
             printf("CPU %d: Applying APD to block matrix %d (%d-by-%d) (%u ms)\n", node, i, r2 - r1 + 1, c2 - c1 + 1, elapsed_time);
         }
 
-        //Mat<T> D = APD_recursive<T>(A.submat(r1, c1, r2, c2), node, n_procs);
-        Mat<T> D = APD<T>(A.submat(r1, c1, r2, c2), node, n_procs);
+        Mat<T> D;
+        if (non_recursive) {
+            D = APD<T>(A.submat(r1, c1, r2, c2), node, n_procs);
+        } else {
+            D = APD_recursive<T>(A.submat(r1, c1, r2, c2), node, n_procs);
+            dis_file.replace(dis_file.end() - 4, dis_file.end(), "_recursive.csv");
+        }
         if (node == 0) {
-            //elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
-            //printf("CPU %d: Assemble the distance matrix... (%u ms)\n", node, elapsed_time);
             for (int j = r1; j < r2 + 1; ++j) {
                 for (int k = c1; k < c2 + 1; ++k) {
                     AA(j, k) = (int)D(j - r1, k - c1);
@@ -434,26 +447,195 @@ void build_distance_matrix(string adj_file, string dis_file, int *argc, char ***
     }
 
     if (node == 0) {
-        //dis_file.replace(dis_file.end() - 4, dis_file.end(), "_parallel_recursive.csv");
-        dis_file.replace(dis_file.end() - 4, dis_file.end(), "_parallel_non_recursive.csv");
         elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
         printf("CPU %d: Writing to %s... (%u ms)\n", node, dis_file.c_str(), elapsed_time);
         AA.save(dis_file, csv_ascii);
 
         cout << "Wall clock time elapsed: " << elapsed_time << " ms" << endl;
     }
-    MPI_Finalize();
 }
 
 template <class T>
-void test_APD(string mat_file, int mode, int *argc, char ***argv) {
-    int node, n_procs;
-    MPI_Comm comm = MPI_COMM_WORLD;
+Mat<T> BPWM(const Mat<T> &A, const Mat<T> &B, int node, int n_procs) {
+    shino::precise_stopwatch stopwatch;
+    auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+    Mat<T> W = -1 * matrix_multiplication(A, B, node, n_procs);
+    long n = A.n_rows;
+    long l = ceil(log2(n));
+    long u = ceil(3.77 * log2(n));
+    for (int k = 0; k < l; ++k) {
+        long d = pow(2, k);
+        for (int m = 0; m < u; ++m) {
+            arma_rng::set_seed_random();
+            Col<int> K = randi<Col<int>>(d, distr_param(0, n - 1));
+            Mat<T> X(n, d, fill::zeros), Y(d, n, fill::zeros);
+            for (int i = 0; i < d; ++i) {
+                X.col(i) = (K(i) + 1) * A.col(K(i));
+                Y.row(i) = B.row(K(i));
+            }
+            if (node == 0) {
+                elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+                printf("CPU %d: Repeating randomized part... (k, d, m: %d, %ld, %d, %u ms)\n", node, k, d, m, elapsed_time);
+            }
+            Mat<T> C = matrix_multiplication(X, Y, node, n_procs);
+            for (int i = 0; i < n; ++i) {
+                for (int j = 0; j < n; ++j) {
+                    if (W(i, j) < 0 && C(i, j) > 0 && C(i, j) < n && A(i, (int)C(i, j) - 1) > 0 && B((int)C(i, j) - 1, j) > 0) {
+                        W(i, j) = C(i, j) - 1;
+                    }
+                }
+            }
+        }
+    }
 
-    MPI_Init(argc, argv);
-    MPI_Comm_rank(comm, &node);
-    MPI_Comm_size(comm, &n_procs);
+    if (node == 0) {
+        elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+        printf("CPU %d: Using brutal force to calculate the undecided entries in W... (%u ms)\n", node, elapsed_time);
+    }
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < n; ++j) {
+            if (W(i, j) < 0) {
+                for (int k = 0; k < n; ++k) {
+                    if (A(i, k) > 0 && B(k, j) > 0) {
+                        W(i, j) = k;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return W;
+}
 
+template <class T>
+Mat<T> compute_successor_matrix(const Mat<T> &A, const Mat<T> &D, int node, int n_procs) {
+    shino::precise_stopwatch stopwatch;
+    auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+    long rows = D.n_rows;
+    long cols = D.n_cols;
+
+    vector<Mat<T>> Wr;
+    Wr.reserve(3);
+    for (int r = 0; r < 3; ++r) {
+        Mat<T> Dr(rows, cols, fill::zeros);
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                if (((int)D(i, j) + 1) % 3 == r) {
+                    Dr(i, j) = 1;
+                }
+            }
+        }
+        if (node == 0) {
+            elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+            printf("CPU %d: r: %d, Constructing BPWM... (%u ms)\n", node, r, elapsed_time);
+        }
+        Wr.push_back(BPWM(A, Dr, node, n_procs));
+    }
+
+    if (node == 0) {
+        elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+        printf("CPU %d: Constructing successor matrix from witness matrix... (%u ms)\n", node, elapsed_time);
+    }
+    Mat<T> S(rows, cols, fill::zeros);
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            S(i, j) = Wr[(int)D(i, j) % 3](i, j);
+        }
+    }
+    return S;
+}
+
+template <class T>
+void build_successor_matrix(string adj_file, string dis_file, int node, int n_procs) {
+    shino::precise_stopwatch stopwatch;
+    auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+    Mat<T> A, D;
+    Mat<long unsigned> id_mat;
+    if (node == 0) {
+        elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+        printf("CPU %d: Reading from %s... (%u ms)\n", node, adj_file.c_str(), elapsed_time);
+    }
+    A.load(adj_file, csv_ascii);
+
+    if (node == 0) {
+        elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+        printf("CPU %d: Reading from %s... (%u ms)\n", node, dis_file.c_str(), elapsed_time);
+    }
+    D.load(dis_file, csv_ascii);
+
+    int rows = A.n_rows;
+    string adj_id_file = adj_file;
+    adj_id_file.replace(adj_id_file.end() - 4, adj_id_file.end(), "_id.csv");
+    if (node == 0) {
+        elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+        printf("CPU %d: Reading from %s... (%u ms)\n", node, adj_id_file.c_str(), elapsed_time);
+    }
+    id_mat.load(adj_id_file);
+
+    if (node == 0) {
+        elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+        printf("CPU %d: Unpacking id... (%u ms)\n", node, elapsed_time);
+    }
+    vector<pair<unsigned int, long unsigned>> id;
+    for (int i = 0; i < rows; i++) {
+        id.push_back({(long unsigned)id_mat(i, 0), (long unsigned)id_mat(i, 1)});
+    }
+
+    vector<pair<int, int>> idx;
+    for (int i = 0; i < rows;) {
+        int start = i;
+        while (i < rows && id[start].first == id[i].first) {
+            ++i;
+        }
+        int end = i - 1;
+        idx.push_back({start, end});
+    }
+
+    Mat<int> SS = -1 * ones<Mat<int>>(rows, rows);
+    for (int i = 0; i < (int)idx.size(); ++i) {
+        int r1 = idx[i].first;
+        int c1 = idx[i].first;
+        int r2 = idx[i].second;
+        int c2 = idx[i].second;
+
+        if (node == 0) {
+            elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+            printf("CPU %d: Computing the successor matrix of block matrix %d (%d-by-%d) (%u ms)\n", node, i, r2 - r1 + 1, c2 - c1 + 1, elapsed_time);
+        }
+
+        Mat<T> S = compute_successor_matrix<T>(A.submat(r1, c1, r2, c2), D.submat(r1, c1, r2, c2), node, n_procs);
+        if (node == 0) {
+            for (int j = r1; j < r2 + 1; ++j) {
+                for (int k = c1; k < c2 + 1; ++k) {
+                    SS(j, k) = (int)S(j - r1, k - c1);
+                }
+            }
+            elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+            printf("CPU %d: Finish computing the successor matrix of block matrix %d (%d-by-%d) (%u ms)\n", node, i, r2 - r1 + 1, c2 - c1 + 1, elapsed_time);
+        }
+    }
+
+    if (node == 0) {
+        string suc_file = dis_file;
+        suc_file.replace(suc_file.end() - 19, suc_file.end(), "successor_matrix.csv");
+        elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+        printf("CPU %d: Writing to %s... (%u ms)\n", node, suc_file.c_str(), elapsed_time);
+        SS.save(suc_file, csv_ascii);
+
+        cout << "Wall clock time elapsed: " << elapsed_time << " ms" << endl;
+    }
+}
+
+template <class T>
+void APSP(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs) {
+    build_adjacency_matrix<T>(ellipse_file, adj_file, rows);
+    find_components<T>(adj_file);
+    build_distance_matrix<T>(adj_ordered_file, dis_file, node, n_procs);
+    build_successor_matrix<T>(adj_ordered_file, dis_file, node, n_procs);
+}
+
+template <class T>
+void test_APD(string mat_file, int mode, int node, int n_procs) {
     Mat<T> A;
     A.load(mat_file, csv_ascii);
     Mat<T> D = APD<T>(A, node, n_procs);
@@ -464,18 +646,10 @@ void test_APD(string mat_file, int mode, int *argc, char ***argv) {
             D.save(mat_file.replace(mat_file.end() - 4, mat_file.end(), "_D_parallel.csv"), csv_ascii);
         }
     }
-    MPI_Finalize();
 }
 
 template <class T>
-void test_APD_recursive(string mat_file, int mode, int *argc, char ***argv) {
-    int node, n_procs;
-    MPI_Comm comm = MPI_COMM_WORLD;
-
-    MPI_Init(argc, argv);
-    MPI_Comm_rank(comm, &node);
-    MPI_Comm_size(comm, &n_procs);
-
+void test_APD_recursive(string mat_file, int mode, int node, int n_procs) {
     Mat<T> A;
     A.load(mat_file, csv_ascii);
     Mat<T> D = APD_recursive<T>(A, node, n_procs);
@@ -486,6 +660,5 @@ void test_APD_recursive(string mat_file, int mode, int *argc, char ***argv) {
             D.save(mat_file.replace(mat_file.end() - 4, mat_file.end(), "_D_parallel.csv"), csv_ascii);
         }
     }
-    MPI_Finalize();
 }
 

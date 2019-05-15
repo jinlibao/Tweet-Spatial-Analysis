@@ -63,38 +63,47 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    int node, n_procs;
+    MPI_Comm comm = MPI_COMM_WORLD;
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(comm, &node);
+    MPI_Comm_size(comm, &n_procs);
+
     if (job == 0) {
-        build_adjacency_matrix<float>(ellipse_file, adj_file, rows);
-        find_components<float>(adj_file);
-        build_distance_matrix<float>(adj_ordered_file, dis_file, &argc, &argv);
+        APSP<float>(rows, ellipse_file, adj_file, adj_ordered_file, dis_file, outlier_file, node, n_procs);
     }
     if (job == 1) {
-        build_distance_matrix<float>(adj_ordered_file, dis_file, &argc, &argv);
+        build_adjacency_matrix<float>(ellipse_file, adj_file, rows);
     }
     if (job == 2) {
-        test_APD_recursive<float>(mat_A, 1, &argc, &argv);
-    }
-    if (job == 3) {
-        test_APD<float>(mat_A, 1, &argc, &argv);
-    }
-    if (job == 4) {
-        test_matrix_multiplication<float>(rows, &argc, &argv);
-    }
-    if (job == 5) {
-        test_matrix_multiplication<float>(rows, &argc, &argv, 1, mat_A, mat_B, mat_C);
-    }
-    if (job == 6) {
-        test_matrix_square<float>(rows, &argc, &argv);
-    }
-    if (job == 7) {
-        test_matrix_square<float>(rows, &argc, &argv, 1, mat_A, mat_C);
-    }
-    if (job == 8) {
-        find_components<float>(adj_file);
-    }
-    if (job == 9) {
         find_components<float>(adj_file, outlier_file);
     }
+    if (job == 3) {
+        build_distance_matrix<float>(adj_ordered_file, dis_file, node, n_procs);
+    }
+    if (job == 4) {
+        build_successor_matrix<float>(adj_ordered_file, dis_file, node, n_procs);
+    }
+    if (job == 5) {
+        test_APD_recursive<float>(mat_A, 1, node, n_procs);
+    }
+    if (job == 6) {
+        test_APD<float>(mat_A, 1, node, n_procs);
+    }
+    if (job == 7) {
+        test_matrix_multiplication<float>(rows, node, n_procs);
+    }
+    if (job == 8) {
+        test_matrix_multiplication<float>(rows, node, n_procs, 1, mat_A, mat_B, mat_C);
+    }
+    if (job == 9) {
+        test_matrix_square<float>(rows, node, n_procs);
+    }
+    if (job == 10) {
+        test_matrix_square<float>(rows, node, n_procs, 1, mat_A, mat_C);
+    }
 
+    MPI_Finalize();
     return 0;
 }

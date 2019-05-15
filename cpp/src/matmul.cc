@@ -8,8 +8,8 @@ template void array2mat<short>(short **A, Mat<short> &B);
 template void mat2array_square<short>(short **A, const Mat<short> &B);
 template void array2mat_square<short>(short **A, Mat<short> &B);
 template void get_mpi_type<short>(MPI_Datatype *mpi_type);
-template void test_matrix_multiplication<short>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
-template void test_matrix_square<short>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
+template void test_matrix_multiplication<short>(int rows, int node, int n_procs, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
+template void test_matrix_square<short>(int rows, int node, int n_procs, int mode = 0, string mat_A = "", string mat_C = "");
 
 template Mat<int> matrix_multiplication<int>(const Mat<int> &A, const Mat<int> &B, int node, int n_procs);
 template Mat<int> matrix_square<int>(const Mat<int> &A, int node, int n_procs);
@@ -18,8 +18,8 @@ template void array2mat<int>(int **A, Mat<int> &B);
 template void mat2array_square<int>(int **A, const Mat<int> &B);
 template void array2mat_square<int>(int **A, Mat<int> &B);
 template void get_mpi_type<int>(MPI_Datatype *mpi_type);
-template void test_matrix_multiplication<int>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
-template void test_matrix_square<int>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
+template void test_matrix_multiplication<int>(int rows, int node, int n_procs, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
+template void test_matrix_square<int>(int rows, int node, int n_procs, int mode = 0, string mat_A = "", string mat_C = "");
 
 template Mat<long> matrix_multiplication<long>(const Mat<long> &A, const Mat<long> &B, int node, int n_procs);
 template Mat<long> matrix_square<long>(const Mat<long> &A, int node, int n_procs);
@@ -28,8 +28,8 @@ template void array2mat<long>(long **A, Mat<long> &B);
 template void mat2array_square<long>(long **A, const Mat<long> &B);
 template void array2mat_square<long>(long **A, Mat<long> &B);
 template void get_mpi_type<long>(MPI_Datatype *mpi_type);
-template void test_matrix_multiplication<long>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
-template void test_matrix_square<long>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
+template void test_matrix_multiplication<long>(int rows, int node, int n_procs, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
+template void test_matrix_square<long>(int rows, int node, int n_procs, int mode = 0, string mat_A = "", string mat_C = "");
 
 template Mat<float> matrix_multiplication<float>(const Mat<float> &A, const Mat<float> &B, int node, int n_procs);
 template Mat<float> matrix_square<float>(const Mat<float> &A, int node, int n_procs);
@@ -38,8 +38,8 @@ template void array2mat<float>(float **A, Mat<float> &B);
 template void mat2array_square<float>(float **A, const Mat<float> &B);
 template void array2mat_square<float>(float **A, Mat<float> &B);
 template void get_mpi_type<float>(MPI_Datatype *mpi_type);
-template void test_matrix_multiplication<float>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
-template void test_matrix_square<float>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
+template void test_matrix_multiplication<float>(int rows, int node, int n_procs, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
+template void test_matrix_square<float>(int rows, int node, int n_procs, int mode = 0, string mat_A = "", string mat_C = "");
 
 template Mat<double> matrix_multiplication<double>(const Mat<double> &A, const Mat<double> &B, int node, int n_procs);
 template Mat<double> matrix_square<double>(const Mat<double> &A, int node, int n_procs);
@@ -48,8 +48,8 @@ template void array2mat<double>(double **A, Mat<double> &B);
 template void mat2array_square<double>(double **A, const Mat<double> &B);
 template void array2mat_square<double>(double **A, Mat<double> &B);
 template void get_mpi_type<double>(MPI_Datatype *mpi_type);
-template void test_matrix_multiplication<double>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
-template void test_matrix_square<double>(int rows, int *argc, char ***argv, int mode = 0, string mat_A = "", string mat_C = "");
+template void test_matrix_multiplication<double>(int rows, int node, int n_procs, int mode = 0, string mat_A = "", string mat_B = "", string mat_C = "");
+template void test_matrix_square<double>(int rows, int node, int n_procs, int mode = 0, string mat_A = "", string mat_C = "");
 
 template <class T>
 void mat2array(T **A, const Mat<T> &B) {
@@ -123,6 +123,7 @@ void get_mpi_type(MPI_Datatype *mpi_type) {
 pair<vector<pair<int, int>>, vector<pair<int, int>>> configure_cpu_triangular(int rows, int cols, int n_procs) {
     // lower trigular (including diagonal) part of m x m grid processors (total m x (m + 1) / 2 processors)
     int n_procs_row = floor(sqrt(n_procs * 2 + 1.0 / 4) - 1.0 / 2);
+    n_procs_row = n_procs_row > rows ? rows : n_procs_row;
     int n_procs_col = n_procs_row;
     int n_procs_required = n_procs_row * (n_procs_row + 1) / 2;
     int rows_per_proc = floor((double)rows / n_procs_row);
@@ -164,6 +165,8 @@ pair<vector<pair<int, int>>, vector<pair<int, int>>> configure_cpu_rectangular(i
         n_procs_row = floor(sqrt(n_procs));
         n_procs_col = floor(sqrt(n_procs));
     }
+    n_procs_row = n_procs_row > rows ? rows : n_procs_row;
+    n_procs_col = n_procs_col > cols ? cols : n_procs_col;
     int rows_per_proc = floor((double)rows / n_procs_row);
     int cols_per_proc = floor((double)cols / n_procs_col);
     int t_row = rows - rows_per_proc * n_procs_row;
@@ -216,8 +219,9 @@ Mat<T> matrix_multiplication(const Mat<T> &A, const Mat<T> &B, int node, int n_p
     pair<vector<pair<int, int>>, vector<pair<int, int>>> ranges = configure_cpu_rectangular(rows, cols, n_procs);
     vector<pair<int, int>> row_idx = ranges.first;
     vector<pair<int, int>> col_idx = ranges.second;
+    int n_procs_row = (int)row_idx.size();
     int n_procs_col = (int)col_idx.size();
-    int n_procs_required = n_procs_col * n_procs_col;
+    int n_procs_required = n_procs_row * n_procs_col;
 
     // int MPI_Type_contiguous(int count, MPI_Datatype oldtype, MPI_Datatype * newtype)
     long limit = INT_MAX;
@@ -295,7 +299,7 @@ Mat<T> matrix_multiplication(const Mat<T> &A, const Mat<T> &B, int node, int n_p
             TC = A.rows(r1, r2) * B.cols(c1, c2);
         } catch (const std::exception &e) {
             cout << e.what() << endl;
-            printf("CPU %d: row_idx[%d]: r1 - r2: %ld - %ld, col_idx[%d] c1 - c2: %ld - %ld, A.n_rows: %ld, B.n_cols: %ld\n", node, 0, r1, r2, 0, c1, c2, rows, cols);
+            printf("CPU %d: row_idx[%d]: r1 - r2: %ld - %ld, col_idx[%d] c1 - c2: %ld - %ld, A.n_rows: %ld, B.n_cols: %ld\n", node, i, r1, r2, j, c1, c2, rows, cols);
         }
         T *c = new T[size];
         mat2array(&c, TC);
@@ -342,7 +346,6 @@ Mat<T> matrix_square(const Mat<T> &A, int node, int n_procs) {
     vector<pair<int, int>> row_idx = ranges.first;
     vector<pair<int, int>> col_idx = ranges.second;
     int n_procs_required = (int)col_idx.size();
-
 
     if (node == 0) {
         long r1 = row_idx[node].first;
@@ -415,14 +418,8 @@ Mat<T> matrix_square(const Mat<T> &A, int node, int n_procs) {
 }
 
 template <class T>
-void test_matrix_multiplication(int rows, int *argc, char ***argv, int mode, string mat_A, string mat_B, string mat_C) {
+void test_matrix_multiplication(int rows, int node, int n_procs, int mode, string mat_A, string mat_B, string mat_C) {
     shino::precise_stopwatch stopwatch;
-    int n_procs, node;
-    MPI_Comm comm = MPI_COMM_WORLD;
-
-    MPI_Init(argc, argv);
-    MPI_Comm_size(comm, &n_procs);
-    MPI_Comm_rank(comm, &node);
 
     if (node == 0) {
         cout << "-----------------------------------" << endl;
@@ -468,18 +465,11 @@ void test_matrix_multiplication(int rows, int *argc, char ***argv, int mode, str
         cout << ", total wall clock time elapsed: " << elapsed_time << " ms" << endl;
         cout << "-----------------------------------" << endl;
     }
-    MPI_Finalize();
 }
 
 template <class T>
-void test_matrix_square(int rows, int *argc, char ***argv, int mode, string mat_A, string mat_C) {
+void test_matrix_square(int rows, int node, int n_procs, int mode, string mat_A, string mat_C) {
     shino::precise_stopwatch stopwatch;
-    int n_procs, node;
-    MPI_Comm comm = MPI_COMM_WORLD;
-
-    MPI_Init(argc, argv);
-    MPI_Comm_size(comm, &n_procs);
-    MPI_Comm_rank(comm, &node);
 
     if (node == 0) {
         cout << "-----------------------------------" << endl;
@@ -515,6 +505,5 @@ void test_matrix_square(int rows, int *argc, char ***argv, int mode, string mat_
         cout << ", total wall clock time elapsed: " << elapsed_time << " ms" << endl;
         cout << "-----------------------------------" << endl;
     }
-    MPI_Finalize();
 }
 
