@@ -607,7 +607,7 @@ void build_successor_matrix(string adj_file, string dis_file, int node, int n_pr
         if (node == 0) {
             for (int j = r1; j < r2 + 1; ++j) {
                 for (int k = c1; k < c2 + 1; ++k) {
-                    SS(j, k) = (int)S(j - r1, k - c1);
+                    SS(j, k) = (int)S(j - r1, k - c1) + r1;
                 }
             }
             elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
@@ -624,6 +624,44 @@ void build_successor_matrix(string adj_file, string dis_file, int node, int n_pr
 
         cout << "Wall clock time elapsed: " << elapsed_time << " ms" << endl;
     }
+}
+
+void get_shortest_path_by_id(string suc_file, string id_file, long unsigned id_from, long unsigned id_to) {
+    Mat<int> S;
+    Mat<long unsigned> id_mat;
+    printf("Reading from %s...\n", suc_file.c_str());
+    S.load(suc_file, csv_ascii);
+    printf("Reading from %s...\n", id_file.c_str());
+    id_mat.load(id_file, csv_ascii);
+
+    unordered_map<long unsigned, int> id_map;
+    int n = id_mat.n_rows;
+    for (int i = 0; i < n; ++i) {
+        id_map[id_mat(i, 1)] = i;
+    }
+    int from = id_map[id_from];
+    int to = id_map[id_to];
+
+    printf("Get shortest path from %d (%lu) to %d (%lu)\n", from, id_from, to, id_to);
+
+    if (id_mat(from, 0) != id_mat(to, 0)) {
+        printf("No path exists from %lu to %lu\n", id_from, id_to);
+        return;
+    }
+
+    vector<int> index_path{from};
+    vector<long unsigned> id_path{id_from};
+
+    for (; from != to; from = S(from, to)) {
+        index_path.push_back(S(from, to));
+        id_path.push_back(id_mat(S(from, to), 1));
+    }
+
+    printf("%4d: %5d (%12lu)\n", 0, index_path[0], id_path[0]);
+    for (int i = 1; i < (int)index_path.size(); ++i) {
+        printf("%4d: %5d (%12lu)\n", i, index_path[i], id_path[i]);
+    }
+    printf("shortest path length: %d\n", (int)index_path.size() - 1);
 }
 
 template <class T>

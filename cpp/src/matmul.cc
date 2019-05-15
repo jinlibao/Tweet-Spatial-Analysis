@@ -203,6 +203,7 @@ pair<vector<pair<int, int>>, vector<pair<int, int>>> configure_cpu_rectangular(i
 template <class T>
 Mat<T> matrix_multiplication(const Mat<T> &A, const Mat<T> &B, int node, int n_procs) {
     shino::precise_stopwatch stopwatch;
+    auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
     MPI_Comm comm = MPI_COMM_WORLD;
     MPI_Status status;
     MPI_Datatype mpi_type;
@@ -248,9 +249,8 @@ Mat<T> matrix_multiplication(const Mat<T> &A, const Mat<T> &B, int node, int n_p
             cout << e.what() << endl;
             printf("CPU %d: row_idx[%d]: r1 - r2: %ld - %ld, col_idx[%d] c1 - c2: %ld - %ld, A.n_rows: %ld, B.n_cols: %ld\n", node, 0, r1, r2, 0, c1, c2, rows, cols);
         }
-        auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
-        printf("CPU %d: CPU used: %d, Receive C(%d, %d) from CPU %d (%d, %d): %ld-by-%ld, %ld", node, n_procs_required, 0, 0, 0, 0, 0, r2 - r1 + 1, c2 - c1 + 1, size);
-        cout << " (" << elapsed_time << " ms)\n";
+        elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+        printf("CPU %d: CPU used: %d, Receive C(%d, %d) from CPU %d (%d, %d): %ld-by-%ld, %ld (%u ms)\n", node, n_procs_required, 0, 0, 0, 0, 0, r2 - r1 + 1, c2 - c1 + 1, size, elapsed_time);
 
         for (int k = 1; k < n_procs_required; ++k) {
             T *c = new T[size];
@@ -267,8 +267,7 @@ Mat<T> matrix_multiplication(const Mat<T> &A, const Mat<T> &B, int node, int n_p
             delete[] c;
             C.submat(r1, c1, r2, c2) = C_sub;
             elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
-            printf("CPU %d: CPU used: %d, Receive C(%d, %d) from CPU %d (%d, %d): %ld-by-%ld, %ld", node, n_procs_required, i, j, i * n_procs_col + j, i, j, (long)C_sub.n_rows, (long)C_sub.n_cols, (long)(C_sub.n_rows * C_sub.n_cols));
-            cout << " (" << elapsed_time << " ms)\n";
+            printf("CPU %d: CPU used: %d, Receive C(%d, %d) from CPU %d (%d, %d): %ld-by-%ld, %ld (%u ms)\n", node, n_procs_required, i, j, i * n_procs_col + j, i, j, (long)C_sub.n_rows, (long)C_sub.n_cols, (long)(C_sub.n_rows * C_sub.n_cols), elapsed_time);
         }
 
         T *c;

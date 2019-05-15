@@ -10,11 +10,15 @@ int main(int argc, char *argv[]) {
     string adj_ordered_file("./data/tweets_median_working_adjacency_matrix_ordered.csv");
     string dis_file("./data/tweets_median_working_distance_matrix.csv");
     string outlier_file("");
+    string suc_file("./data/tweets_median_working_successor_matrix.csv");
+    string id_file("./data/tweets_median_working_adjacency_matrix_ordered_id.csv");
+
+    long unsigned id_from = 379005817LU, id_to = 134577044LU;
 
     int c, rows, cols, job;
     rows = cols = 0;
     job = 0;
-    while ((c = getopt(argc, argv, "A:B:C:O:e:a:o:d:r:c:t:j:")) != -1) {
+    while ((c = getopt(argc, argv, "A:B:C:O:e:a:o:d:r:c:j:s:i:f:t:")) != -1) {
         switch (c) {
         case 'A':
             if (optarg)
@@ -60,6 +64,22 @@ int main(int argc, char *argv[]) {
             if (optarg)
                 job = atoi(optarg);
             break;
+        case 's':
+            if (optarg)
+                suc_file = optarg;
+            break;
+        case 'i':
+            if (optarg)
+                id_file = optarg;
+            break;
+        case 'f':
+            if (optarg)
+                id_from = (long unsigned)atol(optarg);
+            break;
+        case 't':
+            if (optarg)
+                id_to = (long unsigned)atol(optarg);
+            break;
         }
     }
 
@@ -102,6 +122,9 @@ int main(int argc, char *argv[]) {
     }
     if (job == 10) {
         test_matrix_square<float>(rows, node, n_procs, 1, mat_A, mat_C);
+    }
+    if (job == 11) {
+        get_shortest_path_by_id(suc_file, id_file, id_from, id_to);
     }
 
     MPI_Finalize();

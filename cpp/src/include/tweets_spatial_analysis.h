@@ -22,5 +22,6 @@ template <class T> void build_successor_matrix(string adj_file, string dis_file,
 template <class T> void APSP(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
 template <class T> void test_APD_recursive(string mat_file, int mode, int node, int n_procs);
 template <class T> void test_APD(string mat_file, int mode, int node, int n_procs);
-
+void get_shortest_path_by_id(string suc_file, string id_file, long unsigned from, long unsigned to);
+ 
 #endif
