@@ -53,19 +53,23 @@ fi
 cd $PROJECT_DIR/cpp
 
 if [ -z $ELLIPSECSV_FILE ]; then
-    ELLIPSECSV_FILE=$PROJECT_DIR/data/tweets_median_working_filtered.csv
+    ELLIPSECSV_FILE=$DATA_DIR/tweets_median_working.csv
     ADJ_MATRIX_FILE=$DATA_DIR/tweets_median_working_adjacency_matrix.csv
-    ADJ_ORDER_FILE=$DATA_DIR/tweets_median_working_adjacency_matrix_ordered.csv
+     ADJ_ORDER_FILE=$DATA_DIR/tweets_median_working_adjacency_matrix_ordered.csv
     DIS_MATRIX_FILE=$DATA_DIR/tweets_median_working_distance_matrix.csv
-    OUTLIER_FILE=$DATA_DIR/outliers.csv
-    MAT_A_FILE=$DATA_DIR/matmul/mat_A.csv
-    MAT_B_FILE=$DATA_DIR/matmul/mat_B.csv
-    MAT_C_FILE=$DATA_DIR/matmul/mat_C.csv
+      ID_ORDER_FILE=$DATA_DIR/tweets_median_working_adjacency_matrix_ordered_id.csv
+    SUC_MATRIX_FILE=$DATA_DIR/tweets_median_working_successor_matrix.csv
+       OUTLIER_FILE=$DATA_DIR/tweets_median_working_outlier.csv
+         MAT_A_FILE=$DATA_DIR/matmul/mat_A.csv
+         MAT_B_FILE=$DATA_DIR/matmul/mat_B.csv
+         MAT_C_FILE=$DATA_DIR/matmul/mat_C.csv
+    FROM=2355845772
+    TO=1587067812
 fi
 
 if [ -z $ROWS ]; then
-    ROWS=2000
-    NCPU=4 # 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66, 78, 91, 105, 120, 136, 153, 171, 190, 210, 231, 253, 276, 300, 325, 351, 378, 406, 435, 465, 496, 528, 561, 595, 630, 666, 703, 741, 780, 820, 861, 903
+    ROWS=1000
+    NCPU=1 # 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66, 78, 91, 105, 120, 136, 153, 171, 190, 210, 231, 253, 276, 300, 325, 351, 378, 406, 435, 465, 496, 528, 561, 595, 630, 666, 703, 741, 780, 820, 861, 903
 fi
 
 JOB=0 # 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
