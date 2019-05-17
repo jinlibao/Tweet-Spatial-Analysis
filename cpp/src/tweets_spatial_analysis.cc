@@ -662,6 +662,12 @@ void get_shortest_path_by_id(string suc_file, string id_file, long unsigned id_f
         printf("%4d: %5d (%12lu)\n", i, index_path[i], id_path[i]);
     }
     printf("shortest path length: %d\n", (int)index_path.size() - 1);
+
+    printf("[%lu", id_path[0]);
+    for (int i = 1; i < (int)index_path.size(); ++i) {
+        printf(", %lu", id_path[i]);
+    }
+    printf("]\n");
 }
 
 template <class T>

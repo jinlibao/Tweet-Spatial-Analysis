@@ -17,7 +17,7 @@ public:
     double f(double c1, double c2, double c3, double d1, double d2, double d3, double t);
     double g(double c1, double c2, double c3, double d1, double d2, double d3, double t);
     double dist(double c1, double c2, double c3, double d1, double d2, double d3, double t);
-    pair<double, double> newton(double c1, double c2, double c3, double d1, double d2, double d3, double t, double tol, int maxIter);
+    double newton(double c1, double c2, double c3, double d1, double d2, double d3, double t, double tol, int maxIter);
 
 private:
     double x, y, a, b, p;

@@ -52,10 +52,14 @@ bool Ellipse::overlap(const Ellipse& e)
     double d2 = (b1 / b2) * cos(p1 - p2);
     double d3 = (-(x1 - x2) * sin(p2) + (y1 - y2) * cos(p2)) / b2;
 
-    pair<double, double> t = Ellipse::newton(c1, c2, c3, d1, d2, d3, 0.0, 1e-5, 100000);
-    double dist1 = Ellipse::dist(c1, c2, c3, d1, d2, d3, t.first);
-    double dist2 = Ellipse::dist(c1, c2, c3, d1, d2, d3, t.second);
-    if (min(dist1, dist2) <= 1.0) {
+    double t = Ellipse::newton(c1, c2, c3, d1, d2, d3, 0.0, 1e-10, 100);
+    double t_old = t;
+    for (int i = 1; Ellipse::dist(c1, c2, c3, d1, d2, d3, t) > 1 && i < 5; ++i) {
+        t = t_old - PI / 2 * i;
+        t = Ellipse::newton(c1, c2, c3, d1, d2, d3, t, 1e-10, 100);
+    }
+
+    if (Ellipse::dist(c1, c2, c3, d1, d2, d3, t) <= 1.0) {
         return true;
     } else {
         return false;
@@ -74,25 +78,17 @@ double Ellipse::g(double c1, double c2, double c3, double d1, double d2, double 
                 (d1 * cos(t) + d2 * sin(t) + d3) * (-d1 * cos(t) - d2 * sin(t)) + pow(-d1 * sin(t) + d2 * cos(t), 2));
 }
 
-pair<double, double> Ellipse::newton(double c1, double c2, double c3, double d1, double d2, double d3, double t, double tol, int maxIter)
+double Ellipse::newton(double c1, double c2, double c3, double d1, double d2, double d3, double t, double tol, int maxIter)
 {
-    double t1, t2;
-    int iter = 0;
-    while (fabs(Ellipse::f(c1, c2, c3, d1, d2, d3, t)) >= tol && iter < maxIter) {
+    for (int i = 0; fabs(Ellipse::f(c1, c2, c3, d1, d2, d3, t)) >= tol && i < maxIter; ++i) {
         if (Ellipse::g(c1, c2, c3, d1, d2, d3, t) == 0) {
             t = t - Ellipse::f(c1, c2, c3, d1, d2, d3, t) * 0.01;
         } else {
             t = t - Ellipse::f(c1, c2, c3, d1, d2, d3, t) / Ellipse::g(c1, c2, c3, d1, d2, d3, t);
         }
-        ++iter;
     }
-    t1 = (t / (2 * PI) - floor(t / (2 * PI))) * 2 * PI;
-    if (t1 > PI) {
-        t2 = t1 - PI;
-    } else {
-        t2 = t1 + PI;
-    }
-    return {t1, t2};
+    t = (t / (2 * PI) - floor(t / (2 * PI))) * 2 * PI;
+    return t;
 }
 
 double Ellipse::dist(double c1, double c2, double c3, double d1, double d2, double d3, double t)
