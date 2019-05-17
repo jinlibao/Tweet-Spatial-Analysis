@@ -1,5 +1,6 @@
 from pyproj import Proj, transform, Geod
 from math import *
+import math
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
@@ -21,17 +22,67 @@ def are_two_ellipses_overlapping(x1, y1, a1, b1, phi1, x2, y2, a2, b2, phi2):
     d1 =  (a1 / b2) * sin(phi1 - phi2)
     d2 =  (b1 / b2) * cos(phi1 - phi2)
     d3 = (-(x1 - x2) * sin(phi2) + (y1 - y2) * cos(phi2)) / b2
+
+    iter_n = 1
     pi = atan(1) * 4
-    t1, t2 = newton(f, g, c1, c2, c3, d1, d2, d3, 0)
-    # t1, t2 = bisection(f, c1, c2, c3, d1, d2, d3, 0, pi)
-    dist1 = dist(c1, c2, c3, d1, d2, d3, t1)
-    dist2 = dist(c1, c2, c3, d1, d2, d3, t2)
-    if min(dist1, dist2) <= 1:
+    t = newton(f, g, c1, c2, c3, d1, d2, d3, 0)
+    t_old = t
+    while dist(c1, c2, c3, d1, d2, d3, t) > 1 and iter_n < 4:
+        t = t_old - pi / 2 * iter_n
+        t = newton(f, g, c1, c2, c3, d1, d2, d3, t)
+        iter_n += 1
+
+    if dist(c1, c2, c3, d1, d2, d3, t) <= 1:
         return True
     else:
         return False
 
+def plot_shortest_path(data, filename='shortest_path.pdf'):
+    plt.style.use('ggplot')
+    plt.rc('font', family='serif')
+    plt.rc('text', usetex=True)
+
+    color = [
+        (209, 85, 62), (77, 136, 185), (150, 142, 208), (119, 119, 119),
+        (242, 195, 110), (151, 185, 85), (244, 184, 185), (157, 209, 199),
+        (255, 255, 188), (189, 186, 215), (235, 135, 119), (138, 176, 208),
+        (242, 183, 112), (188, 221, 120), (245, 207, 228),
+        (31, 119, 180), (255, 127, 14), (44, 160, 44), (214, 39, 40),
+        (148, 103, 189), (140, 86, 75), (227, 119, 194), (127, 127, 127),
+        (188, 189, 34), (23, 190, 207), (174, 199, 232), (255, 187, 120),
+        (152, 223, 138), (255, 152, 150), (197, 176, 213),
+        (196, 156, 148)
+    ]
+    # Scale the RGB values to the [0, 1] range
+    for i in range(len(color)):
+        r, g, b = color[i]
+        color[i] = (r / 255., g / 255., b / 255.)
+
+    pi = atan(1) * 4
+    t = np.linspace(0, 2 * pi, 100)
+    with PdfPages(filename) as pdf:
+        fig = plt.figure()
+        handles = []
+        for i, datum in enumerate(data):
+            x, y, a, b, phi, id_name = datum
+            ex = a * np.cos(t) * np.cos(phi) - b * np.sin(t) * np.sin(phi) + x
+            ey = a * np.cos(t) * np.sin(phi) + b * np.sin(t) * np.cos(phi) + y
+            # plt.plot(ex, ey)
+            # plt.annotate(str(int(id_name)), (x, y))
+            handle, = plt.plot(ex, ey, linewidth=0.5, label=str(int(id_name)), color=color[i])
+            handles.append(handle)
+        plt.axis('equal')
+        plt.xlabel('$x$')
+        plt.ylabel('$y$')
+        plt.legend(handles=handles, loc='best')
+        plt.title('Shortest path from {} to {}'.format(str(int(data[0][5])), str(int(data[-1][5]))))
+        plt.show(block=False)
+        pdf.savefig(fig)
+
 def plot_ellipses(x1, y1, a1, b1, phi1, x2, y2, a2, b2, phi2, filename="plot.pdf"):
+
+    if max(a1, b1) > max(a2, b2):
+        x1, y1, a1, b1, phi1, x2, y2, a2, b2, phi2 = x2, y2, a2, b2, phi2, x1, y1, a1, b1, phi1
 
     c1 =  (a1 / a2) * cos(phi1 - phi2)
     c2 = -(b1 / a2) * sin(phi1 - phi2)
@@ -54,6 +105,12 @@ def plot_ellipses(x1, y1, a1, b1, phi1, x2, y2, a2, b2, phi2, filename="plot.pdf
     ey = [[ey1, ey2], [ey3, ey4]]
     label = ['Before Inverse Transformation', 'After Inverse Transformation']
     style = [['r:', 'b:'], ['r-', 'b-']]
+
+    dv = dist(c1, c2, c3, d1, d2, d3, t)
+    fv = f(c1, c2, c3, d1, d2, d3, t)
+    gv = g(c1, c2, c3, d1, d2, d3, t)
+    d_list = [dv, fv, gv]
+    func_name = ['$\mathrm{dist}(t)$', '$\mathrm{dist}\'(t)$', '$\mathrm{dist}\'\'(t)$']
 
     plt.style.use('ggplot')
     plt.rc('text', usetex=True)
@@ -87,63 +144,45 @@ def plot_ellipses(x1, y1, a1, b1, phi1, x2, y2, a2, b2, phi2, filename="plot.pdf
         pdf.savefig(fig)
         plt.close()
 
-
-
+        fig = plt.figure()
+        handles = []
+        for i in range(len(d_list)):
+            handle, = plt.plot(t, d_list[i], label=func_name[i])
+            handles.append(handle)
+        plt.xlabel('$t$')
+        plt.ylabel('$y$')
+        plt.legend(handles=handles, loc='best')
+        plt.title('{}, {}, {} vs. $t$'.format(func_name[0], func_name[1], func_name[2]))
+        plt.show(block=False)
+        pdf.savefig(fig)
+        plt.close()
 
 def dist(c1, c2, c3, d1, d2, d3, t):
-    return (c1 * cos(t) + c2 * sin(t) + c3) ** 2 + \
-           (d1 * cos(t) + d2 * sin(t) + d3) ** 2
+    return (c1 * np.cos(t) + c2 * np.sin(t) + c3) ** 2 + \
+           (d1 * np.cos(t) + d2 * np.sin(t) + d3) ** 2
 
 def f(c1, c2, c3, d1, d2, d3, t):
-    return 2 * ((c1 * cos(t) + c2 * sin(t) + c3) * (-c1 * sin(t) + c2 * cos(t)) + \
-                (d1 * cos(t) + d2 * sin(t) + d3) * (-d1 * sin(t) + d2 * cos(t)))
+    return 2 * ((c1 * np.cos(t) + c2 * np.sin(t) + c3) * (-c1 * np.sin(t) + c2 * np.cos(t)) + \
+                (d1 * np.cos(t) + d2 * np.sin(t) + d3) * (-d1 * np.sin(t) + d2 * np.cos(t)))
 
 def g(c1, c2, c3, d1, d2, d3, t):
-    return 2 * ((c1 * cos(t) + c2 * sin(t) + c3) * (-c1 * cos(t) - c2 * sin(t)) + \
-                (-c1 * sin(t) + c2 * cos(t)) ** 2 + \
-                (d1 * cos(t) + d2 * sin(t) + d3) * (-d1 * cos(t) - d2 * sin(t)) + \
-                (-d1 * sin(t) + d2 * cos(t)) ** 2)
+    return 2 * ((c1 * np.cos(t) + c2 * np.sin(t) + c3) * (-c1 * np.cos(t) - c2 * np.sin(t)) + \
+                (-c1 * np.sin(t) + c2 * np.cos(t)) ** 2 + \
+                (d1 * np.cos(t) + d2 * np.sin(t) + d3) * (-d1 * np.cos(t) - d2 * np.sin(t)) + \
+                (-d1 * np.sin(t) + d2 * np.cos(t)) ** 2)
 
-def bisection(f, c1, c2, c3, d1, d2, d3, lo, hi, tol=1e-5, maxIter=100):
-    pi = atan(1) * 4
-    iter = 0
-    if fabs(f(c1, c2, c3, d1, d2, d3, lo)) < tol:
-        return (lo, lo + pi)
-    elif fabs(f(c1, c2, c3, d1, d2, d3, hi)) < tol:
-        return (hi, hi + pi)
-    mid = (lo + hi) / 2
-
-    while fabs(f(c1, c2, c3, d1, d2, d3, mid)) >= tol and iter < maxIter:
-        if f(c1, c2, c3, d1, d2, d3, lo) * f(c1, c2, c3, d1, d2, d3, mid) < 0:
-            hi = mid
-        else:
-            lo = mid
-        mid = (lo + hi) / 2
-        iter += 1
-
-    t1 = (mid / (2 * pi) - floor(mid / (2 * pi))) * 2 * pi
-    if t1 > pi:
-        t2 = t1 - pi
-    else:
-        t2 = t1 + pi
-    return (t1, t2)
-
-def newton(f, g, c1, c2, c3, d1, d2, d3, t0, tol=1e-5, maxIter=100000):
-    pi = atan(1) * 4
-    iter = 0
+def newton(f, g, c1, c2, c3, d1, d2, d3, t0, tol=1e-10, maxIter=100):
+    cur_iter = 0
     t = t0
-    while fabs(f(c1, c2, c3, d1, d2, d3, t)) >= tol and iter < maxIter:
+    while fabs(f(c1, c2, c3, d1, d2, d3, t)) >= tol and cur_iter < maxIter:
         if g(c1, c2, c3, d1, d2, d3, t) == 0:
             t = t - f(c1, c2, c3, d1, d2, d3, t) * 0.01
         else:
             t = t - f(c1, c2, c3, d1, d2, d3, t) / g(c1, c2, c3, d1, d2, d3, t)
-        iter += 1
-    t1 = (t / (2 * pi) - floor(t / (2 * pi))) * 2 * pi
-    if t1 > pi:
-        t2 = t1 - pi
-    else:
-        t2 = t1 + pi
-    return (t1, t2)
+        cur_iter += 1
+
+    t = (t / (2 * pi) - math.floor(t / (2 * pi))) * 2 * pi
+    return t
 
 # Point and ellipse (rotated) position test: algorithm
 # https://stackoverflow.com/questions/7946187/point-and-ellipse-rotated-position-test-algorithm
@@ -185,5 +224,4 @@ def calculate_distance_non_projected_havershine(lat1, lon1, lat2, lon2):
     c = 2 * asin(sqrt(a))
     r = 6372.8 # 6371
     return c * r
-
 
