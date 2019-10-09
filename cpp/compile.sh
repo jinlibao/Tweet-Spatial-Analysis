@@ -6,7 +6,7 @@
 # Distributed under terms of the MIT license.
 
 
-ARMADILLO_VER=9.400.3
+ARMADILLO_VER=9.800.1
 
 if [[ $OSTYPE == darwin* ]]     # MacBook Pro @ libaooutrage (macOS)
 then

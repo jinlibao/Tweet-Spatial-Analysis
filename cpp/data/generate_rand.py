@@ -5,13 +5,13 @@
 # Copyright © 2019 Libao Jin <jinlibao@outlook.com>
 #
 # Distributed under terms of the MIT license.
-
 """
 Generate random matrix
 """
 
 import numpy as np
 import pandas as pd
+
 
 def create_matrix(n):
     a = np.random.randint(0, 10, (n, n))
@@ -31,6 +31,7 @@ def create_matrix(n):
     print(A)
     print(B)
     print(C)
+
 
 if __name__ == '__main__':
     create_matrix(10)

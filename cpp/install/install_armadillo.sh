@@ -5,7 +5,7 @@
 #
 # Distributed under terms of the MIT license.
 
-ARMADILLO_VER=9.400.3
+ARMADILLO_VER=9.800.1
 ROOT=~/.armadillo
 LOC=armadillo-$ARMADILLO_VER
 DIR=$ROOT/$LOC

@@ -11,7 +11,7 @@
 #SBATCH --mail-user=ljin1@uwyo.edu
 #SBATCH --time=6-23:59:59
 
-ARMADILLO_VER=9.400.3
+ARMADILLO_VER=9.800.1
 
 if [[ $OSTYPE == darwin* ]]     # MacBook Pro @ libaooutrage (macOS)
 then
