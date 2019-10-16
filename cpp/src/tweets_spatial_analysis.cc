@@ -1,9 +1,10 @@
-#include "include/tweets_spatial_analysis.h"
 #include <cstdio>
 #include <set>
 #include <stack>
 #include <unordered_map>
+
 #include "include/stopwatch.h"
+#include "include/tweets_spatial_analysis.h"
 
 template void build_adjacency_matrix<short>(string input_file, string output_file, long rows = 0);
 template void find_components<short>(string adj_file, string outlier_file = "");
@@ -13,6 +14,7 @@ template Mat<short> APD_recursive<short>(const Mat<short> &A, int rank, int n_pr
 template Mat<short> APD<short>(const Mat<short> &A, int rank, int n_procs);
 template Mat<short> BPWM<short>(const Mat<short> &A, const Mat<short> &B, int node, int n_procs);
 template Mat<short> compute_successor_matrix<short>(const Mat<short> &A, const Mat<short> &D, int node, int n_procs);
+template Mat<short> compute_successor_matrix_saving_witness<short>(const Mat<short> &A, const Mat<short> &D, int node, int n_procs, int i, string dis_file);
 template void build_successor_matrix<short>(string adj_file, string dis_file, int node, int n_procs);
 template void APSP<short>(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
 template void test_APD_recursive<short>(string mat_file, int mode, int node, int n_procs);
@@ -26,6 +28,7 @@ template Mat<int> APD_recursive<int>(const Mat<int> &A, int rank, int n_procs);
 template Mat<int> APD<int>(const Mat<int> &A, int rank, int n_procs);
 template Mat<int> BPWM<int>(const Mat<int> &A, const Mat<int> &B, int node, int n_procs);
 template Mat<int> compute_successor_matrix<int>(const Mat<int> &A, const Mat<int> &D, int node, int n_procs);
+template Mat<int> compute_successor_matrix_saving_witness<int>(const Mat<int> &A, const Mat<int> &D, int node, int n_procs, int i, string dis_file);
 template void build_successor_matrix<int>(string adj_file, string dis_file, int node, int n_procs);
 template void APSP<int>(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
 template void test_APD_recursive<int>(string mat_file, int mode, int node, int n_procs);
@@ -39,6 +42,7 @@ template Mat<long> APD_recursive<long>(const Mat<long> &A, int rank, int n_procs
 template Mat<long> APD<long>(const Mat<long> &A, int rank, int n_procs);
 template Mat<long> BPWM<long>(const Mat<long> &A, const Mat<long> &B, int node, int n_procs);
 template Mat<long> compute_successor_matrix<long>(const Mat<long> &A, const Mat<long> &D, int node, int n_procs);
+template Mat<long> compute_successor_matrix_saving_witness<long>(const Mat<long> &A, const Mat<long> &D, int node, int n_procs, int i, string dis_file);
 template void build_successor_matrix<long>(string adj_file, string dis_file, int node, int n_procs);
 template void APSP<long>(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
 template void test_APD_recursive<long>(string mat_file, int mode, int node, int n_procs);
@@ -52,6 +56,7 @@ template Mat<float> APD_recursive<float>(const Mat<float> &A, int rank, int n_pr
 template Mat<float> APD<float>(const Mat<float> &A, int rank, int n_procs);
 template Mat<float> BPWM<float>(const Mat<float> &A, const Mat<float> &B, int node, int n_procs);
 template Mat<float> compute_successor_matrix<float>(const Mat<float> &A, const Mat<float> &D, int node, int n_procs);
+template Mat<float> compute_successor_matrix_saving_witness<float>(const Mat<float> &A, const Mat<float> &D, int node, int n_procs, int i, string dis_file);
 template void build_successor_matrix<float>(string adj_file, string dis_file, int node, int n_procs);
 template void APSP<float>(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
 template void test_APD_recursive<float>(string mat_file, int mode, int node, int n_procs);
@@ -65,6 +70,7 @@ template Mat<double> APD_recursive<double>(const Mat<double> &A, int rank, int n
 template Mat<double> APD<double>(const Mat<double> &A, int rank, int n_procs);
 template Mat<double> BPWM<double>(const Mat<double> &A, const Mat<double> &B, int node, int n_procs);
 template Mat<double> compute_successor_matrix<double>(const Mat<double> &A, const Mat<double> &D, int node, int n_procs);
+template Mat<double> compute_successor_matrix_saving_witness<double>(const Mat<double> &A, const Mat<double> &D, int node, int n_procs, int i, string dis_file);
 template void build_successor_matrix<double>(string adj_file, string dis_file, int node, int n_procs);
 template void APSP<double>(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
 template void test_APD_recursive<double>(string mat_file, int mode, int node, int n_procs);
@@ -119,10 +125,7 @@ void build_adjacency_matrix(string ellipse_file, string adj_file, long rows) {
   id_mat.col(0) = conv_to<Mat<long unsigned>>::from(sum(Adj, 1));
 
   // output
-  // char suffix[100] = "";
-  // sprintf(suffix, "_%ld.csv", rows);
-  // adj_file.replace(adj_file.end() - 4, adj_file.end(), suffix);
-  string adj_id_file = adj_file;
+  string adj_id_file(adj_file);
   adj_id_file.replace(adj_id_file.end() - 4, adj_id_file.end(), "_id.csv");
   id_mat.save(adj_id_file, csv_ascii);
   Adj.save(adj_file, csv_ascii);
@@ -180,7 +183,8 @@ void find_components(string adj_file, string outlier_file) {
   // adj_id_file_update.end(), "_update.csv"); id_mat.col(0) = conv_to<Mat<long
   // unsigned>>::from(sum(A, 1)); id_mat.save(adj_id_file_update, csv_ascii);
 
-  if (outlier_file.size() > 0) {
+  cout << outlier_file << endl;
+  if (outlier_file.size() > 5) {
     Col<long unsigned> outlier_id;
     outlier_id.load(outlier_file);
     unordered_map<long unsigned, int> id_map;
@@ -574,6 +578,56 @@ Mat<T> compute_successor_matrix(const Mat<T> &A, const Mat<T> &D, int node, int 
 }
 
 template <class T>
+Mat<T> compute_successor_matrix_saving_witness(const Mat<T> &A, const Mat<T> &D, int node, int n_procs, int i, string dis_file) {
+  shino::precise_stopwatch stopwatch;
+  auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+  long rows = D.n_rows;
+  long cols = D.n_cols;
+
+  vector<Mat<T>> Wr;
+  Wr.reserve(3);
+  for (int r = 0; r < 3; ++r) {
+    Mat<T> Dr(rows, cols, fill::zeros);
+    for (int i = 0; i < rows; ++i) {
+      for (int j = 0; j < cols; ++j) {
+        if (((int)D(i, j) + 1) % 3 == r) {
+          Dr(i, j) = 1;
+        }
+      }
+    }
+
+    Mat<T> W = BPWM(A, Dr, node, n_procs);
+    if (node == 0) {
+      elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+      printf("CPU %d: r: %d, Constructing BPWM... (%u ms)\n", node, r, elapsed_time);
+      if (rows > 80 || cols > 80) {
+        string suffix = "witness_matrix_" + to_string(i) + "_" + to_string(r) + ".csv";
+        string wit_file(dis_file);
+        wit_file.replace(wit_file.end() - 19, wit_file.end(), suffix);
+        W.save(wit_file, csv_ascii);
+        printf("CPU %d: r: %d, Saving BPWM (%d, %d) to %s (%u ms)\n", node, r, i, r, wit_file.c_str(), elapsed_time);
+      }
+    }
+    Wr.push_back(W);
+  }
+
+  if (node == 0) {
+    elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+    printf(
+        "CPU %d: Constructing successor matrix from witness matrix... (%u "
+        "ms)\n",
+        node, elapsed_time);
+  }
+  Mat<T> S(rows, cols, fill::zeros);
+  for (int i = 0; i < rows; ++i) {
+    for (int j = 0; j < cols; ++j) {
+      S(i, j) = Wr[(int)D(i, j) % 3](i, j);
+    }
+  }
+  return S;
+}
+
+template <class T>
 void build_successor_matrix(string adj_file, string dis_file, int node, int n_procs) {
   shino::precise_stopwatch stopwatch;
   auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
@@ -634,7 +688,7 @@ void build_successor_matrix(string adj_file, string dis_file, int node, int n_pr
           node, i, r2 - r1 + 1, c2 - c1 + 1, elapsed_time);
     }
 
-    Mat<T> S = compute_successor_matrix<T>(A.submat(r1, c1, r2, c2), D.submat(r1, c1, r2, c2), node, n_procs);
+    Mat<T> S = compute_successor_matrix_saving_witness<T>(A.submat(r1, c1, r2, c2), D.submat(r1, c1, r2, c2), node, n_procs, i, dis_file);
     if (node == 0) {
       for (int j = r1; j < r2 + 1; ++j) {
         for (int k = c1; k < c2 + 1; ++k) {
