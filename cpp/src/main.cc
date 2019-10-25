@@ -6,20 +6,14 @@ int main(int argc, char *argv[]) {
   string mat_A("./data/data_100_A.csv");
   string mat_B("./data/data_100_B.csv");
   string mat_C("./data/data_100_C.csv");
-  string ellipse_file("../data/tweets_median_working_filtered.csv");
-  string adj_file("./data/tweets_median_working_adjacency_matrix.csv");
-  string adj_ordered_file("./data/tweets_median_working_adjacency_matrix_ordered.csv");
-  string dis_file("./data/tweets_median_working_distance_matrix.csv");
-  string outlier_file("");
-  string suc_file("./data/tweets_median_working_successor_matrix.csv");
-  string id_file("./data/tweets_median_working_adjacency_matrix_ordered_id.csv");
+  string ellipse_file("../data/tweets_median_working.csv");
 
   long unsigned id_from = 379005817LU, id_to = 134577044LU;
 
   int c, rows, cols, job;
   rows = cols = 0;
   job = 0;
-  while ((c = getopt(argc, argv, "A:B:C:O:e:a:o:d:r:c:j:s:i:f:t:")) != -1) {
+  while ((c = getopt(argc, argv, "A:B:C:e:r:c:j:f:t:")) != -1) {
     switch (c) {
       case 'A':
         if (optarg) mat_A = optarg;
@@ -30,20 +24,8 @@ int main(int argc, char *argv[]) {
       case 'C':
         if (optarg) mat_C = optarg;
         break;
-      case 'O':
-        if (optarg) outlier_file = optarg;
-        break;
       case 'e':
         if (optarg) ellipse_file = optarg;
-        break;
-      case 'a':
-        if (optarg) adj_file = optarg;
-        break;
-      case 'o':
-        if (optarg) adj_ordered_file = optarg;
-        break;
-      case 'd':
-        if (optarg) dis_file = optarg;
         break;
       case 'r':
         if (optarg) rows = atoi(optarg);
@@ -54,12 +36,6 @@ int main(int argc, char *argv[]) {
       case 'j':
         if (optarg) job = atoi(optarg);
         break;
-      case 's':
-        if (optarg) suc_file = optarg;
-        break;
-      case 'i':
-        if (optarg) id_file = optarg;
-        break;
       case 'f':
         if (optarg) id_from = (long unsigned)atol(optarg);
         break;
@@ -68,6 +44,20 @@ int main(int argc, char *argv[]) {
         break;
     }
   }
+
+  string adj_file(ellipse_file);
+  adj_file.replace(adj_file.end() - 4, adj_file.end(), "_adjacency_matrix.csv");
+  string adj_ordered_file(adj_file);
+  adj_ordered_file.replace(adj_ordered_file.end() - 4, adj_ordered_file.end(), "_ordered.csv");
+  string dis_file(ellipse_file);
+  dis_file.replace(dis_file.end() - 4, dis_file.end(), "_distance_matrix.csv");
+  string outlier_file("NONE");
+  // string outlier_file(ellipse_file);
+  // outlier_file.replace(outlier_file.end() - 4, outlier_file.end(), "_outlier.csv");
+  string suc_file(ellipse_file);
+  suc_file.replace(suc_file.end() - 4, suc_file.end(), "_successor_matrix.csv");
+  string id_file(adj_ordered_file);
+  id_file.replace(id_file.end() - 4, id_file.end(), "_ordered.csv");
 
   int node, n_procs;
   MPI_Comm comm = MPI_COMM_WORLD;

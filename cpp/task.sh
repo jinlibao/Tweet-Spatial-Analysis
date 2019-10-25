@@ -2,14 +2,11 @@
 
 #SBATCH --job-name APSP
 #SBATCH --account=dpicls
-#SBATCH --output=/gscratch/ljin1/data/twitter/log/cpp_total/APSP.%j.out
-#SBATCH --error=/gscratch/ljin1/data/twitter/log/cpp_total/APSP.%j.err
+#SBATCH --output=/gscratch/ljin1/data/twitter/log/10-24-10000/APSP.%j.out
+#SBATCH --error=/gscratch/ljin1/data/twitter/log/10-24-10000/APSP.%j.err
 #SBATCH --mail-type=END
-# #SBATCH --output=/gscratch/ljin1/data/twitter/log/cpp_test/APSP.%j.out
-# #SBATCH --error=/gscratch/ljin1/data/twitter/log/cpp_test/APSP.%j.err
-# #SBATCH --mail-type=NONE
 #SBATCH --mail-user=ljin1@uwyo.edu
-#SBATCH --time=6-23:59:59
+#SBATCH --time=7-00:00:00
 
 ARMADILLO_VER=9.800.1
 
@@ -32,7 +29,7 @@ then
     module use ~/.modulefiles
     module load arcc/0.1 slurm/18.08 swset/2018.05 gcc/7.3.0 openmpi/3.1.0 intel-mkl/2018.2.199 armadillo/$ARMADILLO_VER-mkl
     PROJECT_DIR=/home/ljin1/repos/Tweet-Spatial-Analysis
-    DATA_DIR=/gscratch/ljin1/data/twitter/csv
+    DATA_DIR=/gscratch/ljin1/data/twitter/csv/output/10-24-10000
     export INTEL_ROOT=/apps/u/gcc/7.3.0/intel-mkl/2018.2.199-isxsqpg
     export MKL_ROOT=$INTEL_ROOT/compilers_and_libraries_2018.2.199/linux
     export MKL_INCLUDE=$MKL_ROOT/mkl/include
@@ -53,19 +50,12 @@ fi
 cd $PROJECT_DIR/cpp
 
 if [ -z $ELLIPSECSV_FILE ]; then
-    ELLIPSECSV_FILE=$DATA_DIR/tweets_median_working.csv
-    ADJ_MATRIX_FILE=$DATA_DIR/tweets_median_working_adjacency_matrix.csv
-     ADJ_ORDER_FILE=$DATA_DIR/tweets_median_working_adjacency_matrix_ordered.csv
-    DIS_MATRIX_FILE=$DATA_DIR/tweets_median_working_distance_matrix.csv
-    SUC_MATRIX_FILE=$DATA_DIR/tweets_median_working_successor_matrix.csv
-      ID_ORDER_FILE=$DATA_DIR/tweets_median_working_adjacency_matrix_ordered_id.csv
-       OUTLIER_FILE=None
-       OUTLIER_FILE=$DATA_DIR/tweets_median_working_outlier.csv
+    ELLIPSECSV_FILE=$DATA_DIR/tweets_median_working_10000_1.00.csv
          MAT_A_FILE=$DATA_DIR/matmul/mat_A.csv
          MAT_B_FILE=$DATA_DIR/matmul/mat_B.csv
          MAT_C_FILE=$DATA_DIR/matmul/mat_C.csv
                FROM=2147825826
-                TO=414498534
+                 TO=414498534
 fi
 
 if [ -z $ROWS ]; then
@@ -73,6 +63,6 @@ if [ -z $ROWS ]; then
     NCPU=1 # 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, 66, 78, 91, 105, 120, 136, 153, 171, 190, 210, 231, 253, 276, 300, 325, 351, 378, 406, 435, 465, 496, 528, 561, 595, 630, 666, 703, 741, 780, 820, 861, 903
 fi
 
-JOB=2 # 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
+JOB=0 # 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
 
-mpirun -n $NCPU bin/main -j $JOB -r $ROWS -c $ROWS -e $ELLIPSECSV_FILE -a $ADJ_MATRIX_FILE -o $ADJ_ORDER_FILE -d $DIS_MATRIX_FILE -A $MAT_A_FILE -B $MAT_B_FILE -C $MAT_C_FILE -O $OUTLIER_FILE -s $SUC_MATRIX_FILE -i $ID_ORDER_FILE -f $FROM -t $TO
+mpirun -n $NCPU bin/main -j $JOB -r $ROWS -c $ROWS -e $ELLIPSECSV_FILE -A $MAT_A_FILE -B $MAT_B_FILE -C $MAT_C_FILE -f $FROM -t $TO

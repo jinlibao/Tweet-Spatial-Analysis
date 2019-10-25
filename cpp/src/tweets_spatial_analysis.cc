@@ -600,7 +600,7 @@ Mat<T> compute_successor_matrix_saving_witness(const Mat<T> &A, const Mat<T> &D,
     if (node == 0) {
       elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
       printf("CPU %d: r: %d, Constructing BPWM... (%u ms)\n", node, r, elapsed_time);
-      if (rows > 80 || cols > 80) {
+      if (rows > 1000 || cols > 1000) {
         string suffix = "witness_matrix_" + to_string(i) + "_" + to_string(r) + ".csv";
         string wit_file(dis_file);
         wit_file.replace(wit_file.end() - 19, wit_file.end(), suffix);

@@ -90,7 +90,7 @@ then
 elif [[ $OSTYPE == linux-gnu ]] # Teton @ UWyo ARCC (Linux)
 then
     PROJECT_DIR=/home/ljin1/repos/Tweet-Spatial-Analysis
-    DATA_DIR=/gscratch/ljin1/data/twitter/csv
+    DATA_DIR=/gscratch/ljin1/data/twitter/csv/output/10-24-10000
 fi
 
 # Set up output directory
@@ -98,50 +98,35 @@ if [ ! -d $DATA_DIR ]; then
     mkdir -p $DATA_DIR
 fi
 
-k=5
-ROW[0]=2000
+k=0
+ROW[0]=0
 ROW[1]=4000
-ROW[2]=8000
+ROW[2]=10000
 ROW[3]=16000
 ROW[4]=57909
 
-ELLIPSECSV[0]=$DATA_DIR/tweets_mean_all_filtered.csv
-ELLIPSECSV[1]=$DATA_DIR/tweets_median_working_filtered.csv
-ELLIPSECSV[2]=$DATA_DIR/tweets_median_non_working_filtered.csv
-ADJ_MATRIX[0]=$DATA_DIR/tweets_mean_all_adjacency_matrix.csv
-ADJ_MATRIX[1]=$DATA_DIR/tweets_median_working_adjacency_matrix.csv
-ADJ_MATRIX[2]=$DATA_DIR/tweets_median_non_working_adjacency_matrix.csv
-DIS_MATRIX[0]=$DATA_DIR/tweets_mean_all_distance_matrix.csv
-DIS_MATRIX[1]=$DATA_DIR/tweets_median_working_distance_matrix.csv
-DIS_MATRIX[2]=$DATA_DIR/tweets_median_non_working_distance_matrix.csv
-SUC_MATRIX[0]=$DATA_DIR/tweets_mean_all_successor_matrix.csv
-SUC_MATRIX[1]=$DATA_DIR/tweets_median_working_successor_matrix.csv
-SUC_MATRIX[2]=$DATA_DIR/tweets_median_non_working_successor_matrix.csv
- ADJ_ORDER[0]=$DATA_DIR/tweets_mean_all_adjacency_matrix_ordered.csv
- ADJ_ORDER[1]=$DATA_DIR/tweets_median_working_adjacency_matrix_ordered.csv
- ADJ_ORDER[2]=$DATA_DIR/tweets_median_non_working_adjacency_matrix_ordered.csv
-  ID_ORDER[0]=$DATA_DIR/tweets_mean_all_adjacency_matrix_ordered_id.csv
-  ID_ORDER[1]=$DATA_DIR/tweets_median_working_adjacency_matrix_ordered_id.csv
-  ID_ORDER[2]=$DATA_DIR/tweets_median_non_working_adjacency_matrix_ordered_id.csv
-   OUTLIER[0]=$DATA_DIR/tweets_mean_all_outlier.csv
-   OUTLIER[1]=$DATA_DIR/tweets_median_working_outlier.csv
-   OUTLIER[2]=$DATA_DIR/tweets_median_non_working_outlier.csv
+ELLIPSECSV[0]=$DATA_DIR/tweets_mean_all_10000_0.85.csv
+ELLIPSECSV[1]=$DATA_DIR/tweets_mean_all_10000_0.95.csv
+ELLIPSECSV[2]=$DATA_DIR/tweets_mean_all_10000_0.99.csv
+ELLIPSECSV[3]=$DATA_DIR/tweets_mean_all_10000_1.00.csv
+ELLIPSECSV[4]=$DATA_DIR/tweets_median_non_working_10000_0.85.csv
+ELLIPSECSV[5]=$DATA_DIR/tweets_median_non_working_10000_0.95.csv
+ELLIPSECSV[6]=$DATA_DIR/tweets_median_non_working_10000_0.99.csv
+ELLIPSECSV[7]=$DATA_DIR/tweets_median_non_working_10000_1.00.csv
+ELLIPSECSV[8]=$DATA_DIR/tweets_median_working_10000_0.85.csv
+ELLIPSECSV[9]=$DATA_DIR/tweets_median_working_10000_0.95.csv
+ELLIPSECSV[10]=$DATA_DIR/tweets_median_working_10000_0.99.csv
+ELLIPSECSV[11]=$DATA_DIR/tweets_median_working_10000_1.00.csv
 export MAT_A_FILE=$DATA_DIR/matmul/mat_A.csv
 export MAT_B_FILE=$DATA_DIR/matmul/mat_B.csv
 export MAT_C_FILE=$DATA_DIR/matmul/mat_C.csv
 
-for (( j=4; j<5; ++j ))
+for (( j=0; j<1; ++j ))
 do
     export ROWS=${ROW[j]}
-    for (( i=0; i<3; ++i ))
+    for (( i=0; i<12; ++i ))
     do
         export ELLIPSECSV_FILE=${ELLIPSECSV[i]}
-        export ADJ_MATRIX_FILE=${ADJ_MATRIX[i]}
-        export ADJ_ORDER_FILE=${ADJ_ORDER[i]}
-        export ID_ORDER_FILE=${ID_ORDER[i]}
-        export DIS_MATRIX_FILE=${DIS_MATRIX[i]}
-        export SUC_MATRIX_FILE=${SUC_MATRIX[i]}
-        export OUTLIER_FILE=${OUTLIER[i]}
         export FROM=2147825826
         export TO=414498534
         export NCPU=`echo ${NODES[k]} \* ${NTASKS_PER_NODE[k]}|bc`
