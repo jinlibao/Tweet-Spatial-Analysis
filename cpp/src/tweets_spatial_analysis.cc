@@ -799,6 +799,50 @@ vector<vector<int>> find_all_shortest_index_paths(Mat<int> &S, Mat<long unsigned
   return index_paths;
 }
 
+void convert_paths_to_json(vector<vector<int>> &index_paths) {
+  cout << "{";
+  cout << "\"" << index_paths[0].front() << "\": ";
+  cout << "{\"" << index_paths[0].back() << "\": [";
+  for (int j = 0; j < (int)index_paths[0].size() - 1; ++j) cout << "\"" << index_paths[0][j] << "\", ";
+  cout << "\"" << index_paths[0].back() << "\"]";
+  for (int i = 1; i < (int)index_paths.size(); ++i) {
+    if (index_paths[i].front() == index_paths[i - 1].front()) {
+      cout << ",\n";
+      cout << "  \"" << index_paths[i].back() << "\": [";
+    } else {
+      cout << "},\n";
+      cout << " \"" << index_paths[i].front() << "\": {";
+      cout << "\"" << index_paths[i].back() << "\": [";
+    }
+    for (int j = 0; j < (int)index_paths[i].size() - 1; ++j) cout << "\"" << index_paths[i][j] << "\", ";
+    cout << "\"" << index_paths[i].back() << "\"]";
+  }
+  cout << "}}\n";
+}
+
+void convert_paths_to_json(vector<vector<int>> &index_paths, string filename) {
+  ofstream fout(filename);
+  fout << "{";
+  fout << "\"" << index_paths[0].front() << "\": ";
+  fout << "{\"" << index_paths[0].back() << "\": [";
+  for (int j = 0; j < (int)index_paths[0].size() - 1; ++j) fout << "\"" << index_paths[0][j] << "\", ";
+  fout << "\"" << index_paths[0].back() << "\"]";
+  for (int i = 1; i < (int)index_paths.size(); ++i) {
+    if (index_paths[i].front() == index_paths[i - 1].front()) {
+      fout << ",\n";
+      fout << "  \"" << index_paths[i].back() << "\": [";
+    } else {
+      fout << "},\n";
+      fout << " \"" << index_paths[i].front() << "\": {";
+      fout << "\"" << index_paths[i].back() << "\": [";
+    }
+    for (int j = 0; j < (int)index_paths[i].size() - 1; ++j) fout << "\"" << index_paths[i][j] << "\", ";
+    fout << "\"" << index_paths[i].back() << "\"]";
+  }
+  fout << "}}\n";
+  fout.close();
+}
+
 void convert_paths_to_json(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths) {
   for (auto &index_path : index_paths) {
     vector<long unsigned> id_path = convert_index_path_to_id_path(id_mat, index_path);
@@ -840,6 +884,30 @@ void convert_paths_to_csv(Mat<long unsigned> &id_mat, vector<vector<int>> &index
     for (int i = 0; i < (int)id_path.size() - 1; ++i) cout << id_path[i] << ", ";
     cout << id_path.back() << "]\"" << endl;
   }
+}
+
+void convert_paths_length_to_csv(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths) {
+  cout << "source,target,length" << endl;
+  for (auto &index_path : index_paths) {
+    vector<long unsigned> id_path = convert_index_path_to_id_path(id_mat, index_path);
+    cout << "\"" << id_path.front() << "\"";
+    cout << ",\"" << id_path.back() << "\"";
+    cout << ",\"" << id_path.size() << "\"";
+    cout << endl;
+  }
+}
+
+void convert_paths_length_to_csv(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths, string filename) {
+  ofstream fout(filename);
+  fout << "source,target,length" << endl;
+  for (auto &index_path : index_paths) {
+    vector<long unsigned> id_path = convert_index_path_to_id_path(id_mat, index_path);
+    fout << "\"" << id_path.front() << "\"";
+    fout << ",\"" << id_path.back() << "\"";
+    fout << ",\"" << id_path.size() << "\"";
+    fout << endl;
+  }
+  fout.close();
 }
 
 void convert_paths_to_csv(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths, string filename) {
@@ -979,21 +1047,25 @@ void test_find_all_shortest_index_paths(string suc_file, string id_file) {
   id_mat.load(id_file, csv_ascii);
   vector<vector<int>> index_paths = find_all_shortest_index_paths(S, id_mat);
 
-  // cout << endl << "--------------- GML ---------------" << endl;
-  // convert_paths_to_gml(id_mat, index_paths);
-  // cout << endl << "--------------- CSV ---------------" << endl;
-  // convert_paths_to_csv(id_mat, index_paths);
-  // cout << endl << "--------------- JSON --------------" << endl;
-  // convert_paths_to_json(id_mat, index_paths);
-
   string shortest_path_gml_file(suc_file);
   string shortest_path_csv_file(suc_file);
+  string shortest_path_length_csv_file(suc_file);
   string shortest_path_json_file(suc_file);
+  string shortest_path_json_file_for_gml(suc_file);
   shortest_path_gml_file.replace(shortest_path_gml_file.end() - 20, shortest_path_gml_file.end(), "shortest_paths.gml");
-  shortest_path_json_file.replace(shortest_path_json_file.end() - 20, shortest_path_json_file.end(), "shortest_paths.json");
   shortest_path_csv_file.replace(shortest_path_csv_file.end() - 20, shortest_path_csv_file.end(), "shortest_paths.csv");
+  shortest_path_length_csv_file.replace(shortest_path_length_csv_file.end() - 20, shortest_path_length_csv_file.end(), "shortest_paths_length.csv");
+  shortest_path_json_file.replace(shortest_path_json_file.end() - 20, shortest_path_json_file.end(), "shortest_paths.json");
+  shortest_path_json_file_for_gml.replace(shortest_path_json_file_for_gml.end() - 20, shortest_path_json_file_for_gml.end(), "shortest_paths_for_gml.json");
 
+  cout << endl << "Writing to " << shortest_path_gml_file << "..." << endl;
   convert_paths_to_gml(id_mat, index_paths, shortest_path_gml_file);
-  convert_paths_to_csv(id_mat, index_paths, shortest_path_csv_file);
+  cout << endl << "Writing to " << shortest_path_json_file << "..." << endl;
   convert_paths_to_json(id_mat, index_paths, shortest_path_json_file);
+  cout << endl << "Writing to " << shortest_path_json_file_for_gml << "..." << endl;
+  convert_paths_to_json(index_paths, shortest_path_json_file_for_gml);
+  cout << endl << "Writing to " << shortest_path_csv_file << "..." << endl;
+  convert_paths_to_csv(id_mat, index_paths, shortest_path_csv_file);
+  cout << endl << "Writing to " << shortest_path_length_csv_file << "..." << endl;
+  convert_paths_length_to_csv(id_mat, index_paths, shortest_path_length_csv_file);
 }

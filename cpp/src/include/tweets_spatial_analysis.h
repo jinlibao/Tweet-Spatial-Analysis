@@ -39,12 +39,16 @@ void test_APD_recursive(string mat_file, int mode, int node, int n_procs);
 template <class T>
 void test_APD(string mat_file, int mode, int node, int n_procs);
 vector<long unsigned> convert_index_path_to_id_path(Mat<long unsigned> &id_mat, vector<int> index_path);
+void convert_paths_length_to_csv(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths);
+void convert_paths_length_to_csv(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths, string filename);
 void convert_paths_to_csv(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths);
 void convert_paths_to_csv(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths, string filename);
 void convert_paths_to_gml(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths, string filename);
 void convert_paths_to_gml(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths);
 void convert_paths_to_json(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths);
 void convert_paths_to_json(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths, string filename);
+void convert_paths_to_json(vector<vector<int>> &index_paths);
+void convert_paths_to_json(vector<vector<int>> &index_paths, string filename);
 vector<vector<int>> find_all_shortest_index_paths(Mat<int> &S, Mat<long unsigned> &id_mat);
 pair<vector<int>, vector<long unsigned>> get_shortest_path_by_id(Mat<int> &S, Mat<long unsigned> &id_mat, long unsigned id_from, long unsigned id_to);
 vector<int> get_shortest_path_by_index(Mat<int> &S, Mat<long unsigned> &id_mat, int from, int to);
