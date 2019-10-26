@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
   string suc_file(ellipse_file);
   suc_file.replace(suc_file.end() - 4, suc_file.end(), "_successor_matrix.csv");
   string id_file(adj_ordered_file);
-  id_file.replace(id_file.end() - 4, id_file.end(), "_ordered.csv");
+  id_file.replace(id_file.end() - 4, id_file.end(), "_id.csv");
 
   int node, n_procs;
   MPI_Comm comm = MPI_COMM_WORLD;
@@ -68,6 +68,7 @@ int main(int argc, char *argv[]) {
 
   if (job == 0) {
     APSP<float>(rows, ellipse_file, adj_file, adj_ordered_file, dis_file, outlier_file, node, n_procs);
+    test_find_all_shortest_index_paths(suc_file, id_file);
   }
   if (job == 1) {
     build_adjacency_matrix<float>(ellipse_file, adj_file, rows);
@@ -100,7 +101,7 @@ int main(int argc, char *argv[]) {
     test_matrix_square<float>(rows, node, n_procs, 1, mat_A, mat_C);
   }
   if (job == 11) {
-    get_shortest_path_by_id(suc_file, id_file, id_from, id_to);
+    test_find_all_shortest_index_paths(suc_file, id_file);
   }
 
   MPI_Finalize();

@@ -2,51 +2,66 @@
 #include <set>
 #include <stack>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "include/stopwatch.h"
 #include "include/tweets_spatial_analysis.h"
 
-template void build_adjacency_matrix<short>(string input_file, string output_file, long rows = 0);
-template void find_components<short>(string adj_file, string outlier_file = "");
-template vector<pair<int, vector<int>>> bfs<short>(Mat<short> &A);
-template void build_distance_matrix<short>(string adj_file, string dis_file, int node, int n_procs, bool non_recursive = true);
-template Mat<short> APD_recursive<short>(const Mat<short> &A, int rank, int n_procs);
-template Mat<short> APD<short>(const Mat<short> &A, int rank, int n_procs);
-template Mat<short> BPWM<short>(const Mat<short> &A, const Mat<short> &B, int node, int n_procs);
-template Mat<short> compute_successor_matrix<short>(const Mat<short> &A, const Mat<short> &D, int node, int n_procs);
-template Mat<short> compute_successor_matrix_saving_witness<short>(const Mat<short> &A, const Mat<short> &D, int node, int n_procs, int i, string dis_file);
-template void build_successor_matrix<short>(string adj_file, string dis_file, int node, int n_procs);
-template void APSP<short>(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
-template void test_APD_recursive<short>(string mat_file, int mode, int node, int n_procs);
-template void test_APD<short>(string mat_file, int mode, int node, int n_procs);
-
-template void build_adjacency_matrix<int>(string input_file, string output_file, long rows = 0);
-template void find_components<int>(string adj_file, string outlier_file = "");
-template vector<pair<int, vector<int>>> bfs<int>(Mat<int> &A);
-template void build_distance_matrix<int>(string adj_file, string dis_file, int node, int n_procs, bool non_recursive = true);
-template Mat<int> APD_recursive<int>(const Mat<int> &A, int rank, int n_procs);
-template Mat<int> APD<int>(const Mat<int> &A, int rank, int n_procs);
-template Mat<int> BPWM<int>(const Mat<int> &A, const Mat<int> &B, int node, int n_procs);
-template Mat<int> compute_successor_matrix<int>(const Mat<int> &A, const Mat<int> &D, int node, int n_procs);
-template Mat<int> compute_successor_matrix_saving_witness<int>(const Mat<int> &A, const Mat<int> &D, int node, int n_procs, int i, string dis_file);
-template void build_successor_matrix<int>(string adj_file, string dis_file, int node, int n_procs);
-template void APSP<int>(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
-template void test_APD_recursive<int>(string mat_file, int mode, int node, int n_procs);
-template void test_APD<int>(string mat_file, int mode, int node, int n_procs);
-
-template void build_adjacency_matrix<long>(string input_file, string output_file, long rows = 0);
-template void find_components<long>(string adj_file, string outlier_file = "");
-template vector<pair<int, vector<int>>> bfs<long>(Mat<long> &A);
-template void build_distance_matrix<long>(string adj_file, string dis_file, int node, int n_procs, bool non_recursive = true);
-template Mat<long> APD_recursive<long>(const Mat<long> &A, int rank, int n_procs);
-template Mat<long> APD<long>(const Mat<long> &A, int rank, int n_procs);
-template Mat<long> BPWM<long>(const Mat<long> &A, const Mat<long> &B, int node, int n_procs);
-template Mat<long> compute_successor_matrix<long>(const Mat<long> &A, const Mat<long> &D, int node, int n_procs);
-template Mat<long> compute_successor_matrix_saving_witness<long>(const Mat<long> &A, const Mat<long> &D, int node, int n_procs, int i, string dis_file);
-template void build_successor_matrix<long>(string adj_file, string dis_file, int node, int n_procs);
-template void APSP<long>(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
-template void test_APD_recursive<long>(string mat_file, int mode, int node, int n_procs);
-template void test_APD<long>(string mat_file, int mode, int node, int n_procs);
+// template void build_adjacency_matrix<short>(string input_file, string output_file, long rows = 0);
+// template void find_components<short>(string adj_file, string outlier_file = "");
+// template vector<pair<int, vector<int>>> bfs<short>(Mat<short> &A);
+// template void build_distance_matrix<short>(string adj_file, string dis_file, int node, int n_procs, bool non_recursive = true);
+// template Mat<short> APD_recursive<short>(const Mat<short> &A, int rank, int n_procs);
+// template Mat<short> APD<short>(const Mat<short> &A, int rank, int n_procs);
+// template Mat<short> BPWM<short>(const Mat<short> &A, const Mat<short> &B, int node, int n_procs);
+// template Mat<short> compute_successor_matrix<short>(const Mat<short> &A, const Mat<short> &D, int node, int n_procs);
+// template Mat<short> compute_successor_matrix_saving_witness<short>(const Mat<short> &A, const Mat<short> &D, int node, int n_procs, int i, string dis_file);
+// template void build_successor_matrix<short>(string adj_file, string dis_file, int node, int n_procs);
+// template void APSP<short>(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
+// template void test_APD_recursive<short>(string mat_file, int mode, int node, int n_procs);
+// template void test_APD<short>(string mat_file, int mode, int node, int n_procs);
+//
+// template void build_adjacency_matrix<int>(string input_file, string output_file, long rows = 0);
+// template void find_components<int>(string adj_file, string outlier_file = "");
+// template vector<pair<int, vector<int>>> bfs<int>(Mat<int> &A);
+// template void build_distance_matrix<int>(string adj_file, string dis_file, int node, int n_procs, bool non_recursive = true);
+// template Mat<int> APD_recursive<int>(const Mat<int> &A, int rank, int n_procs);
+// template Mat<int> APD<int>(const Mat<int> &A, int rank, int n_procs);
+// template Mat<int> BPWM<int>(const Mat<int> &A, const Mat<int> &B, int node, int n_procs);
+// template Mat<int> compute_successor_matrix<int>(const Mat<int> &A, const Mat<int> &D, int node, int n_procs);
+// template Mat<int> compute_successor_matrix_saving_witness<int>(const Mat<int> &A, const Mat<int> &D, int node, int n_procs, int i, string dis_file);
+// template void build_successor_matrix<int>(string adj_file, string dis_file, int node, int n_procs);
+// template void APSP<int>(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
+// template void test_APD_recursive<int>(string mat_file, int mode, int node, int n_procs);
+// template void test_APD<int>(string mat_file, int mode, int node, int n_procs);
+//
+// template void build_adjacency_matrix<long>(string input_file, string output_file, long rows = 0);
+// template void find_components<long>(string adj_file, string outlier_file = "");
+// template vector<pair<int, vector<int>>> bfs<long>(Mat<long> &A);
+// template void build_distance_matrix<long>(string adj_file, string dis_file, int node, int n_procs, bool non_recursive = true);
+// template Mat<long> APD_recursive<long>(const Mat<long> &A, int rank, int n_procs);
+// template Mat<long> APD<long>(const Mat<long> &A, int rank, int n_procs);
+// template Mat<long> BPWM<long>(const Mat<long> &A, const Mat<long> &B, int node, int n_procs);
+// template Mat<long> compute_successor_matrix<long>(const Mat<long> &A, const Mat<long> &D, int node, int n_procs);
+// template Mat<long> compute_successor_matrix_saving_witness<long>(const Mat<long> &A, const Mat<long> &D, int node, int n_procs, int i, string dis_file);
+// template void build_successor_matrix<long>(string adj_file, string dis_file, int node, int n_procs);
+// template void APSP<long>(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
+// template void test_APD_recursive<long>(string mat_file, int mode, int node, int n_procs);
+// template void test_APD<long>(string mat_file, int mode, int node, int n_procs);
+//
+// template void build_adjacency_matrix<double>(string input_file, string output_file, long rows = 0);
+// template void find_components<double>(string adj_file, string outlier_file = "");
+// template vector<pair<int, vector<int>>> bfs<double>(Mat<double> &A);
+// template void build_distance_matrix<double>(string adj_file, string dis_file, int node, int n_procs, bool non_recursive = true);
+// template Mat<double> APD_recursive<double>(const Mat<double> &A, int rank, int n_procs);
+// template Mat<double> APD<double>(const Mat<double> &A, int rank, int n_procs);
+// template Mat<double> BPWM<double>(const Mat<double> &A, const Mat<double> &B, int node, int n_procs);
+// template Mat<double> compute_successor_matrix<double>(const Mat<double> &A, const Mat<double> &D, int node, int n_procs);
+// template Mat<double> compute_successor_matrix_saving_witness<double>(const Mat<double> &A, const Mat<double> &D, int node, int n_procs, int i, string dis_file);
+// template void build_successor_matrix<double>(string adj_file, string dis_file, int node, int n_procs);
+// template void APSP<double>(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
+// template void test_APD_recursive<double>(string mat_file, int mode, int node, int n_procs);
+// template void test_APD<double>(string mat_file, int mode, int node, int n_procs);
 
 template void build_adjacency_matrix<float>(string input_file, string output_file, long rows = 0);
 template void find_components<float>(string adj_file, string outlier_file = "");
@@ -61,20 +76,6 @@ template void build_successor_matrix<float>(string adj_file, string dis_file, in
 template void APSP<float>(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
 template void test_APD_recursive<float>(string mat_file, int mode, int node, int n_procs);
 template void test_APD<float>(string mat_file, int mode, int node, int n_procs);
-
-template void build_adjacency_matrix<double>(string input_file, string output_file, long rows = 0);
-template void find_components<double>(string adj_file, string outlier_file = "");
-template vector<pair<int, vector<int>>> bfs<double>(Mat<double> &A);
-template void build_distance_matrix<double>(string adj_file, string dis_file, int node, int n_procs, bool non_recursive = true);
-template Mat<double> APD_recursive<double>(const Mat<double> &A, int rank, int n_procs);
-template Mat<double> APD<double>(const Mat<double> &A, int rank, int n_procs);
-template Mat<double> BPWM<double>(const Mat<double> &A, const Mat<double> &B, int node, int n_procs);
-template Mat<double> compute_successor_matrix<double>(const Mat<double> &A, const Mat<double> &D, int node, int n_procs);
-template Mat<double> compute_successor_matrix_saving_witness<double>(const Mat<double> &A, const Mat<double> &D, int node, int n_procs, int i, string dis_file);
-template void build_successor_matrix<double>(string adj_file, string dis_file, int node, int n_procs);
-template void APSP<double>(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
-template void test_APD_recursive<double>(string mat_file, int mode, int node, int n_procs);
-template void test_APD<double>(string mat_file, int mode, int node, int n_procs);
 
 template <class T>
 void build_adjacency_matrix(string ellipse_file, string adj_file, long rows) {
@@ -714,50 +715,6 @@ void build_successor_matrix(string adj_file, string dis_file, int node, int n_pr
   }
 }
 
-void get_shortest_path_by_id(string suc_file, string id_file, long unsigned id_from, long unsigned id_to) {
-  Mat<int> S;
-  Mat<long unsigned> id_mat;
-  printf("Reading from %s...\n", suc_file.c_str());
-  S.load(suc_file, csv_ascii);
-  printf("Reading from %s...\n", id_file.c_str());
-  id_mat.load(id_file, csv_ascii);
-
-  unordered_map<long unsigned, int> id_map;
-  int n = id_mat.n_rows;
-  for (int i = 0; i < n; ++i) {
-    id_map[id_mat(i, 1)] = i;
-  }
-  int from = id_map[id_from];
-  int to = id_map[id_to];
-
-  printf("Get shortest path from %d (%lu) to %d (%lu)\n", from, id_from, to, id_to);
-
-  if (id_mat(from, 0) != id_mat(to, 0)) {
-    printf("No path exists from %lu to %lu\n", id_from, id_to);
-    return;
-  }
-
-  vector<int> index_path{from};
-  vector<long unsigned> id_path{id_from};
-
-  for (; from != to; from = S(from, to)) {
-    index_path.push_back(S(from, to));
-    id_path.push_back(id_mat(S(from, to), 1));
-  }
-
-  printf("%4d: %5d (%12lu)\n", 0, index_path[0], id_path[0]);
-  for (int i = 1; i < (int)index_path.size(); ++i) {
-    printf("%4d: %5d (%12lu)\n", i, index_path[i], id_path[i]);
-  }
-  printf("shortest path length: %d\n", (int)index_path.size() - 1);
-
-  printf("[%lu", id_path[0]);
-  for (int i = 1; i < (int)index_path.size(); ++i) {
-    printf(", %lu", id_path[i]);
-  }
-  printf("]\n");
-}
-
 template <class T>
 void APSP(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs) {
   build_adjacency_matrix<T>(ellipse_file, adj_file, rows);
@@ -794,3 +751,249 @@ void test_APD_recursive(string mat_file, int mode, int node, int n_procs) {
   }
 }
 
+vector<int> get_shortest_path_by_index(Mat<int> &S, Mat<long unsigned> &id_mat, int from, int to) {
+  vector<int> index_path{from};
+
+  if (id_mat(from, 0) != id_mat(to, 0)) return index_path;
+
+  for (; from != to; from = S(from, to)) index_path.push_back(S(from, to));
+
+  return index_path;
+}
+
+vector<long unsigned> convert_index_path_to_id_path(Mat<long unsigned> &id_mat, vector<int> index_path) {
+  int n = index_path.size();
+  vector<long unsigned> id_path(n, 0);
+
+  for (int i = 0; i < n; ++i) id_path[i] = id_mat(index_path[i], 1);
+
+  return id_path;
+}
+
+pair<vector<int>, vector<long unsigned>> get_shortest_path_by_id(Mat<int> &S, Mat<long unsigned> &id_mat, long unsigned id_from, long unsigned id_to) {
+  unordered_map<long unsigned, int> id_map;
+  int n = id_mat.n_rows;
+
+  for (int i = 0; i < n; ++i) id_map[id_mat(i, 1)] = i;
+
+  int from = id_map[id_from];
+  int to = id_map[id_to];
+  vector<int> index_path = get_shortest_path_by_index(S, id_mat, from, to);
+  vector<long unsigned> id_path = convert_index_path_to_id_path(id_mat, index_path);
+
+  return make_pair(index_path, id_path);
+}
+
+vector<vector<int>> find_all_shortest_index_paths(Mat<int> &S, Mat<long unsigned> &id_mat) {
+  vector<vector<int>> index_paths;
+  int n = id_mat.n_rows;
+
+  for (int i = 0; i < n - 1; ++i) {
+    for (int j = i + 1; j < n; ++j) {
+      vector<int> index_path = get_shortest_path_by_index(S, id_mat, i, j);
+      if (index_path.size() <= 1) continue;
+      index_paths.push_back(index_path);
+    }
+  }
+
+  return index_paths;
+}
+
+void convert_paths_to_json(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths) {
+  for (auto &index_path : index_paths) {
+    vector<long unsigned> id_path = convert_index_path_to_id_path(id_mat, index_path);
+    cout << "{";
+    cout << "\"source\":" << id_path.front() << ",";
+    cout << "\"target\":" << id_path.back() << ",";
+    cout << "\"length\":" << id_path.size() << ",";
+    cout << "\"path\":[";
+    for (int i = 0; i < (int)id_path.size() - 1; ++i) cout << id_path[i] << ",";
+    cout << id_path.back() << "]";
+    cout << "}" << endl;
+  }
+}
+
+void convert_paths_to_json(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths, string filename) {
+  ofstream fout(filename);
+  for (auto &index_path : index_paths) {
+    vector<long unsigned> id_path = convert_index_path_to_id_path(id_mat, index_path);
+    fout << "{";
+    fout << "\"source\":" << id_path.front() << ",";
+    fout << "\"target\":" << id_path.back() << ",";
+    fout << "\"length\":" << id_path.size() << ",";
+    fout << "\"path\":[";
+    for (int i = 0; i < (int)id_path.size() - 1; ++i) fout << id_path[i] << ",";
+    fout << id_path.back() << "]";
+    fout << "}" << endl;
+  }
+  fout.close();
+}
+
+void convert_paths_to_csv(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths) {
+  cout << "source,target,length,path" << endl;
+  for (auto &index_path : index_paths) {
+    vector<long unsigned> id_path = convert_index_path_to_id_path(id_mat, index_path);
+    cout << "\"" << id_path.front() << "\"";
+    cout << ",\"" << id_path.back() << "\"";
+    cout << ",\"" << id_path.size() << "\"";
+    cout << ",\"[";
+    for (int i = 0; i < (int)id_path.size() - 1; ++i) cout << id_path[i] << ", ";
+    cout << id_path.back() << "]\"" << endl;
+  }
+}
+
+void convert_paths_to_csv(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths, string filename) {
+  ofstream fout(filename);
+  fout << "source,target,length,path" << endl;
+  for (auto &index_path : index_paths) {
+    vector<long unsigned> id_path = convert_index_path_to_id_path(id_mat, index_path);
+    fout << "\"" << id_path.front() << "\"";
+    fout << ",\"" << id_path.back() << "\"";
+    fout << ",\"" << id_path.size() << "\"";
+    fout << ",\"[";
+    for (int i = 0; i < (int)id_path.size() - 1; ++i) fout << id_path[i] << ", ";
+    fout << id_path.back() << "]\"" << endl;
+  }
+  fout.close();
+}
+
+void convert_paths_to_gml(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths) {
+  cout << "graph [" << endl;
+  int n = id_mat.n_rows;
+  for (int i = 0; i < n; ++i) {
+    cout << "  node [" << endl;
+    cout << "    id " << i << endl;
+    cout << "    label \"" << i << "\"" << endl;
+    cout << "    userid " << id_mat(i, 1) << endl;
+    cout << "  ]" << endl;
+  }
+
+  unordered_set<string> edges;
+  for (auto &index_path : index_paths) {
+    int n = index_path.size();
+    for (int i = 0; i < n - 1; ++i) {
+      string edge1 = to_string(index_path[i]) + "," + to_string(index_path[i + 1]);
+      string edge2 = to_string(index_path[i + 1]) + "," + to_string(index_path[i]);
+      if (edges.find(edge1) != edges.end() or edges.find(edge2) != edges.end()) continue;
+      cout << "  edge [" << endl;
+      cout << "    source " << index_path[i] << endl;
+      cout << "    target " << index_path[i + 1] << endl;
+      cout << "  ]" << endl;
+      edges.insert(edge1);
+      edges.insert(edge2);
+    }
+  }
+  cout << "]" << endl;
+}
+
+void convert_paths_to_gml(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths, string filename) {
+  ofstream fout(filename);
+  fout << "graph [" << endl;
+  int n = id_mat.n_rows;
+  for (int i = 0; i < n; ++i) {
+    fout << "  node [" << endl;
+    fout << "    id " << i << endl;
+    fout << "    label \"" << i << "\"" << endl;
+    fout << "    userid " << id_mat(i, 1) << endl;
+    fout << "  ]" << endl;
+  }
+
+  unordered_set<string> edges;
+  for (auto &index_path : index_paths) {
+    int n = index_path.size();
+    for (int i = 0; i < n - 1; ++i) {
+      string edge1 = to_string(index_path[i]) + "," + to_string(index_path[i + 1]);
+      string edge2 = to_string(index_path[i + 1]) + "," + to_string(index_path[i]);
+      if (edges.find(edge1) != edges.end() or edges.find(edge2) != edges.end()) continue;
+      fout << "  edge [" << endl;
+      fout << "    source " << index_path[i] << endl;
+      fout << "    target " << index_path[i + 1] << endl;
+      fout << "  ]" << endl;
+      edges.insert(edge1);
+      edges.insert(edge2);
+    }
+  }
+  fout << "]" << endl;
+  fout.close();
+}
+
+void print_shortest_path(vector<int> &index_path, Mat<long unsigned> &id_mat) {
+  printf("%4d: %5d (%12lu)\n", 0, index_path[0], id_mat(index_path[0], 1));
+  for (int i = 1; i < (int)index_path.size(); ++i) {
+    printf("%4d: %5d (%12lu)\n", i, index_path[i], id_mat(index_path[i], 1));
+  }
+  printf("shortest path length: %d\n", (int)index_path.size() - 1);
+
+  printf("[%lu", id_mat(index_path[0], 1));
+  for (int i = 1; i < (int)index_path.size(); ++i) {
+    printf(", %lu", id_mat(index_path[i], 1));
+  }
+  printf("]\n");
+}
+
+void print_shortest_path(vector<int> &index_path, vector<long unsigned> &id_path) {
+  printf("%4d: %5d (%12lu)\n", 0, index_path[0], id_path[0]);
+  for (int i = 1; i < (int)index_path.size(); ++i) {
+    printf("%4d: %5d (%12lu)\n", i, index_path[i], id_path[i]);
+  }
+  printf("shortest path length: %d\n", (int)index_path.size() - 1);
+
+  printf("[%lu", id_path[0]);
+  for (int i = 1; i < (int)index_path.size(); ++i) {
+    printf(", %lu", id_path[i]);
+  }
+  printf("]\n");
+}
+
+void test_get_shortest_path_by_index(string suc_file, string id_file, int from, int to) {
+  Mat<int> S;
+  Mat<long unsigned> id_mat;
+  printf("Reading from %s...\n", suc_file.c_str());
+  S.load(suc_file, csv_ascii);
+  printf("Reading from %s...\n", id_file.c_str());
+  id_mat.load(id_file, csv_ascii);
+
+  printf("Get shortest path from %d (%lu) to %d (%lu)\n", from, id_mat(from, 1), to, id_mat(to, 1));
+  vector<int> index_path = get_shortest_path_by_index(S, id_mat, from, to);
+  print_shortest_path(index_path, id_mat);
+}
+
+void test_get_shortest_path_by_id(string suc_file, string id_file, long unsigned id_from, long unsigned id_to) {
+  Mat<int> S;
+  Mat<long unsigned> id_mat;
+  printf("Reading from %s...\n", suc_file.c_str());
+  S.load(suc_file, csv_ascii);
+  printf("Reading from %s...\n", id_file.c_str());
+  id_mat.load(id_file, csv_ascii);
+
+  pair<vector<int>, vector<long unsigned>> ret = get_shortest_path_by_id(S, id_mat, id_from, id_to);
+  print_shortest_path(ret.first, ret.second);
+}
+
+void test_find_all_shortest_index_paths(string suc_file, string id_file) {
+  Mat<int> S;
+  Mat<long unsigned> id_mat;
+  printf("Reading from %s...\n", suc_file.c_str());
+  S.load(suc_file, csv_ascii);
+  printf("Reading from %s...\n", id_file.c_str());
+  id_mat.load(id_file, csv_ascii);
+  vector<vector<int>> index_paths = find_all_shortest_index_paths(S, id_mat);
+
+  // cout << endl << "--------------- GML ---------------" << endl;
+  // convert_paths_to_gml(id_mat, index_paths);
+  // cout << endl << "--------------- CSV ---------------" << endl;
+  // convert_paths_to_csv(id_mat, index_paths);
+  // cout << endl << "--------------- JSON --------------" << endl;
+  // convert_paths_to_json(id_mat, index_paths);
+
+  string shortest_path_gml_file(suc_file);
+  string shortest_path_csv_file(suc_file);
+  string shortest_path_json_file(suc_file);
+  shortest_path_gml_file.replace(shortest_path_gml_file.end() - 20, shortest_path_gml_file.end(), "shortest_paths.gml");
+  shortest_path_json_file.replace(shortest_path_json_file.end() - 20, shortest_path_json_file.end(), "shortest_paths.json");
+  shortest_path_csv_file.replace(shortest_path_csv_file.end() - 20, shortest_path_csv_file.end(), "shortest_paths.csv");
+
+  convert_paths_to_gml(id_mat, index_paths, shortest_path_gml_file);
+  convert_paths_to_csv(id_mat, index_paths, shortest_path_csv_file);
+  convert_paths_to_json(id_mat, index_paths, shortest_path_json_file);
+}
