@@ -10,10 +10,10 @@ int main(int argc, char *argv[]) {
 
   long unsigned id_from = 379005817LU, id_to = 134577044LU;
 
-  int c, rows, cols, job;
+  int c, rows, cols, job, r = 0;
   rows = cols = 0;
   job = 0;
-  while ((c = getopt(argc, argv, "A:B:C:e:r:c:j:f:t:")) != -1) {
+  while ((c = getopt(argc, argv, "A:B:C:e:r:c:j:f:t:w:")) != -1) {
     switch (c) {
       case 'A':
         if (optarg) mat_A = optarg;
@@ -35,6 +35,9 @@ int main(int argc, char *argv[]) {
         break;
       case 'j':
         if (optarg) job = atoi(optarg);
+        break;
+      case 'w':
+        if (optarg) r = atol(optarg);
         break;
       case 'f':
         if (optarg) id_from = (long unsigned)atol(optarg);
@@ -67,8 +70,11 @@ int main(int argc, char *argv[]) {
   MPI_Comm_size(comm, &n_procs);
 
   if (job == 0) {
-    APSP<float>(rows, ellipse_file, adj_file, adj_ordered_file, dis_file, outlier_file, node, n_procs);
-    test_find_all_shortest_index_paths(suc_file, id_file);
+    // APSP<float>(rows, ellipse_file, adj_file, adj_ordered_file, dis_file, outlier_file, node, n_procs);
+    // test_find_all_shortest_index_paths(suc_file, id_file);
+    build_adjacency_matrix<float>(ellipse_file, adj_file, rows);
+    find_components<float>(adj_file, outlier_file);
+    build_distance_matrix<float>(adj_ordered_file, dis_file, node, n_procs);
   }
   if (job == 1) {
     build_adjacency_matrix<float>(ellipse_file, adj_file, rows);
@@ -80,27 +86,30 @@ int main(int argc, char *argv[]) {
     build_distance_matrix<float>(adj_ordered_file, dis_file, node, n_procs);
   }
   if (job == 4) {
-    build_successor_matrix<float>(adj_ordered_file, dis_file, node, n_procs);
+    build_witness_matrix<float>(adj_ordered_file, dis_file, r, node, n_procs);
   }
   if (job == 5) {
-    test_APD_recursive<float>(mat_A, 1, node, n_procs);
+    build_successor_matrix<float>(adj_ordered_file, dis_file, node, n_procs);
   }
   if (job == 6) {
-    test_APD<float>(mat_A, 1, node, n_procs);
+    test_APD_recursive<float>(mat_A, 1, node, n_procs);
   }
   if (job == 7) {
-    test_matrix_multiplication<float>(rows, node, n_procs);
+    test_APD<float>(mat_A, 1, node, n_procs);
   }
   if (job == 8) {
-    test_matrix_multiplication<float>(rows, node, n_procs, 1, mat_A, mat_B, mat_C);
+    test_matrix_multiplication<float>(rows, node, n_procs);
   }
   if (job == 9) {
-    test_matrix_square<float>(rows, node, n_procs);
+    test_matrix_multiplication<float>(rows, node, n_procs, 1, mat_A, mat_B, mat_C);
   }
   if (job == 10) {
-    test_matrix_square<float>(rows, node, n_procs, 1, mat_A, mat_C);
+    test_matrix_square<float>(rows, node, n_procs);
   }
   if (job == 11) {
+    test_matrix_square<float>(rows, node, n_procs, 1, mat_A, mat_C);
+  }
+  if (job == 12) {
     test_find_all_shortest_index_paths(suc_file, id_file);
   }
 

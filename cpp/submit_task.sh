@@ -90,7 +90,7 @@ then
 elif [[ $OSTYPE == linux-gnu ]] # Teton @ UWyo ARCC (Linux)
 then
     PROJECT_DIR=/home/ljin1/repos/Tweet-Spatial-Analysis
-    DATA_DIR=/gscratch/ljin1/data/twitter/csv/output/10-24-10000
+    DATA_DIR=/gscratch/ljin1/data/twitter/csv/output/10-31-all
 fi
 
 # Set up output directory
@@ -130,6 +130,11 @@ do
         export FROM=2147825826
         export TO=414498534
         export NCPU=`echo ${NODES[k]} \* ${NTASKS_PER_NODE[k]}|bc`
-        sbatch --partition=${PARTITION[k]} --nodes=${NODES[k]} --ntasks-per-node=${NTASKS_PER_NODE[k]} --mem=${MEM[k]} task.sh
+        for (( w=0; w<3; ++w))
+        do
+            export WITNESS_ORDER=$w
+            # echo $j $i $WITNESS_ORDER
+            sbatch --partition=${PARTITION[k]} --nodes=${NODES[k]} --ntasks-per-node=${NTASKS_PER_NODE[k]} --mem=${MEM[k]} task.sh
+        done
     done
 done

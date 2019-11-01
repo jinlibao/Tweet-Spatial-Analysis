@@ -27,9 +27,11 @@ void build_distance_matrix(string adj_file, string dis_file, int node, int n_pro
 template <class T>
 Mat<T> BPWM(const Mat<T> &A, const Mat<T> &B, int node, int n_procs);
 template <class T>
-Mat<T> compute_successor_matrix(const Mat<T> &A, const Mat<T> &D, int node, int n_procs);
+Mat<T> get_witness_matrix(const Mat<T> &A, const Mat<T> &D, int node, int n_procs, int i, int r, string dis_file);
 template <class T>
-Mat<T> compute_successor_matrix_saving_witness(const Mat<T> &A, const Mat<T> &D, int node, int n_procs, int i, string name);
+void build_witness_matrix(string adj_file, string dis_file, int r, int node, int n_procs);
+template <class T>
+Mat<T> compute_successor_matrix(const Mat<T> &A, const Mat<T> &D, int node, int n_procs, int i, string name);
 template <class T>
 void build_successor_matrix(string adj_file, string dis_file, int node, int n_procs);
 template <class T>

@@ -70,8 +70,9 @@ template void build_distance_matrix<float>(string adj_file, string dis_file, int
 template Mat<float> APD_recursive<float>(const Mat<float> &A, int rank, int n_procs);
 template Mat<float> APD<float>(const Mat<float> &A, int rank, int n_procs);
 template Mat<float> BPWM<float>(const Mat<float> &A, const Mat<float> &B, int node, int n_procs);
-template Mat<float> compute_successor_matrix<float>(const Mat<float> &A, const Mat<float> &D, int node, int n_procs);
-template Mat<float> compute_successor_matrix_saving_witness<float>(const Mat<float> &A, const Mat<float> &D, int node, int n_procs, int i, string dis_file);
+template Mat<float> get_witness_matrix(const Mat<float> &A, const Mat<float> &D, int node, int n_procs, int i, int r, string dis_file);
+template void build_witness_matrix<float>(string adj_file, string dis_file, int r, int node, int n_procs);
+template Mat<float> compute_successor_matrix<float>(const Mat<float> &A, const Mat<float> &D, int node, int n_procs, int i, string dis_file);
 template void build_successor_matrix<float>(string adj_file, string dis_file, int node, int n_procs);
 template void APSP<float>(long rows, string ellipse_file, string adj_file, string adj_ordered_file, string dis_file, string outlier_file, int node, int n_procs);
 template void test_APD_recursive<float>(string mat_file, int mode, int node, int n_procs);
@@ -537,8 +538,50 @@ Mat<T> BPWM(const Mat<T> &A, const Mat<T> &B, int node, int n_procs) {
   return W;
 }
 
+inline bool exists(const string &name) {
+  ifstream f(name.c_str());
+  return f.good();
+}
+
 template <class T>
-Mat<T> compute_successor_matrix(const Mat<T> &A, const Mat<T> &D, int node, int n_procs) {
+Mat<T> get_witness_matrix(const Mat<T> &A, const Mat<T> &D, int node, int n_procs, int i, int r, string dis_file) {
+  string suffix = "witness_matrix_" + to_string(i) + "_" + to_string(r) + ".csv";
+  string wit_file(dis_file);
+  wit_file.replace(wit_file.end() - 19, wit_file.end(), suffix);
+
+  long rows = D.n_rows;
+  long cols = D.n_cols;
+  Mat<T> W;
+
+  if (exists(wit_file)) {
+    if (node == 0) {
+      printf("CPU %d: r: %d, Reading BPWM (%d, %d) from %s\n", node, r, i, r, wit_file.c_str());
+    }
+    W.load(wit_file, csv_ascii);
+    return W;
+  }
+
+  Mat<T> Dr(rows, cols, fill::zeros);
+  for (int i = 0; i < rows; ++i) {
+    for (int j = 0; j < cols; ++j) {
+      if (((int)D(i, j) + 1) % 3 == r) {
+        Dr(i, j) = 1;
+      }
+    }
+  }
+
+  W = BPWM(A, Dr, node, n_procs);
+  if (rows > 1000 || cols > 1000) {
+    if (node == 0) {
+      W.save(wit_file, csv_ascii);
+      printf("CPU %d: r: %d, Saving BPWM (%d, %d) to %s\n", node, r, i, r, wit_file.c_str());
+    }
+  }
+  return W;
+}
+
+template <class T>
+Mat<T> compute_successor_matrix(const Mat<T> &A, const Mat<T> &D, int node, int n_procs, int i, string dis_file) {
   shino::precise_stopwatch stopwatch;
   auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
   long rows = D.n_rows;
@@ -547,19 +590,8 @@ Mat<T> compute_successor_matrix(const Mat<T> &A, const Mat<T> &D, int node, int 
   vector<Mat<T>> Wr;
   Wr.reserve(3);
   for (int r = 0; r < 3; ++r) {
-    Mat<T> Dr(rows, cols, fill::zeros);
-    for (int i = 0; i < rows; ++i) {
-      for (int j = 0; j < cols; ++j) {
-        if (((int)D(i, j) + 1) % 3 == r) {
-          Dr(i, j) = 1;
-        }
-      }
-    }
-    if (node == 0) {
-      elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
-      printf("CPU %d: r: %d, Constructing BPWM... (%u ms)\n", node, r, elapsed_time);
-    }
-    Wr.push_back(BPWM(A, Dr, node, n_procs));
+    Mat<T> W = get_witness_matrix(A, D, node, n_procs, i, r, dis_file);
+    Wr.push_back(W);
   }
 
   if (node == 0) {
@@ -579,53 +611,72 @@ Mat<T> compute_successor_matrix(const Mat<T> &A, const Mat<T> &D, int node, int 
 }
 
 template <class T>
-Mat<T> compute_successor_matrix_saving_witness(const Mat<T> &A, const Mat<T> &D, int node, int n_procs, int i, string dis_file) {
+void build_witness_matrix(string adj_file, string dis_file, int r, int node, int n_procs) {
   shino::precise_stopwatch stopwatch;
   auto elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
-  long rows = D.n_rows;
-  long cols = D.n_cols;
-
-  vector<Mat<T>> Wr;
-  Wr.reserve(3);
-  for (int r = 0; r < 3; ++r) {
-    Mat<T> Dr(rows, cols, fill::zeros);
-    for (int i = 0; i < rows; ++i) {
-      for (int j = 0; j < cols; ++j) {
-        if (((int)D(i, j) + 1) % 3 == r) {
-          Dr(i, j) = 1;
-        }
-      }
-    }
-
-    Mat<T> W = BPWM(A, Dr, node, n_procs);
-    if (node == 0) {
-      elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
-      printf("CPU %d: r: %d, Constructing BPWM... (%u ms)\n", node, r, elapsed_time);
-      if (rows > 1000 || cols > 1000) {
-        string suffix = "witness_matrix_" + to_string(i) + "_" + to_string(r) + ".csv";
-        string wit_file(dis_file);
-        wit_file.replace(wit_file.end() - 19, wit_file.end(), suffix);
-        W.save(wit_file, csv_ascii);
-        printf("CPU %d: r: %d, Saving BPWM (%d, %d) to %s (%u ms)\n", node, r, i, r, wit_file.c_str(), elapsed_time);
-      }
-    }
-    Wr.push_back(W);
+  Mat<T> A, D;
+  Mat<long unsigned> id_mat;
+  if (node == 0) {
+    elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+    printf("CPU %d: Reading from %s... (%u ms)\n", node, adj_file.c_str(), elapsed_time);
   }
+  A.load(adj_file, csv_ascii);
 
   if (node == 0) {
     elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
-    printf(
-        "CPU %d: Constructing successor matrix from witness matrix... (%u "
-        "ms)\n",
-        node, elapsed_time);
+    printf("CPU %d: Reading from %s... (%u ms)\n", node, dis_file.c_str(), elapsed_time);
   }
-  Mat<T> S(rows, cols, fill::zeros);
-  for (int i = 0; i < rows; ++i) {
-    for (int j = 0; j < cols; ++j) {
-      S(i, j) = Wr[(int)D(i, j) % 3](i, j);
+  D.load(dis_file, csv_ascii);
+
+  int rows = A.n_rows;
+  string adj_id_file = adj_file;
+  adj_id_file.replace(adj_id_file.end() - 4, adj_id_file.end(), "_id.csv");
+  if (node == 0) {
+    elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+    printf("CPU %d: Reading from %s... (%u ms)\n", node, adj_id_file.c_str(), elapsed_time);
+  }
+  id_mat.load(adj_id_file);
+
+  if (node == 0) {
+    elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+    printf("CPU %d: Unpacking id... (%u ms)\n", node, elapsed_time);
+  }
+  vector<pair<unsigned int, long unsigned>> id;
+  for (int i = 0; i < rows; i++) {
+    id.push_back({(long unsigned)id_mat(i, 0), (long unsigned)id_mat(i, 1)});
+  }
+
+  vector<pair<int, int>> idx;
+  for (int i = 0; i < rows;) {
+    int start = i;
+    while (i < rows && id[start].first == id[i].first) {
+      ++i;
+    }
+    int end = i - 1;
+    idx.push_back({start, end});
+  }
+
+  for (int i = 0; i < (int)idx.size(); ++i) {
+    int r1 = idx[i].first;
+    int c1 = idx[i].first;
+    int r2 = idx[i].second;
+    int c2 = idx[i].second;
+
+    if (r2 - r1 + 1 >= 1000 || c2 - c1 + 1 >= 1000) {
+      if (node == 0) {
+        elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+        printf(
+            "CPU %d: Computing the witness matrix of block matrix %d - %d "
+            "(%d-by-%d) (%u ms)\n",
+            node, i, r, r2 - r1 + 1, c2 - c1 + 1, elapsed_time);
+      }
+      Mat<T> W = get_witness_matrix<T>(A.submat(r1, c1, r2, c2), D.submat(r1, c1, r2, c2), node, n_procs, i, r, dis_file);
+    }
+    if (node == 0) {
+      elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
+      cout << "Wall clock time elapsed: " << elapsed_time << " ms" << endl;
     }
   }
-  return S;
 }
 
 template <class T>
@@ -689,7 +740,7 @@ void build_successor_matrix(string adj_file, string dis_file, int node, int n_pr
           node, i, r2 - r1 + 1, c2 - c1 + 1, elapsed_time);
     }
 
-    Mat<T> S = compute_successor_matrix_saving_witness<T>(A.submat(r1, c1, r2, c2), D.submat(r1, c1, r2, c2), node, n_procs, i, dis_file);
+    Mat<T> S = compute_successor_matrix<T>(A.submat(r1, c1, r2, c2), D.submat(r1, c1, r2, c2), node, n_procs, i, dis_file);
     if (node == 0) {
       for (int j = r1; j < r2 + 1; ++j) {
         for (int k = c1; k < c2 + 1; ++k) {
@@ -849,7 +900,7 @@ void convert_paths_to_json(Mat<long unsigned> &id_mat, vector<vector<int>> &inde
     cout << "{";
     cout << "\"source\":" << id_path.front() << ",";
     cout << "\"target\":" << id_path.back() << ",";
-    cout << "\"length\":" << id_path.size() << ",";
+    cout << "\"length\":" << id_path.size() - 1 << ",";
     cout << "\"path\":[";
     for (int i = 0; i < (int)id_path.size() - 1; ++i) cout << id_path[i] << ",";
     cout << id_path.back() << "]";
@@ -864,7 +915,7 @@ void convert_paths_to_json(Mat<long unsigned> &id_mat, vector<vector<int>> &inde
     fout << "{";
     fout << "\"source\":" << id_path.front() << ",";
     fout << "\"target\":" << id_path.back() << ",";
-    fout << "\"length\":" << id_path.size() << ",";
+    fout << "\"length\":" << id_path.size() - 1 << ",";
     fout << "\"path\":[";
     for (int i = 0; i < (int)id_path.size() - 1; ++i) fout << id_path[i] << ",";
     fout << id_path.back() << "]";
@@ -879,7 +930,7 @@ void convert_paths_to_csv(Mat<long unsigned> &id_mat, vector<vector<int>> &index
     vector<long unsigned> id_path = convert_index_path_to_id_path(id_mat, index_path);
     cout << "\"" << id_path.front() << "\"";
     cout << ",\"" << id_path.back() << "\"";
-    cout << ",\"" << id_path.size() << "\"";
+    cout << ",\"" << id_path.size() - 1 << "\"";
     cout << ",\"[";
     for (int i = 0; i < (int)id_path.size() - 1; ++i) cout << id_path[i] << ", ";
     cout << id_path.back() << "]\"" << endl;
@@ -892,7 +943,7 @@ void convert_paths_length_to_csv(Mat<long unsigned> &id_mat, vector<vector<int>>
     vector<long unsigned> id_path = convert_index_path_to_id_path(id_mat, index_path);
     cout << "\"" << id_path.front() << "\"";
     cout << ",\"" << id_path.back() << "\"";
-    cout << ",\"" << id_path.size() << "\"";
+    cout << ",\"" << id_path.size() - 1 << "\"";
     cout << endl;
   }
 }
@@ -904,7 +955,7 @@ void convert_paths_length_to_csv(Mat<long unsigned> &id_mat, vector<vector<int>>
     vector<long unsigned> id_path = convert_index_path_to_id_path(id_mat, index_path);
     fout << "\"" << id_path.front() << "\"";
     fout << ",\"" << id_path.back() << "\"";
-    fout << ",\"" << id_path.size() << "\"";
+    fout << ",\"" << id_path.size() - 1 << "\"";
     fout << endl;
   }
   fout.close();
@@ -917,7 +968,7 @@ void convert_paths_to_csv(Mat<long unsigned> &id_mat, vector<vector<int>> &index
     vector<long unsigned> id_path = convert_index_path_to_id_path(id_mat, index_path);
     fout << "\"" << id_path.front() << "\"";
     fout << ",\"" << id_path.back() << "\"";
-    fout << ",\"" << id_path.size() << "\"";
+    fout << ",\"" << id_path.size() - 1 << "\"";
     fout << ",\"[";
     for (int i = 0; i < (int)id_path.size() - 1; ++i) fout << id_path[i] << ", ";
     fout << id_path.back() << "]\"" << endl;
