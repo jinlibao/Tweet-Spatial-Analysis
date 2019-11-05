@@ -498,6 +498,7 @@ Mat<T> BPWM(const Mat<T> &A, const Mat<T> &B, int node, int n_procs) {
         X.col(i) = (K(i) + 1) * A.col(K(i));
         Y.row(i) = B.row(K(i));
       }
+
       if (node == 0) {
         elapsed_time = stopwatch.elapsed_time<unsigned int, std::chrono::milliseconds>();
         printf(
@@ -505,7 +506,14 @@ Mat<T> BPWM(const Mat<T> &A, const Mat<T> &B, int node, int n_procs) {
             "ms)\n",
             node, k, d, m, elapsed_time);
       }
-      Mat<T> C = matrix_multiplication(X, Y, node, n_procs);
+
+      Mat<T> C;
+      if (k >= 11) {
+        C = matrix_multiplication(X, Y, node, n_procs);
+      } else {
+        C = X * Y;
+      }
+
       for (int i = 0; i < n; ++i) {
         for (int j = 0; j < n; ++j) {
           if (W(i, j) < 0 && C(i, j) > 0 && C(i, j) < n && A(i, (int)C(i, j) - 1) > 0 && B((int)C(i, j) - 1, j) > 0) {
@@ -948,6 +956,17 @@ void convert_paths_length_to_csv(Mat<long unsigned> &id_mat, vector<vector<int>>
   }
 }
 
+void convert_paths_length_col_to_csv(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths, string filename) {
+  ofstream fout(filename);
+  fout << "length" << endl;
+  for (auto &index_path : index_paths) {
+    vector<long unsigned> id_path = convert_index_path_to_id_path(id_mat, index_path);
+    fout << "\"" << id_path.size() - 1 << "\"";
+    fout << endl;
+  }
+  fout.close();
+}
+
 void convert_paths_length_to_csv(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths, string filename) {
   ofstream fout(filename);
   fout << "source,target,length" << endl;
@@ -1101,11 +1120,13 @@ void test_find_all_shortest_index_paths(string suc_file, string id_file) {
   string shortest_path_gml_file(suc_file);
   string shortest_path_csv_file(suc_file);
   string shortest_path_length_csv_file(suc_file);
+  string shortest_path_length_col_csv_file(suc_file);
   string shortest_path_json_file(suc_file);
   string shortest_path_json_file_for_gml(suc_file);
   shortest_path_gml_file.replace(shortest_path_gml_file.end() - 20, shortest_path_gml_file.end(), "shortest_paths.gml");
   shortest_path_csv_file.replace(shortest_path_csv_file.end() - 20, shortest_path_csv_file.end(), "shortest_paths.csv");
   shortest_path_length_csv_file.replace(shortest_path_length_csv_file.end() - 20, shortest_path_length_csv_file.end(), "shortest_paths_length.csv");
+  shortest_path_length_col_csv_file.replace(shortest_path_length_col_csv_file.end() - 20, shortest_path_length_col_csv_file.end(), "shortest_paths_length_col.csv");
   shortest_path_json_file.replace(shortest_path_json_file.end() - 20, shortest_path_json_file.end(), "shortest_paths.json");
   shortest_path_json_file_for_gml.replace(shortest_path_json_file_for_gml.end() - 20, shortest_path_json_file_for_gml.end(), "shortest_paths_for_gml.json");
 
@@ -1119,4 +1140,6 @@ void test_find_all_shortest_index_paths(string suc_file, string id_file) {
   convert_paths_to_csv(id_mat, index_paths, shortest_path_csv_file);
   cout << endl << "Writing to " << shortest_path_length_csv_file << "..." << endl;
   convert_paths_length_to_csv(id_mat, index_paths, shortest_path_length_csv_file);
+  cout << endl << "Writing to " << shortest_path_length_csv_file << "..." << endl;
+  convert_paths_length_col_to_csv(id_mat, index_paths, shortest_path_length_col_csv_file);
 }
