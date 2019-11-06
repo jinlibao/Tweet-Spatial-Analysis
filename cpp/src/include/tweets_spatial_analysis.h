@@ -59,5 +59,6 @@ void print_shortest_path(vector<int> &index_path, vector<long unsigned> &id_path
 void test_find_all_shortest_index_paths(string suc_file, string id_file);
 void test_get_shortest_path_by_id(string suc_file, string id_file, long unsigned id_from, long unsigned id_to);
 void test_get_shortest_path_by_index(string suc_file, string id_file, int from, int to);
+void find_node_degree(string adj_file);
 
 #endif

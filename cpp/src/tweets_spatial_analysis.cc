@@ -1143,3 +1143,14 @@ void test_find_all_shortest_index_paths(string suc_file, string id_file) {
   cout << endl << "Writing to " << shortest_path_length_csv_file << "..." << endl;
   convert_paths_length_col_to_csv(id_mat, index_paths, shortest_path_length_col_csv_file);
 }
+
+void find_node_degree(string adj_file) {
+  shino::precise_stopwatch stopwatch;
+  string rowsum_file(adj_file);
+  rowsum_file.replace(rowsum_file.end() - 28, rowsum_file.end() - 4, "degree");
+
+  Mat<int> A;
+  A.load(adj_file, csv_ascii);
+  Col<int> rowsum = sum(A, 1);
+  rowsum.save(rowsum_file, csv_ascii);
+}

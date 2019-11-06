@@ -75,6 +75,8 @@ int main(int argc, char *argv[]) {
     build_adjacency_matrix<float>(ellipse_file, adj_file, rows);
     find_components<float>(adj_file, outlier_file);
     build_distance_matrix<float>(adj_ordered_file, dis_file, node, n_procs);
+    build_successor_matrix<float>(adj_ordered_file, dis_file, node, n_procs);
+    test_find_all_shortest_index_paths(suc_file, id_file);
   }
   if (job == 1) {
     build_adjacency_matrix<float>(ellipse_file, adj_file, rows);
@@ -111,6 +113,9 @@ int main(int argc, char *argv[]) {
   }
   if (job == 12) {
     test_find_all_shortest_index_paths(suc_file, id_file);
+  }
+  if (job == 13) {
+    find_node_degree(adj_ordered_file);
   }
 
   MPI_Finalize();
