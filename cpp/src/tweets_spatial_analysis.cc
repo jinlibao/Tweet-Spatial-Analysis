@@ -858,6 +858,23 @@ vector<vector<int>> find_all_shortest_index_paths(Mat<int> &S, Mat<long unsigned
   return index_paths;
 }
 
+vector<vector<int>> find_cluster_shortest_index_paths(Mat<int> &S, Mat<long unsigned> &id_mat) {
+  vector<vector<int>> index_paths;
+  int n = id_mat.n_rows;
+
+  for (int i = 0; i < n - 1; ++i) {
+    for (int j = i + 1; j < n; ++j) {
+      if (id_mat(i, 0) == 0 and id_mat(j, 0) == 0) {
+        vector<int> index_path = get_shortest_path_by_index(S, id_mat, i, j);
+        if (index_path.size() <= 1) continue;
+        index_paths.push_back(index_path);
+      }
+    }
+  }
+
+  return index_paths;
+}
+
 void convert_paths_to_json(vector<vector<int>> &index_paths) {
   cout << "{";
   cout << "\"" << index_paths[0].front() << "\": ";
@@ -1024,6 +1041,38 @@ void convert_paths_to_gml(Mat<long unsigned> &id_mat, vector<vector<int>> &index
   cout << "]" << endl;
 }
 
+void convert_cluster_paths_to_gml(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths, string filename) {
+  ofstream fout(filename);
+  fout << "graph [" << endl;
+  int n = id_mat.n_rows;
+  for (int i = 0; i < n; ++i) {
+    if (id_mat(i, 0) > 0) break;
+    fout << "  node [" << endl;
+    fout << "    id " << i << endl;
+    fout << "    label \"" << i << "\"" << endl;
+    fout << "    userid " << id_mat(i, 1) << endl;
+    fout << "  ]" << endl;
+  }
+
+  unordered_set<string> edges;
+  for (auto &index_path : index_paths) {
+    int n = index_path.size();
+    for (int i = 0; i < n - 1; ++i) {
+      string edge1 = to_string(index_path[i]) + "," + to_string(index_path[i + 1]);
+      string edge2 = to_string(index_path[i + 1]) + "," + to_string(index_path[i]);
+      if (edges.find(edge1) != edges.end() or edges.find(edge2) != edges.end()) continue;
+      fout << "  edge [" << endl;
+      fout << "    source " << index_path[i] << endl;
+      fout << "    target " << index_path[i + 1] << endl;
+      fout << "  ]" << endl;
+      edges.insert(edge1);
+      edges.insert(edge2);
+    }
+  }
+  fout << "]" << endl;
+  fout.close();
+}
+
 void convert_paths_to_gml(Mat<long unsigned> &id_mat, vector<vector<int>> &index_paths, string filename) {
   ofstream fout(filename);
   fout << "graph [" << endl;
@@ -1115,7 +1164,8 @@ void test_find_all_shortest_index_paths(string suc_file, string id_file) {
   S.load(suc_file, csv_ascii);
   printf("Reading from %s...\n", id_file.c_str());
   id_mat.load(id_file, csv_ascii);
-  vector<vector<int>> index_paths = find_all_shortest_index_paths(S, id_mat);
+  // vector<vector<int>> index_paths = find_all_shortest_index_paths(S, id_mat);
+  vector<vector<int>> index_paths = find_cluster_shortest_index_paths(S, id_mat);
 
   string shortest_path_gml_file(suc_file);
   string shortest_path_csv_file(suc_file);
@@ -1131,7 +1181,8 @@ void test_find_all_shortest_index_paths(string suc_file, string id_file) {
   shortest_path_json_file_for_gml.replace(shortest_path_json_file_for_gml.end() - 20, shortest_path_json_file_for_gml.end(), "shortest_paths_for_gml.json");
 
   cout << endl << "Writing to " << shortest_path_gml_file << "..." << endl;
-  convert_paths_to_gml(id_mat, index_paths, shortest_path_gml_file);
+  convert_cluster_paths_to_gml(id_mat, index_paths, shortest_path_gml_file);
+  // convert_paths_to_gml(id_mat, index_paths, shortest_path_gml_file);
   cout << endl << "Writing to " << shortest_path_json_file << "..." << endl;
   convert_paths_to_json(id_mat, index_paths, shortest_path_json_file);
   cout << endl << "Writing to " << shortest_path_json_file_for_gml << "..." << endl;
